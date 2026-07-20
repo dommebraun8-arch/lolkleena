@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoL Esports Kalender</title>
+<style>
+  :root {
+    --bg: #17102b;
+    --card: #241a3d;
+    --card-line: #392a5c;
+    --gold: #f2b705;
+    --cyan: #5eead4;
+    --coral: #fb7185;
+    --text: #f1ecff;
+    --text-dim: #a99fc9;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); }
+  body { font-family: var(--sans); color: var(--text); }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 60px 20px 80px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+  }
+
+  .lede {
+    color: var(--text-dim);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 32px;
+    max-width: 46ch;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 18px;
+  }
+
+  .card h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .leagues {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .league-chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: #100b1f;
+    border: 1px solid var(--card-line);
+    color: var(--cyan);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold);
+    color: #241a00;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--card-line);
+  }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .url-box {
+    margin-top: 14px;
+    background: #100b1f;
+    border: 1px solid var(--card-line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    word-break: break-all;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .url-box button {
+    background: var(--card-line);
+    color: var(--text);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .url-box button:hover { background: var(--gold); color: #241a00; }
+
+  ol {
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 0;
+  }
+  ol b { color: var(--text); }
+
+  .status {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .status .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    margin-right: 6px;
+  }
+  .status.error .dot { background: var(--coral); }
+
+  footer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Inoffizieller Feed</p>
+  <h1>LoL Esports Kalender</h1>
+  <p class="lede">
+    Alle Profi-Matches automatisch im eigenen Kalender – aktualisiert sich
+    selbst alle paar Stunden, inklusive Ergebnissen sobald ein Spiel vorbei ist.
+  </p>
+
+  <div class="card">
+    <h2>📅 Kalender abonnieren</h2>
+    <div class="leagues" id="league-chips">
+      <span class="league-chip">LEC</span>
+      <span class="league-chip">LCS</span>
+      <span class="league-chip">LCK</span>
+      <span class="league-chip">LPL</span>
+      <span class="league-chip">MSI</span>
+      <span class="league-chip">Worlds</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn" id="subscribe-btn" href="#">📲 Jetzt abonnieren</a>
+      <a class="btn secondary" id="view-btn" href="#" target="_blank">.ics ansehen</a>
+    </div>
+    <div class="url-box">
+      <span id="webcal-url">webcal://…</span>
+      <button id="copy-btn">Kopieren</button>
+    </div>
+    <p class="status" id="status"><span class="dot"></span>Prüfe Feed…</p>
+  </div>
+
+  <div class="card">
+    <h2>📱 Manuell einrichten (iPhone)</h2>
+    <ol>
+      <li>Auf den Button <b>„Jetzt abonnieren"</b> tippen, <b>oder</b> von Hand:</li>
+      <li><b>Einstellungen → Kalender → Accounts → Account hinzufügen → Andere</b></li>
+      <li><b>„Kalenderabo hinzufügen"</b> auswählen</li>
+      <li>Die Server-URL oben einfügen</li>
+      <li>Aktualisierungsintervall bei Bedarf anpassen (Accounts → Abo → Aktualisieren)</li>
+    </ol>
+  </div>
+
+  <footer>
+    Feed wird automatisch per GitHub Actions aktualisiert · <a href="https://github.com/dommebraun8-arch/lolkleena" target="_blank">Quellcode auf GitHub</a>
+  </footer>
+</div>
+
+<script>
+  const ICS_PATH = "lol-schedule.ics";
+  const httpsUrl = new URL(ICS_PATH, window.location.href).href;
+  const webcalUrl = httpsUrl.replace(/^https?:\/\//, "webcal://");
+
+  document.getElementById("subscribe-btn").href = webcalUrl;
+  document.getElementById("view-btn").href = httpsUrl;
+  document.getElementById("webcal-url").textContent = webcalUrl;
+
+  document.getElementById("copy-btn").addEventListener("click", () => {
+    navigator.clipboard.writeText(webcalUrl).then(() => {
+      const btn = document.getElementById("copy-btn");
+      btn.textContent = "Kopiert ✓";
+      setTimeout(() => (btn.textContent = "Kopieren"), 1500);
+    });
+  });
+
+  const statusEl = document.getElementById("status");
+  fetch(httpsUrl, { cache: "no-store" })
+    .then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    })
+    .then(text => {
+      const count = (text.match(/BEGIN:VEVENT/g) || []).length;
+      statusEl.innerHTML = `<span class="dot"></span>Feed aktiv · ${count} Matches geladen`;
+    })
+    .catch(() => {
+      statusEl.classList.add("error");
+      statusEl.innerHTML = `<span class="dot"></span>Feed gerade nicht erreichbar`;
+    });
+</script>
+</body>
+</html>
