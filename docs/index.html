@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoL Esports Kalender</title>
+<title>LoL Esports Dashboard</title>
 <style>
   :root {
     --bg: #17102b;
@@ -21,208 +21,213 @@
   html, body { margin: 0; padding: 0; background: var(--bg); }
   body { font-family: var(--sans); color: var(--text); }
 
-  .wrap {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 60px 20px 80px;
-  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 30px 16px 70px; }
 
   .eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gold);
-    font-weight: 700;
-    margin: 0 0 8px;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin: 0 0 6px;
   }
+  h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 18px; }
 
-  h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    margin: 0 0 12px;
+  nav.tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    background: var(--card); border: 1px solid var(--card-line);
+    border-radius: 12px; padding: 4px; position: sticky; top: 10px; z-index: 10;
   }
+  nav.tabs button {
+    flex: 1; background: transparent; border: none; color: var(--text-dim);
+    font-family: var(--sans); font-weight: 700; font-size: 12px;
+    padding: 9px 4px; border-radius: 9px; cursor: pointer;
+  }
+  nav.tabs button.active { background: var(--gold); color: #241a00; }
 
-  .lede {
-    color: var(--text-dim);
-    font-size: 15px;
-    line-height: 1.6;
-    margin: 0 0 32px;
-    max-width: 46ch;
-  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
   .card {
-    background: var(--card);
-    border: 1px solid var(--card-line);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 18px;
+    background: var(--card); border: 1px solid var(--card-line);
+    border-radius: 16px; padding: 20px; margin-bottom: 14px;
   }
-
   .card h2 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    margin: 0 0 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-dim); margin: 0 0 14px; display: flex; align-items: center; gap: 8px;
   }
 
-  .leagues {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
+  .leagues { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
   .league-chip {
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 5px 10px;
-    border-radius: 6px;
-    background: #100b1f;
-    border: 1px solid var(--card-line);
-    color: var(--cyan);
+    font-family: var(--mono); font-size: 12px; padding: 5px 10px; border-radius: 6px;
+    background: #100b1f; border: 1px solid var(--card-line); color: var(--cyan);
   }
 
   .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--gold);
-    color: #241a00;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px; background: var(--gold);
+    color: #241a00; font-weight: 700; font-size: 13px; padding: 10px 18px;
+    border-radius: 10px; text-decoration: none; border: none; cursor: pointer;
   }
   .btn:hover { filter: brightness(1.08); }
-  .btn.secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--card-line);
-  }
-
+  .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--card-line); }
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
   .url-box {
-    margin-top: 14px;
-    background: #100b1f;
-    border: 1px solid var(--card-line);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-dim);
-    word-break: break-all;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+    margin-top: 12px; background: #100b1f; border: 1px solid var(--card-line);
+    border-radius: 8px; padding: 9px 11px; font-family: var(--mono); font-size: 11px;
+    color: var(--text-dim); word-break: break-all; display: flex;
+    justify-content: space-between; align-items: center; gap: 10px;
   }
   .url-box button {
-    background: var(--card-line);
-    color: var(--text);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    flex-shrink: 0;
+    background: var(--card-line); color: var(--text); border: none; border-radius: 6px;
+    padding: 6px 10px; font-size: 11px; cursor: pointer; flex-shrink: 0;
   }
   .url-box button:hover { background: var(--gold); color: #241a00; }
 
-  ol {
-    color: var(--text-dim);
-    font-size: 13px;
-    line-height: 1.8;
-    padding-left: 20px;
-    margin: 0;
-  }
-  ol b { color: var(--text); }
-
-  .status {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 6px;
-  }
-  .status .dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--cyan);
-    margin-right: 6px;
-  }
+  .status { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+  .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); margin-right: 6px; }
   .status.error .dot { background: var(--coral); }
 
-  footer {
-    margin-top: 40px;
-    font-size: 12px;
-    color: var(--text-dim);
-    text-align: center;
+  .standings-group { margin-bottom: 18px; }
+  .standings-group:last-child { margin-bottom: 0; }
+  .standings-group h3 {
+    font-family: var(--mono); font-size: 11px; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 6px;
   }
+
+  table.standings { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.standings th {
+    text-align: left; color: var(--text-dim); font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.05em; font-weight: 700; padding: 4px 6px; border-bottom: 1px solid var(--card-line);
+  }
+  table.standings td { padding: 7px 6px; border-bottom: 1px solid var(--card-line); }
+  table.standings tr:last-child td { border-bottom: none; }
+  table.standings .rank { color: var(--gold); font-family: var(--mono); font-weight: 700; width: 30px; }
+  table.standings .team { font-weight: 600; }
+  table.standings .record { font-family: var(--mono); color: var(--text-dim); text-align: right; }
+
+  .match {
+    padding: 10px 0; border-bottom: 1px solid var(--card-line); font-size: 13px; cursor: pointer;
+  }
+  .match:last-child { border-bottom: none; }
+  .match-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .match .league-tag {
+    font-family: var(--mono); font-size: 10px; color: var(--gold); text-transform: uppercase;
+    letter-spacing: 0.05em; width: 42px; flex-shrink: 0;
+  }
+  .match .teams { flex: 1; font-weight: 600; }
+  .match .teams .a { color: var(--cyan); }
+  .match .teams .b { color: var(--coral); }
+  .match .when { color: var(--text-dim); font-size: 11px; flex-shrink: 0; text-align: right; }
+  .match .result { font-family: var(--mono); font-weight: 700; color: var(--gold); flex-shrink: 0; }
+  .match.live .when { color: var(--coral); font-weight: 700; }
+  .empty-list { color: var(--text-dim); font-size: 13px; padding: 6px 0; }
+
+  .h2h-panel {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--card-line);
+    font-size: 12px; color: var(--text-dim); display: none;
+  }
+  .h2h-panel.open { display: block; }
+  .h2h-row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .h2h-row .r { font-family: var(--mono); color: var(--gold); }
+
+  .live-card { margin-bottom: 12px; }
+  .live-card .games-score {
+    text-align: center; font-family: var(--mono); font-size: 22px; font-weight: 800;
+    color: var(--gold); margin: 8px 0;
+  }
+  .live-kills {
+    display: flex; justify-content: center; gap: 30px; font-size: 12px; color: var(--text-dim);
+  }
+  .live-kills b { color: var(--text); font-family: var(--mono); font-size: 16px; }
+  .live-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+
+  footer { margin-top: 30px; font-size: 12px; color: var(--text-dim); text-align: center; }
   footer a { color: var(--gold); text-decoration: none; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">Inoffizieller Feed</p>
-  <h1>LoL Esports Kalender</h1>
-  <p class="lede">
-    Alle Profi-Matches automatisch im eigenen Kalender – aktualisiert sich
-    selbst alle paar Stunden, inklusive Ergebnissen sobald ein Spiel vorbei ist.
-  </p>
+  <p class="eyebrow">Inoffizieller LoL Esports Feed</p>
+  <h1>Dashboard</h1>
 
-  <div class="card">
-    <h2>📅 Kalender abonnieren</h2>
-    <div class="leagues" id="league-chips">
-      <span class="league-chip">LEC</span>
-      <span class="league-chip">LCS</span>
-      <span class="league-chip">LCK</span>
-      <span class="league-chip">LPL</span>
-      <span class="league-chip">MSI</span>
-      <span class="league-chip">Worlds</span>
+  <nav class="tabs">
+    <button data-tab="start" class="active">Start</button>
+    <button data-tab="live">Live</button>
+    <button data-tab="results">Ergebnisse</button>
+    <button data-tab="standings">Tabellen</button>
+  </nav>
+
+  <!-- START -->
+  <div class="tab-panel active" id="tab-start">
+    <div class="card">
+      <h2>📅 Kalender abonnieren</h2>
+      <div class="leagues">
+        <span class="league-chip">LEC</span><span class="league-chip">LCS</span>
+        <span class="league-chip">LCK</span><span class="league-chip">LPL</span>
+        <span class="league-chip">MSI</span><span class="league-chip">Worlds</span>
+      </div>
+      <div class="btn-row">
+        <a class="btn" id="subscribe-btn" href="#">📲 Jetzt abonnieren</a>
+        <a class="btn secondary" id="view-btn" href="#" target="_blank">.ics ansehen</a>
+      </div>
+      <div class="url-box"><span id="webcal-url">webcal://…</span><button id="copy-btn">Kopieren</button></div>
     </div>
-    <div class="btn-row">
-      <a class="btn" id="subscribe-btn" href="#">📲 Jetzt abonnieren</a>
-      <a class="btn secondary" id="view-btn" href="#" target="_blank">.ics ansehen</a>
+    <div class="card">
+      <h2>⏰ Nächste 24 Stunden</h2>
+      <div id="start-list"><p class="status"><span class="dot"></span>Lade Spiele…</p></div>
     </div>
-    <div class="url-box">
-      <span id="webcal-url">webcal://…</span>
-      <button id="copy-btn">Kopieren</button>
-    </div>
-    <p class="status" id="status"><span class="dot"></span>Prüfe Feed…</p>
   </div>
 
-  <div class="card">
-    <h2>📱 Manuell einrichten (iPhone)</h2>
-    <ol>
-      <li>Auf den Button <b>„Jetzt abonnieren"</b> tippen, <b>oder</b> von Hand:</li>
-      <li><b>Einstellungen → Kalender → Accounts → Account hinzufügen → Andere</b></li>
-      <li><b>„Kalenderabo hinzufügen"</b> auswählen</li>
-      <li>Die Server-URL oben einfügen</li>
-      <li>Aktualisierungsintervall bei Bedarf anpassen (Accounts → Abo → Aktualisieren)</li>
-    </ol>
+  <!-- LIVE -->
+  <div class="tab-panel" id="tab-live">
+    <div class="card">
+      <h2>🔴 Gerade live</h2>
+      <div id="live-list"><p class="status"><span class="dot"></span>Prüfe auf laufende Spiele…</p></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="tab-panel" id="tab-results">
+    <div class="card">
+      <h2>🏁 Letzte Ergebnisse</h2>
+      <p class="live-note" style="margin-bottom:10px">Auf ein Match tippen für Head-to-Head</p>
+      <div id="results-list"><p class="status"><span class="dot"></span>Lade Ergebnisse…</p></div>
+    </div>
+  </div>
+
+  <!-- STANDINGS -->
+  <div class="tab-panel" id="tab-standings">
+    <div class="card">
+      <h2>🏆 Tabellen</h2>
+      <div id="standings-list"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div>
+    </div>
   </div>
 
   <footer>
-    Feed wird automatisch per GitHub Actions aktualisiert · <a href="https://github.com/dommebraun8-arch/lolkleena" target="_blank">Quellcode auf GitHub</a>
+    Direkt aus der Riot Esports API · <a href="https://github.com/dommebraun8-arch/lolkleena" target="_blank">Quellcode auf GitHub</a>
   </footer>
 </div>
 
 <script>
+(function () {
+  const ESPORTS_API_KEY = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
+  const ESPORTS_BASE = "https://esports-api.lolesports.com/persisted/gw";
+  const FEED_BASE = "https://feed.lolesports.com/livestats/v1/window";
+  const HEADERS = { "x-api-key": ESPORTS_API_KEY };
+  const SCHEDULE_LEAGUES = ["LEC", "LCS", "LCK", "LPL", "MSI", "Worlds"];
+  const STANDINGS_LEAGUES = ["LEC", "LCS", "LCK", "LPL"];
+
+  function esc(s) {
+    return (s || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+  function fmtWhen(d) {
+    return d.toLocaleString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+
+  // ---- ICS Abo-Link (Start-Tab) ----
   const ICS_PATH = "lol-schedule.ics";
   const httpsUrl = new URL(ICS_PATH, window.location.href).href;
   const webcalUrl = httpsUrl.replace(/^https?:\/\//, "webcal://");
-
   document.getElementById("subscribe-btn").href = webcalUrl;
   document.getElementById("view-btn").href = httpsUrl;
   document.getElementById("webcal-url").textContent = webcalUrl;
-
   document.getElementById("copy-btn").addEventListener("click", () => {
     navigator.clipboard.writeText(webcalUrl).then(() => {
       const btn = document.getElementById("copy-btn");
@@ -231,20 +236,303 @@
     });
   });
 
-  const statusEl = document.getElementById("status");
-  fetch(httpsUrl, { cache: "no-store" })
-    .then(r => {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.text();
-    })
-    .then(text => {
-      const count = (text.match(/BEGIN:VEVENT/g) || []).length;
-      statusEl.innerHTML = `<span class="dot"></span>Feed aktiv · ${count} Matches geladen`;
-    })
-    .catch(() => {
-      statusEl.classList.add("error");
-      statusEl.innerHTML = `<span class="dot"></span>Feed gerade nicht erreichbar`;
+  // ---- Tabs ----
+  const tabButtons = document.querySelectorAll("nav.tabs button");
+  const loaded = { start: false, live: false, results: false, standings: false };
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.getAttribute("data-tab");
+      document.getElementById("tab-" + tab).classList.add("active");
+      loadTab(tab);
     });
+  });
+
+  function loadTab(tab) {
+    if (loaded[tab]) return;
+    loaded[tab] = true;
+    if (tab === "start") loadStart();
+    if (tab === "live") loadLive();
+    if (tab === "results") loadResults();
+    if (tab === "standings") loadStandings();
+  }
+
+  // ---- Geteilte Schedule-Daten ----
+  let allLeaguesCache = null;
+  let scheduleCache = null; // Promise<events[]>
+
+  async function getAllLeagues() {
+    if (allLeaguesCache) return allLeaguesCache;
+    const r = await fetch(`${ESPORTS_BASE}/getLeagues?hl=en-GB`, { headers: HEADERS });
+    if (!r.ok) throw new Error("Ligen nicht erreichbar (" + r.status + ")");
+    const data = await r.json();
+    allLeaguesCache = data.data.leagues;
+    return allLeaguesCache;
+  }
+
+  function normalizeEvent(ev) {
+    const match = ev.match;
+    if (!match || !match.teams || match.teams.length < 2) return null;
+    const [tA, tB] = match.teams;
+    return {
+      id: match.id,
+      league: ev.league ? ev.league.name : "",
+      start: new Date(ev.startTime),
+      state: ev.state, // unstarted | inProgress | completed
+      teamA: { name: tA.name || tA.code || "TBD", code: tA.code || "", result: tA.result },
+      teamB: { name: tB.name || tB.code || "TBD", code: tB.code || "", result: tB.result },
+      games: match.games || [],
+      strategy: match.strategy || {}
+    };
+  }
+
+  async function loadSchedule() {
+    if (scheduleCache) return scheduleCache;
+    scheduleCache = (async () => {
+      const leagues = await getAllLeagues();
+      const ids = leagues.filter(l => SCHEDULE_LEAGUES.includes(l.name)).map(l => l.id);
+      const all = [];
+      await Promise.all(ids.map(async id => {
+        try {
+          const r = await fetch(`${ESPORTS_BASE}/getSchedule?hl=en-GB&leagueId=${id}`, { headers: HEADERS });
+          if (!r.ok) return;
+          const data = await r.json();
+          (data.data.schedule.events || []).forEach(ev => {
+            const n = normalizeEvent(ev);
+            if (n) all.push(n);
+          });
+        } catch (e) { /* eine Liga darf ruhig fehlschlagen */ }
+      }));
+      return all;
+    })();
+    return scheduleCache;
+  }
+
+  // ---- START TAB ----
+  async function loadStart() {
+    const el = document.getElementById("start-list");
+    try {
+      const events = await loadSchedule();
+      const now = new Date();
+      const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const upcoming = events
+        .filter(e => e.state !== "completed" && e.start >= now && e.start <= in24h)
+        .sort((a, b) => a.start - b.start);
+
+      if (upcoming.length === 0) {
+        el.innerHTML = '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>';
+        return;
+      }
+      el.innerHTML = upcoming.map(m => `
+        <div class="match ${m.state === "inProgress" ? "live" : ""}">
+          <div class="match-row">
+            <span class="league-tag">${esc(m.league)}</span>
+            <span class="teams"><span class="a">${esc(m.teamA.name)}</span> vs <span class="b">${esc(m.teamB.name)}</span></span>
+            <span class="when">${m.state === "inProgress" ? "🔴 LIVE" : fmtWhen(m.start)}</span>
+          </div>
+        </div>`).join("");
+    } catch (e) {
+      el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  // ---- LIVE TAB ----
+  async function fetchLiveWindow(gameId) {
+    const r = await fetch(`${FEED_BASE}/${gameId}`);
+    if (!r.ok) throw new Error("kein Zugriff");
+    const data = await r.json();
+    const frames = data.frames || [];
+    if (frames.length === 0) throw new Error("keine Daten");
+    return frames[frames.length - 1];
+  }
+
+  async function loadLive() {
+    const el = document.getElementById("live-list");
+    try {
+      const events = await loadSchedule();
+      const liveEvents = events.filter(e => e.state === "inProgress");
+
+      if (liveEvents.length === 0) {
+        el.innerHTML = '<p class="empty-list">Gerade läuft kein Match.</p>';
+        return;
+      }
+
+      const cards = await Promise.all(liveEvents.map(async m => {
+        const curGame = (m.games || []).find(g => g.state === "inProgress") || (m.games || [])[0];
+        const gamesWonA = m.teamA.result ? m.teamA.result.gameWins : "-";
+        const gamesWonB = m.teamB.result ? m.teamB.result.gameWins : "-";
+
+        let killsHtml = '<p class="live-note">Live-Kills gerade nicht verfügbar</p>';
+        if (curGame && curGame.id) {
+          try {
+            const frame = await fetchLiveWindow(curGame.id);
+            const blue = frame.blueTeam || {};
+            const red = frame.redTeam || {};
+            if (typeof blue.totalKills === "number" || typeof red.totalKills === "number") {
+              killsHtml = `
+                <div class="live-kills">
+                  <div>Blue<br><b>${blue.totalKills ?? "-"}</b> Kills</div>
+                  <div>Red<br><b>${red.totalKills ?? "-"}</b> Kills</div>
+                </div>`;
+            }
+          } catch (e) { /* fallback bleibt */ }
+        }
+
+        return `
+          <div class="card live-card">
+            <span class="league-tag">${esc(m.league)}</span>
+            <div class="games-score">
+              ${esc(m.teamA.name)} ${gamesWonA} : ${gamesWonB} ${esc(m.teamB.name)}
+            </div>
+            ${curGame ? `<p class="live-note">Spiel ${curGame.number || "?"} läuft</p>` : ""}
+            ${killsHtml}
+          </div>`;
+      }));
+
+      el.innerHTML = cards.join("");
+    } catch (e) {
+      el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  // ---- RESULTS TAB + Head-to-Head ----
+  async function loadResults() {
+    const el = document.getElementById("results-list");
+    try {
+      const events = await loadSchedule();
+      const completed = events
+        .filter(e => e.state === "completed")
+        .sort((a, b) => b.start - a.start)
+        .slice(0, 30);
+
+      if (completed.length === 0) {
+        el.innerHTML = '<p class="empty-list">Noch keine abgeschlossenen Matches.</p>';
+        return;
+      }
+
+      el.innerHTML = completed.map((m, i) => {
+        const wA = m.teamA.result ? m.teamA.result.gameWins : "-";
+        const wB = m.teamB.result ? m.teamB.result.gameWins : "-";
+        return `
+          <div class="match" data-idx="${i}">
+            <div class="match-row">
+              <span class="league-tag">${esc(m.league)}</span>
+              <span class="teams"><span class="a">${esc(m.teamA.name)}</span> vs <span class="b">${esc(m.teamB.name)}</span></span>
+              <span class="result">${wA}:${wB}</span>
+            </div>
+            <div class="h2h-panel" id="h2h-${i}"></div>
+          </div>`;
+      }).join("");
+
+      el.querySelectorAll(".match[data-idx]").forEach(row => {
+        row.addEventListener("click", () => {
+          const idx = parseInt(row.getAttribute("data-idx"), 10);
+          const m = completed[idx];
+          const panel = document.getElementById("h2h-" + idx);
+          const isOpen = panel.classList.contains("open");
+          el.querySelectorAll(".h2h-panel").forEach(p => p.classList.remove("open"));
+          if (isOpen) return;
+
+          const history = completed.filter((other, j) =>
+            j !== idx &&
+            ((other.teamA.name === m.teamA.name && other.teamB.name === m.teamB.name) ||
+             (other.teamA.name === m.teamB.name && other.teamB.name === m.teamA.name))
+          );
+
+          if (history.length === 0) {
+            panel.innerHTML = "Keine früheren Aufeinandertreffen im geladenen Zeitraum gefunden.";
+          } else {
+            panel.innerHTML = history.map(h => {
+              const hwA = h.teamA.result ? h.teamA.result.gameWins : "-";
+              const hwB = h.teamB.result ? h.teamB.result.gameWins : "-";
+              return `<div class="h2h-row"><span>${esc(h.teamA.name)} vs ${esc(h.teamB.name)} · ${fmtWhen(h.start)}</span><span class="r">${hwA}:${hwB}</span></div>`;
+            }).join("");
+          }
+          panel.classList.add("open");
+        });
+      });
+    } catch (e) {
+      el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  // ---- STANDINGS TAB ----
+  function extractRankings(standings) {
+    if (!standings || !standings.stages) return [];
+    const stage = standings.stages.find(s => s.type === "split") || standings.stages[0];
+    if (!stage || !stage.sections || !stage.sections[0]) return [];
+    return stage.sections[0].rankings || [];
+  }
+
+  function renderStandingsTable(rankings) {
+    const rows = [];
+    rankings.forEach(r => {
+      (r.teams || []).forEach(t => {
+        rows.push({
+          ordinal: r.ordinal,
+          name: t.name || t.code || "?",
+          wins: t.record ? t.record.wins : "-",
+          losses: t.record ? t.record.losses : "-"
+        });
+      });
+    });
+    return `
+      <table class="standings">
+        <thead><tr><th></th><th>Team</th><th style="text-align:right">W&nbsp;–&nbsp;L</th></tr></thead>
+        <tbody>
+          ${rows.map(row => `
+            <tr>
+              <td class="rank">${row.ordinal}</td>
+              <td class="team">${esc(row.name)}</td>
+              <td class="record">${row.wins}&nbsp;–&nbsp;${row.losses}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  }
+
+  async function loadStandingsForLeague(leagueName, allLeagues) {
+    const league = allLeagues.find(l => l.name === leagueName);
+    if (!league) return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">Liga nicht gefunden.</p></div>`;
+    try {
+      const tournRes = await fetch(`${ESPORTS_BASE}/getTournamentsForLeague?hl=en-GB&leagueId=${league.id}`, { headers: HEADERS });
+      if (!tournRes.ok) throw new Error("Turniere nicht erreichbar");
+      const tournData = await tournRes.json();
+      const tournaments = tournData.data.leagues[0].tournaments;
+      if (!tournaments || tournaments.length === 0) throw new Error("Kein aktuelles Turnier");
+      const current = tournaments[tournaments.length - 1];
+
+      const standRes = await fetch(`${ESPORTS_BASE}/getStandings?hl=en-GB&tournamentId=${current.id}`, { headers: HEADERS });
+      if (!standRes.ok) throw new Error("Tabelle nicht erreichbar");
+      const standData = await standRes.json();
+      const standings = standData.data.standings && standData.data.standings[0];
+      const rankings = extractRankings(standings);
+
+      if (rankings.length === 0) {
+        return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">Aktuell keine Tabelle verfügbar.</p></div>`;
+      }
+      return `<div class="standings-group"><h3>${esc(leagueName)}</h3>${renderStandingsTable(rankings)}</div>`;
+    } catch (e) {
+      return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">Nicht ladbar (${esc(e.message)}).</p></div>`;
+    }
+  }
+
+  async function loadStandings() {
+    const el = document.getElementById("standings-list");
+    try {
+      const allLeagues = await getAllLeagues();
+      const groupsHtml = await Promise.all(STANDINGS_LEAGUES.map(name => loadStandingsForLeague(name, allLeagues)));
+      el.innerHTML = groupsHtml.join("");
+    } catch (e) {
+      el.innerHTML = `<p class="empty-list">Tabellen gerade nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  // initial: Start-Tab laden
+  loadTab("start");
+})();
 </script>
 </body>
 </html>
