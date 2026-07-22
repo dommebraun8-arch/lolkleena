@@ -86,8 +86,16 @@
   .standings-group:last-child { margin-bottom: 0; }
   .standings-group h3 {
     font-family: var(--mono); font-size: 11px; color: var(--text-dim);
-    text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 8px; font-weight: 600;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
   }
+
+  .filter-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .filter-select {
+    font-family: var(--mono); font-size: 11px; background: var(--bg); color: var(--text-dim);
+    border: 1px solid var(--line); border-radius: 3px; padding: 4px 6px; cursor: pointer;
+  }
+  .filter-select:hover { border-color: var(--accent); }
 
   table.standings { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.standings th {
@@ -122,15 +130,6 @@
   .team-modal-header img { width: 64px; height: 64px; object-fit: contain; background: var(--bg); border-radius: 4px; padding: 8px; }
   .team-modal-name { font-weight: 600; font-size: 16px; }
 
-  .roster-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
-  .roster-row:last-child { border-bottom: none; }
-  .roster-row img { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; background: var(--bg); flex-shrink: 0; }
-  .roster-row .role {
-    font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--text-dim);
-    width: 52px; flex-shrink: 0;
-  }
-  .roster-row .pname { font-weight: 500; font-size: 13px; }
-  .roster-row .real-name { font-size: 11px; color: var(--text-dim); }
 
   .match {
     padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 12.5px; cursor: pointer;
@@ -332,7 +331,7 @@
     </div>
     <div class="card">
       <h2>Lieblingsteam</h2>
-      <p class="live-note" style="margin-bottom:10px">Team anklicken für den Kader dieser Saison</p>
+      <p class="live-note" style="margin-bottom:10px">Team anklicken für alle Spiele dieser Saison</p>
       <div id="team-browser"><p class="status"><span class="dot"></span>Lade Teams…</p></div>
     </div>
   </div>
@@ -346,8 +345,11 @@
 
   <div class="tab-panel" id="tab-results">
     <div class="card">
-      <h2>Letzte Ergebnisse</h2>
-      <p class="live-note" style="margin-bottom:10px">Auf ein Match tippen für Details</p>
+      <div class="filter-row">
+        <h2 style="margin:0">Letzte Ergebnisse</h2>
+        <select id="results-year-select" class="filter-select"></select>
+      </div>
+      <p class="live-note" style="margin:10px 0">Auf ein Match tippen für Details</p>
       <div id="results-list"><p class="status"><span class="dot"></span>Lade Ergebnisse…</p></div>
     </div>
   </div>
@@ -399,7 +401,7 @@
       <img id="team-modal-logo" src="">
       <div class="team-modal-name" id="team-modal-name"></div>
     </div>
-    <div id="team-modal-roster"><p class="empty-list">Lade…</p></div>
+    <div id="team-modal-games"><p class="empty-list">Lade…</p></div>
   </div>
 </div>
 
@@ -622,7 +624,7 @@
     const allLeagues = await getAllLeagues();
     teamsByLeagueCache = Promise.all(STANDINGS_LEAGUES.map(async name => {
       try {
-        const { rankings } = await fetchStandingsForLeagueName(name, allLeagues);
+        const { rankings } = await fetchCurrentStandingsForLeague(name, allLeagues);
         const teams = [];
         const seen = new Set();
         (rankings || []).forEach(r => (r.teams || []).forEach(t => {
@@ -636,16 +638,25 @@
     return teamsByLeagueCache;
   }
 
+  let teamRegistry = [];
+  function registerTeam(t, leagueName) {
+    teamRegistry.push({ id: t.id, name: t.name, code: t.code, image: t.image, league: leagueName });
+    return teamRegistry.length - 1;
+  }
+
   function renderTeamBrowser(groups) {
     return groups.map(g => `
       <div class="league-group">
         <div class="league-group-header">${esc(g.name)}</div>
         <div class="team-icon-grid">
-          ${g.teams.length ? g.teams.map(t => `
-            <button class="team-icon-btn" data-team-id="${esc(t.id)}" data-team-league="${esc(g.name)}">
+          ${g.teams.length ? g.teams.map(t => {
+            const tidx = registerTeam(t, g.name);
+            return `
+            <button class="team-icon-btn" data-tidx="${tidx}">
               <img src="${esc(t.image || fallbackLogo(t.name))}" onerror="this.src='${fallbackLogo(t.name)}'">
               <span class="tcode">${esc(t.code || t.name)}</span>
-            </button>`).join("") : `<p class="empty-list">${esc(g.error || "Keine Teams gefunden.")}</p>`}
+            </button>`;
+          }).join("") : `<p class="empty-list">${esc(g.error || "Keine Teams gefunden.")}</p>`}
         </div>
       </div>`).join("");
   }
@@ -657,7 +668,8 @@
       el.innerHTML = renderTeamBrowser(groups);
       el.querySelectorAll(".team-icon-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-          openTeamModal(btn.getAttribute("data-team-id"), btn.getAttribute("data-team-league"));
+          const idx = parseInt(btn.getAttribute("data-tidx"), 10);
+          openTeamModal(teamRegistry[idx]);
         });
       });
     } catch (e) {
@@ -665,52 +677,43 @@
     }
   }
 
-  const ROLE_LABELS = { top: "Top", jungle: "Jungle", mid: "Mid", bottom: "Bot", support: "Support" };
-  const teamRosterCache = {};
-
-  async function fetchTeamRoster(teamId) {
-    if (teamRosterCache[teamId]) return teamRosterCache[teamId];
-    const r = await fetch(`${ESPORTS_BASE}/getTeams?hl=en-GB&id=${teamId}`, { headers: HEADERS });
-    if (!r.ok) throw new Error("Kader nicht erreichbar (" + r.status + ")");
-    const data = await r.json();
-    const team = (data.data.teams || [])[0];
-    teamRosterCache[teamId] = team;
-    return team;
-  }
-
   const teamModal = document.getElementById("team-modal");
   document.getElementById("team-modal-close").addEventListener("click", () => teamModal.classList.remove("open"));
   teamModal.addEventListener("click", e => { if (e.target === teamModal) teamModal.classList.remove("open"); });
 
-  async function openTeamModal(teamId, leagueName) {
-    document.getElementById("team-modal-league").textContent = leagueName;
-    document.getElementById("team-modal-name").textContent = "Lade…";
-    document.getElementById("team-modal-logo").src = fallbackLogo("?");
-    document.getElementById("team-modal-roster").innerHTML = '<p class="empty-list">Lade Kader…</p>';
+  function findTeamMatches(events, team) {
+    return events
+      .filter(e => team.code
+        ? (e.teamA.code === team.code || e.teamB.code === team.code)
+        : (e.teamA.name === team.name || e.teamB.name === team.name))
+      .sort((a, b) => a.start - b.start);
+  }
+
+  async function openTeamModal(team) {
+    document.getElementById("team-modal-league").textContent = team.league;
+    document.getElementById("team-modal-name").textContent = team.name;
+    document.getElementById("team-modal-logo").src = team.image || fallbackLogo(team.name);
+    const gamesEl = document.getElementById("team-modal-games");
+    gamesEl.innerHTML = '<p class="empty-list">Lade Spiele…</p>';
     teamModal.classList.add("open");
 
     try {
-      const team = await fetchTeamRoster(teamId);
-      if (!team) throw new Error("Team nicht gefunden");
-      document.getElementById("team-modal-name").textContent = team.name;
-      document.getElementById("team-modal-logo").src = team.image || fallbackLogo(team.name);
-      const players = team.players || [];
-      const rosterEl = document.getElementById("team-modal-roster");
-      if (players.length === 0) {
-        rosterEl.innerHTML = '<p class="empty-list">Kein Kader verfügbar.</p>';
+      const events = await loadSchedule();
+      const matches = findTeamMatches(events, team);
+      if (matches.length === 0) {
+        gamesEl.innerHTML = '<p class="empty-list">Keine Spiele in diesem Zeitraum gefunden.</p>';
         return;
       }
-      rosterEl.innerHTML = players.map(p => `
-        <div class="roster-row">
-          <img src="${esc(p.image || fallbackLogo(p.summonerName))}" onerror="this.src='${fallbackLogo(p.summonerName)}'">
-          <span class="role">${esc(ROLE_LABELS[p.role] || p.role || "")}</span>
-          <div>
-            <div class="pname">${esc(p.summonerName)}</div>
-            ${p.firstName || p.lastName ? `<div class="real-name">${esc([p.firstName, p.lastName].filter(Boolean).join(" "))}</div>` : ""}
-          </div>
-        </div>`).join("");
+      gamesEl.innerHTML = matches.map(matchRow).join("");
+      gamesEl.querySelectorAll(".match[data-ridx]").forEach(row => {
+        row.addEventListener("click", () => {
+          const idx = parseInt(row.getAttribute("data-ridx"), 10);
+          teamModal.classList.remove("open");
+          openMatchModal(matchRegistry[idx]);
+        });
+      });
     } catch (e) {
-      document.getElementById("team-modal-roster").innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+      gamesEl.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
   }
 
@@ -780,22 +783,81 @@
     }
   }
 
-  // ---- RESULTS TAB ----
-  async function loadResults() {
-    const el = document.getElementById("results-list");
-    try {
-      const events = await loadSchedule();
-      const completed = events
-        .filter(e => e.state === "completed")
-        .sort((a, b) => b.start - a.start)
-        .slice(0, 30);
+  // ---- RESULTS TAB (nach Jahr filterbar, über alle Turniere/Splits) ----
+  let allTournamentsCache = null;
+  async function getAllTournaments() {
+    if (allTournamentsCache) return allTournamentsCache;
+    const allLeagues = await getAllLeagues();
+    allTournamentsCache = Promise.all(SCHEDULE_LEAGUES.map(async name => {
+      try {
+        const tournaments = await getTournamentsForLeagueName(name, allLeagues);
+        return tournaments.map(t => ({ ...t, league: name }));
+      } catch (e) {
+        return [];
+      }
+    })).then(perLeague => perLeague.flat());
+    return allTournamentsCache;
+  }
 
+  function tournamentYear(t) {
+    return t.startDate ? t.startDate.slice(0, 4) : null;
+  }
+
+  async function fetchCompletedEventsForTournament(tournamentId) {
+    const r = await fetch(`${ESPORTS_BASE}/getCompletedEvents?hl=en-GB&tournamentId=${tournamentId}`, { headers: HEADERS });
+    if (!r.ok) throw new Error("Ergebnisse nicht erreichbar (" + r.status + ")");
+    const data = await r.json();
+    return (data.data.schedule.events || [])
+      .map(ev => {
+        const n = normalizeEvent(ev);
+        if (n) n.state = "completed";
+        return n;
+      })
+      .filter(Boolean);
+  }
+
+  const resultsByYearCache = {};
+  async function loadResultsForYear(year) {
+    if (resultsByYearCache[year]) return resultsByYearCache[year];
+    resultsByYearCache[year] = (async () => {
+      const tournaments = await getAllTournaments();
+      const yearTournaments = tournaments.filter(t => tournamentYear(t) === year);
+      const perTournament = await Promise.all(
+        yearTournaments.map(t => fetchCompletedEventsForTournament(t.id).catch(() => []))
+      );
+      return perTournament.flat().sort((a, b) => b.start - a.start);
+    })();
+    return resultsByYearCache[year];
+  }
+
+  async function renderResultsForSelectedYear() {
+    const el = document.getElementById("results-list");
+    const year = document.getElementById("results-year-select").value;
+    el.innerHTML = '<p class="status"><span class="dot"></span>Lade Ergebnisse…</p>';
+    try {
+      const completed = await loadResultsForYear(year);
       if (completed.length === 0) {
-        el.innerHTML = '<p class="empty-list">Noch keine abgeschlossenen Matches.</p>';
+        el.innerHTML = '<p class="empty-list">Keine abgeschlossenen Matches in diesem Jahr.</p>';
         return;
       }
       el.innerHTML = renderGrouped(completed);
       attachRowClicks(el);
+    } catch (e) {
+      el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  async function loadResults() {
+    const el = document.getElementById("results-list");
+    const yearSelect = document.getElementById("results-year-select");
+    el.innerHTML = '<p class="status"><span class="dot"></span>Lade Ergebnisse…</p>';
+    try {
+      const tournaments = await getAllTournaments();
+      const years = Array.from(new Set(tournaments.map(tournamentYear).filter(Boolean))).sort((a, b) => b - a);
+      const thisYear = String(new Date().getFullYear());
+      yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === thisYear ? "selected" : ""}>${y}</option>`).join("");
+      yearSelect.addEventListener("change", renderResultsForSelectedYear);
+      await renderResultsForSelectedYear();
     } catch (e) {
       el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
@@ -835,22 +897,21 @@
       </table>`;
   }
 
-  async function fetchStandingsForLeagueName(leagueName, allLeagues) {
+  async function getTournamentsForLeagueName(leagueName, allLeagues) {
     const league = allLeagues.find(l => l.name === leagueName);
-    if (!league) return { error: "Liga nicht gefunden", tournLabel: "" };
+    if (!league) throw new Error("Liga nicht gefunden");
+    const r = await fetch(`${ESPORTS_BASE}/getTournamentsForLeague?hl=en-GB&leagueId=${league.id}`, { headers: HEADERS });
+    if (!r.ok) throw new Error("Turniere nicht erreichbar");
+    const data = await r.json();
+    return data.data.leagues[0].tournaments || [];
+  }
 
-    const tournRes = await fetch(`${ESPORTS_BASE}/getTournamentsForLeague?hl=en-GB&leagueId=${league.id}`, { headers: HEADERS });
-    if (!tournRes.ok) throw new Error("Turniere nicht erreichbar");
-    const tournData = await tournRes.json();
-    const tournaments = tournData.data.leagues[0].tournaments;
-    if (!tournaments || tournaments.length === 0) throw new Error("Kein aktuelles Turnier");
-
+  function pickCurrentTournament(tournaments) {
     function parseDateSafe(v) {
       if (!v) return null;
       const d = new Date(v);
       return isNaN(d.getTime()) ? null : d;
     }
-
     const now = new Date();
     const parsed = tournaments.map(t => ({ ...t, _start: parseDateSafe(t.startDate), _end: parseDateSafe(t.endDate) }));
     const validDated = parsed.filter(t => t._start !== null);
@@ -858,55 +919,100 @@
     let current = null;
     if (validDated.length > 0) {
       current = validDated.find(t => t._start <= now && (!t._end || t._end >= now));
-      if (!current) {
-        const started = validDated.filter(t => t._start <= now).sort((a, b) => b._start - a._start);
-        current = started[0];
-      }
-      if (!current) {
-        current = validDated.sort((a, b) => b._start - a._start)[0];
-      }
+      if (!current) current = validDated.filter(t => t._start <= now).sort((a, b) => b._start - a._start)[0];
+      if (!current) current = validDated.sort((a, b) => b._start - a._start)[0];
     }
     // Falls gar keine Datumsangaben brauchbar sind: davon ausgehen, dass die API
     // die Turniere chronologisch liefert, und einfach das letzte nehmen.
     if (!current) current = parsed[parsed.length - 1];
-
-    const standRes = await fetch(`${ESPORTS_BASE}/getStandings?hl=en-GB&tournamentId=${current.id}`, { headers: HEADERS });
-    if (!standRes.ok) throw new Error("Tabelle nicht erreichbar");
-    const standData = await standRes.json();
-    const standings = standData.data.standings && standData.data.standings[0];
-    const rankings = extractRankings(standings);
-    return { rankings, tournLabel: current.slug || current.id };
+    return current;
   }
 
-  async function loadStandingsForLeague(leagueName, allLeagues) {
+  const LEAGUE_SLUG_PREFIX = { LEC: "lec_", LCS: "lcs_", LCK: "lck_", LPL: "lpl_" };
+  function splitLabel(t, leagueName) {
+    const prefix = LEAGUE_SLUG_PREFIX[leagueName] || "";
+    let s = t.slug && t.slug.startsWith(prefix) ? t.slug.slice(prefix.length) : (t.slug || t.id);
+    s = s.replace(/_/g, " ").trim();
+    const year = (t.startDate || "").slice(0, 4);
+    if (year && !s.includes(year)) s = `${s} ${year}`.trim();
+    return s.split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  }
+
+  async function fetchStandingsForTournament(tournamentId) {
+    const r = await fetch(`${ESPORTS_BASE}/getStandings?hl=en-GB&tournamentId=${tournamentId}`, { headers: HEADERS });
+    if (!r.ok) throw new Error("Tabelle nicht erreichbar");
+    const data = await r.json();
+    const standings = data.data.standings && data.data.standings[0];
+    return extractRankings(standings);
+  }
+
+  async function fetchCurrentStandingsForLeague(leagueName, allLeagues) {
+    const tournaments = await getTournamentsForLeagueName(leagueName, allLeagues);
+    if (tournaments.length === 0) throw new Error("Kein Turnier gefunden");
+    const current = pickCurrentTournament(tournaments);
+    const rankings = await fetchStandingsForTournament(current.id);
+    return { rankings, tournLabel: splitLabel(current, leagueName) };
+  }
+
+  async function loadStandingsTableInto(slot, tournamentId) {
+    slot.innerHTML = '<p class="empty-list">Lade…</p>';
     try {
-      const { rankings, tournLabel, error } = await fetchStandingsForLeagueName(leagueName, allLeagues);
-      if (error) return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">${esc(error)}</p></div>`;
+      const rankings = await fetchStandingsForTournament(tournamentId);
       if (!rankings || rankings.length === 0) {
-        return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">Aktuell keine Tabelle verfügbar.</p></div>`;
+        slot.innerHTML = '<p class="empty-list">Für diesen Split keine Tabelle verfügbar.</p>';
+        return;
       }
-      return `<div class="standings-group"><h3>${esc(leagueName)} <span style="color:var(--text-dim);font-weight:400">· ${esc(tournLabel)}</span></h3>${renderStandingsTable(rankings)}</div>`;
+      slot.innerHTML = renderStandingsTable(rankings);
+    } catch (e) {
+      slot.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  async function renderStandingsGroupHtml(leagueName, allLeagues) {
+    try {
+      const tournaments = await getTournamentsForLeagueName(leagueName, allLeagues);
+      if (tournaments.length === 0) {
+        return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">Keine Turniere gefunden.</p></div>`;
+      }
+      const sorted = tournaments.slice().sort((a, b) => new Date(b.startDate || 0) - new Date(a.startDate || 0));
+      const current = pickCurrentTournament(tournaments);
+      const options = sorted.map(t =>
+        `<option value="${esc(t.id)}" ${t.id === current.id ? "selected" : ""}>${esc(splitLabel(t, leagueName))}</option>`
+      ).join("");
+      return `
+        <div class="standings-group">
+          <h3>${esc(leagueName)}<select class="filter-select split-select">${options}</select></h3>
+          <div class="standings-table-slot" data-tournament="${esc(current.id)}"><p class="empty-list">Lade…</p></div>
+        </div>`;
     } catch (e) {
       return `<div class="standings-group"><h3>${esc(leagueName)}</h3><p class="empty-list">Nicht ladbar (${esc(e.message)}).</p></div>`;
     }
   }
 
-  let standingsGroupsHtmlCache = null;
-  async function getStandingsGroupsHtml() {
-    if (standingsGroupsHtmlCache) return standingsGroupsHtmlCache;
-    const allLeagues = await getAllLeagues();
-    const groupsHtml = await Promise.all(STANDINGS_LEAGUES.map(name => loadStandingsForLeague(name, allLeagues)));
-    standingsGroupsHtmlCache = groupsHtml.join("");
-    return standingsGroupsHtmlCache;
+  function wireStandingsGroups(containerEl) {
+    containerEl.querySelectorAll(".standings-group").forEach(group => {
+      const slot = group.querySelector(".standings-table-slot");
+      const select = group.querySelector(".split-select");
+      if (!slot) return;
+      loadStandingsTableInto(slot, slot.getAttribute("data-tournament"));
+      if (select) select.addEventListener("change", () => loadStandingsTableInto(slot, select.value));
+    });
+  }
+
+  async function renderStandingsInto(containerEl) {
+    containerEl.innerHTML = '<p class="status"><span class="dot"></span>Lade Tabellen…</p>';
+    try {
+      const allLeagues = await getAllLeagues();
+      const groupsHtml = await Promise.all(STANDINGS_LEAGUES.map(name => renderStandingsGroupHtml(name, allLeagues)));
+      containerEl.innerHTML = groupsHtml.join("");
+      wireStandingsGroups(containerEl);
+    } catch (e) {
+      containerEl.innerHTML = `<p class="empty-list">Tabellen gerade nicht ladbar (${esc(e.message)}).</p>`;
+    }
   }
 
   async function loadStandings() {
-    const el = document.getElementById("standings-list");
-    try {
-      el.innerHTML = await getStandingsGroupsHtml();
-    } catch (e) {
-      el.innerHTML = `<p class="empty-list">Tabellen gerade nicht ladbar (${esc(e.message)}).</p>`;
-    }
+    await renderStandingsInto(document.getElementById("standings-list"));
   }
 
   // ---- MATCH DETAIL MODAL ----
@@ -996,7 +1102,7 @@
     } else {
       getAllLeagues().then(async allLeagues => {
         try {
-          const { rankings, tournLabel, error } = await fetchStandingsForLeagueName(m.league, allLeagues);
+          const { rankings, tournLabel, error } = await fetchCurrentStandingsForLeague(m.league, allLeagues);
           if (error || !rankings || rankings.length === 0) {
             tableEl.innerHTML = '<p class="empty-list">Aktuell keine Tabelle verfügbar.</p>';
             return;
@@ -1301,13 +1407,8 @@
       });
     });
 
-    getStandingsGroupsHtml().then(html => {
-      const tEl = document.getElementById("tipp-standings");
-      if (tEl) tEl.innerHTML = html;
-    }).catch(e => {
-      const tEl = document.getElementById("tipp-standings");
-      if (tEl) tEl.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
-    });
+    const tippStandingsEl = document.getElementById("tipp-standings");
+    if (tippStandingsEl) renderStandingsInto(tippStandingsEl);
   }
   // ==================== /TIPPSPIEL ====================
 
