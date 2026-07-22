@@ -211,15 +211,6 @@
   .h2h-row .r { font-family: var(--mono); color: var(--gold); font-weight: 700; }
 
   /* ---- Tippspiel ---- */
-  .tipp-gate {
-    max-width: 320px; margin: 40px auto; background: var(--card); border: 1px solid var(--card-line);
-    border-radius: 16px; padding: 24px; text-align: center;
-  }
-  .tipp-gate p { color: var(--text-dim); font-size: 13px; margin: 6px 0 16px; }
-  .tipp-gate input {
-    width: 100%; background: #100b1f; border: 1px solid var(--card-line); color: var(--text);
-    padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 10px;
-  }
 
   .round-info {
     text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 14px;
@@ -884,12 +875,20 @@
   // ==================== TIPPSPIEL ====================
   const TIPP_LEAGUES = ["LCK", "LPL", "LEC", "LCS"];
   const ALLOWED_TIPP_PLAYERS = ["Domi", "Lisa"];
-  // WICHTIG: eigene jsonblob-ID eintragen (siehe TIPPSPIEL-SETUP.md)
-  const JSONBLOB_ID = "019f89e9-ade2-7d41-801f-86ba05498ed2";
-  const BLOB_URL = "https://jsonblob.com/api/jsonBlob/" + JSONBLOB_ID;
+  // Speicher + Identität laufen über den Cloudflare Worker (Basic-Auth-Login),
+  // siehe README.md "Tippspiel absichern (Cloudflare Worker)".
+  const TIPP_API_URL = "/api/tipp";
+  const WHOAMI_URL = "/api/whoami";
 
-  let tippPlayerName = localStorage.getItem("lol_tipp_name") || "";
+  let tippPlayerName = "";
   let tippStore = { picks: {} };
+
+  async function tippWhoAmI() {
+    const r = await fetch(WHOAMI_URL, { cache: "no-store" });
+    if (!r.ok) throw new Error("Login nicht erkannt (" + r.status + ")");
+    const data = await r.json();
+    return data.name;
+  }
 
   // Runde: Montag 12:00 (lokale Zeit) bis zum nächsten Montag 12:00
   function getWeekBounds(now) {
@@ -907,7 +906,7 @@
 
   async function tippLoadStore() {
     try {
-      const r = await fetch(BLOB_URL, { cache: "no-store" });
+      const r = await fetch(TIPP_API_URL, { cache: "no-store" });
       if (!r.ok) throw new Error("Speicher nicht erreichbar (" + r.status + ")");
       return await r.json();
     } catch (e) {
@@ -917,7 +916,7 @@
   }
 
   async function tippSaveStore() {
-    await fetch(BLOB_URL, {
+    await fetch(TIPP_API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(tippStore)
@@ -953,20 +952,16 @@
   async function loadTipp() {
     const el = document.getElementById("tipp-body");
 
-    if (JSONBLOB_ID === "REPLACE_WITH_YOUR_BLOB_ID") {
-      el.innerHTML = '<div class="card"><p class="empty-list">Noch keine jsonblob-ID eingetragen (siehe TIPPSPIEL-SETUP.md).</p></div>';
-      return;
-    }
-
-    if (!tippPlayerName || !ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
-      tippPlayerName = "";
-      localStorage.removeItem("lol_tipp_name");
-      renderTippGate();
-      return;
-    }
-
     el.innerHTML = '<p class="status"><span class="dot"></span>Lade Runde…</p>';
     try {
+      if (!tippPlayerName || !ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
+        tippPlayerName = await tippWhoAmI();
+      }
+      if (!ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
+        el.innerHTML = `<div class="card"><p class="empty-list">Eingeloggt als "${esc(tippPlayerName)}" - für diesen Login ist das Tippspiel nicht freigeschaltet.</p></div>`;
+        return;
+      }
+
       const [events, store] = await Promise.all([loadSchedule(), tippLoadStore()]);
       tippStore = store;
 
@@ -990,33 +985,6 @@
     } catch (e) {
       el.innerHTML = `<div class="card"><p class="empty-list">Nicht ladbar (${esc(e.message)}).</p></div>`;
     }
-  }
-
-  function renderTippGate(errorMsg) {
-    const el = document.getElementById("tipp-body");
-    el.innerHTML = `
-      <div class="tipp-gate">
-        <p class="eyebrow" style="margin-bottom:10px">Willkommen</p>
-        <p>Wie heißt du?</p>
-        <input type="text" id="tipp-name-input" placeholder="Domi oder Lisa" maxlength="20">
-        ${errorMsg ? `<p style="color:var(--coral);font-size:12px;margin-top:-4px;margin-bottom:10px">${esc(errorMsg)}</p>` : ""}
-        <button class="btn" id="tipp-name-btn" style="width:100%;justify-content:center">Los geht's</button>
-      </div>`;
-    document.getElementById("tipp-name-btn").addEventListener("click", () => {
-      const val = document.getElementById("tipp-name-input").value.trim();
-      if (!val) return;
-      const match = ALLOWED_TIPP_PLAYERS.find(n => n.toLowerCase() === val.toLowerCase());
-      if (!match) {
-        renderTippGate("Nur Domi und Lisa können hier tippen.");
-        return;
-      }
-      tippPlayerName = match;
-      localStorage.setItem("lol_tipp_name", match);
-      loadTipp();
-    });
-    document.getElementById("tipp-name-input").addEventListener("keydown", e => {
-      if (e.key === "Enter") document.getElementById("tipp-name-btn").click();
-    });
   }
 
   function computeTippTotals(allCompleted, roundCompleted) {

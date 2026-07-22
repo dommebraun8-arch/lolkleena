@@ -93,3 +93,47 @@ willst (z.B. Ergebnis quasi live), stell den Cron in `sync.yml` z.B. auf
   zuerst in den Actions-Logs schauen.
 - Cron läuft alle 3 Stunden - reicht locker, Spielpläne ändern sich nicht
   minütlich. Anpassbar in `sync.yml`.
+
+## Tippspiel absichern (Cloudflare Worker)
+
+GitHub Pages kann keine echte Passwortsperre (rein statisches Hosting), daher
+läuft die Zugriffskontrolle über einen kostenlosen Cloudflare Worker
+(`worker/gate-worker.js`), der:
+
+- die komplette Seite hinter HTTP Basic Auth legt (nur Logins `domi` / `lisa`),
+- alle Anfragen sonst unverändert an GitHub Pages durchreicht,
+- den Tippspiel-Speicher (`/api/tipp`) über Cloudflare KV bereitstellt -
+  ersetzt jsonblob.com, das keine Zugriffskontrolle kennt,
+- über `/api/whoami` automatisch erkennt, wer eingeloggt ist (kein
+  Namensfeld im Frontend mehr nötig).
+
+### Einmaliges Setup
+
+1. Kostenlosen Account auf [cloudflare.com](https://cloudflare.com) anlegen.
+2. `npm install -g wrangler` und `wrangler login`.
+3. KV-Namespace anlegen:
+   ```bash
+   wrangler kv namespace create TIPP_KV
+   ```
+   Die ausgegebene `id` in `wrangler.toml` bei `TIPP_KV` eintragen.
+4. Passwörter als Secrets setzen (werden nicht im Code gespeichert):
+   ```bash
+   wrangler secret put DOMI_PASSWORD
+   wrangler secret put LISA_PASSWORD
+   ```
+5. Deployen:
+   ```bash
+   wrangler deploy
+   ```
+   Danach ist der Worker unter `https://lolkleena-gate.<dein-subdomain>.workers.dev`
+   erreichbar.
+
+### Nutzung
+
+- Ab jetzt **diese Worker-URL** statt der GitHub-Pages-URL besuchen/abonnieren
+  (Browser fragt beim ersten Aufruf nach Nutzername/Passwort ab).
+- Für den Kalender-Abo-Link (`webcal://…`) fragt iOS beim ersten Sync
+  ebenfalls nach den Zugangsdaten, oder sie können direkt in die URL
+  eingebettet werden: `webcal://domi:PASSWORT@lolkleena-gate.<sub>.workers.dev/lol-schedule.ics`.
+- Die alte jsonblob-ID braucht niemand mehr - der Worker übernimmt den
+  Speicher automatisch.

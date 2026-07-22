@@ -1,0 +1,8 @@
+name = "lolkleena-gate"
+main = "worker/gate-worker.js"
+compatibility_date = "2024-11-01"
+
+# Nach "wrangler kv namespace create TIPP_KV" die ausgegebene id hier eintragen.
+kv_namespaces = [
+  { binding = "TIPP_KV", id = "4edb5c6bcfd347b59c0dedf0c0beeee9" }
+]
