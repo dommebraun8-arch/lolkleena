@@ -121,7 +121,7 @@
     font-family: var(--mono); font-size: 10px; color: var(--gold); text-transform: uppercase;
     letter-spacing: 0.05em; width: 42px; flex-shrink: 0;
   }
-  .match .when-col { width: 40px; flex-shrink: 0; font-size: 10.5px; color: var(--text-dim); }
+  .match .when-col { width: 46px; flex-shrink: 0; font-size: 10px; line-height: 1.3; color: var(--text-dim); text-align: center; }
   .match .teams { flex: 1; font-weight: 600; display: flex; align-items: center; gap: 5px; min-width: 0; }
   .match .teams span.a, .match .teams span.b {
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%;
@@ -209,6 +209,74 @@
   .h2h-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--card-line); font-size: 12px; }
   .h2h-row:last-child { border-bottom: none; }
   .h2h-row .r { font-family: var(--mono); color: var(--gold); font-weight: 700; }
+
+  /* ---- Tippspiel ---- */
+  .tipp-gate {
+    max-width: 320px; margin: 40px auto; background: var(--card); border: 1px solid var(--card-line);
+    border-radius: 16px; padding: 24px; text-align: center;
+  }
+  .tipp-gate p { color: var(--text-dim); font-size: 13px; margin: 6px 0 16px; }
+  .tipp-gate input {
+    width: 100%; background: #100b1f; border: 1px solid var(--card-line); color: var(--text);
+    padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 10px;
+  }
+
+  .round-info {
+    text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 14px;
+  }
+  .round-info b { color: var(--gold); }
+
+  .tipp-board {
+    display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .tipp-board-entry {
+    flex: 1; min-width: 130px; background: var(--card); border: 1px solid var(--card-line);
+    border-radius: 12px; padding: 12px; text-align: center;
+  }
+  .tipp-board-entry .pname { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+  .tipp-board-entry .stat-row { display: flex; justify-content: center; gap: 14px; }
+  .tipp-board-entry .stat { text-align: center; }
+  .tipp-board-entry .stat .n { font-family: var(--mono); font-size: 20px; font-weight: 800; color: var(--gold); }
+  .tipp-board-entry .stat .l { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .ticket {
+    background: var(--card); border: 1px solid var(--card-line); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 10px;
+  }
+  .ticket .league {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); font-weight: 700;
+  }
+  .ticket .when { font-size: 11px; color: var(--text-dim); float: right; }
+  .ticket .matchup {
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0 12px;
+    font-weight: 700; font-size: 14px;
+  }
+  .ticket .matchup img { width: 22px; height: 22px; border-radius: 5px; object-fit: contain; background: #100b1f; }
+  .ticket .matchup .a { color: var(--cyan); text-align: right; }
+  .ticket .matchup .b { color: var(--coral); text-align: left; }
+  .ticket .pick-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .ticket .pick-row input {
+    width: 44px; text-align: center; background: #100b1f; border: 1px solid var(--card-line);
+    color: var(--text); border-radius: 8px; padding: 8px 0; font-family: var(--mono); font-size: 15px;
+  }
+  .ticket .pick-row .colon { color: var(--text-dim); font-family: var(--mono); }
+  .ticket .saved-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+  .ticket .saved-note.ok { color: var(--cyan); }
+  .ticket .locked-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+  .ticket .other-picks {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--card-line); font-size: 12px;
+    color: var(--text-dim); display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;
+  }
+  .ticket .other-picks b { color: var(--text); font-family: var(--mono); }
+  .ticket .blind-note { text-align: center; font-size: 11px; color: var(--gold-dim, #6b5a1f); margin-top: 10px; }
+  .ticket .result-row { display: flex; justify-content: center; gap: 22px; font-size: 12px; margin-top: 10px; flex-wrap: wrap; }
+  .ticket .result-row .pcol { text-align: center; }
+  .ticket .result-row .pcol .pname { color: var(--text-dim); }
+  .ticket .result-row .pcol .pval { font-family: var(--mono); font-size: 14px; }
+  .pts-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+  .pts-2 { background: var(--gold); color: #241a00; }
+  .pts-1 { background: var(--card-line); color: var(--cyan); }
+  .pts-0 { background: var(--card-line); color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -221,6 +289,7 @@
     <button data-tab="live">Live</button>
     <button data-tab="results">Ergebnisse</button>
     <button data-tab="standings">Tabellen</button>
+    <button data-tab="tipp">Tippen</button>
   </nav>
 
   <div class="tab-panel active" id="tab-start">
@@ -263,6 +332,10 @@
       <h2>🏆 Tabellen</h2>
       <div id="standings-list"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div>
     </div>
+  </div>
+
+  <div class="tab-panel" id="tab-tipp">
+    <div id="tipp-body"><p class="status"><span class="dot"></span>Lade…</p></div>
   </div>
 
   <footer>
@@ -331,7 +404,7 @@
 
   // ---- Tabs ----
   const tabButtons = document.querySelectorAll("nav.tabs button");
-  const loaded = { start: false, live: false, results: false, standings: false };
+  const loaded = { start: false, live: false, results: false, standings: false, tipp: false };
 
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -351,6 +424,7 @@
     if (tab === "live") loadLive();
     if (tab === "results") loadResults();
     if (tab === "standings") loadStandings();
+    if (tab === "tipp") loadTipp();
   }
 
   // ---- Geteilte Schedule-Daten ----
@@ -451,17 +525,19 @@
 
   function matchRow(m) {
     const ridx = registerMatch(m);
+    const dateStr = m.start.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+    const timeStr = m.start.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
     let leftCol, rightCol;
     if (m.state === "completed") {
       const wA = m.teamA.result ? m.teamA.result.gameWins : "-";
       const wB = m.teamB.result ? m.teamB.result.gameWins : "-";
-      leftCol = `<span class="when-col">${m.start.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}</span>`;
+      leftCol = `<span class="when-col">${dateStr}<br>${timeStr}</span>`;
       rightCol = `<span class="result-col">${wA}:${wB}</span>`;
     } else if (m.state === "inProgress") {
-      leftCol = `<span class="when-col"><span class="live-dot"></span>Live</span>`;
+      leftCol = `<span class="when-col"><span class="live-dot"></span>Live<br>${dateStr}</span>`;
       rightCol = `<span class="result-col">${m.teamA.result ? m.teamA.result.gameWins : 0}:${m.teamB.result ? m.teamB.result.gameWins : 0}</span>`;
     } else {
-      leftCol = `<span class="when-col">${m.start.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}</span>`;
+      leftCol = `<span class="when-col">${dateStr}<br>${timeStr}</span>`;
       rightCol = `<span class="result-col">–</span>`;
     }
     return `
@@ -631,14 +707,30 @@
     const tournaments = tournData.data.leagues[0].tournaments;
     if (!tournaments || tournaments.length === 0) throw new Error("Kein aktuelles Turnier");
 
-    const now = new Date();
-    const parsed = tournaments.map(t => ({ ...t, _start: new Date(t.startDate), _end: t.endDate ? new Date(t.endDate) : null }));
-    let current = parsed.find(t => t._start <= now && (!t._end || t._end >= now));
-    if (!current) {
-      const started = parsed.filter(t => t._start <= now).sort((a, b) => b._start - a._start);
-      current = started[0];
+    function parseDateSafe(v) {
+      if (!v) return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d;
     }
-    if (!current) current = parsed.sort((a, b) => a._start - b._start)[0];
+
+    const now = new Date();
+    const parsed = tournaments.map(t => ({ ...t, _start: parseDateSafe(t.startDate), _end: parseDateSafe(t.endDate) }));
+    const validDated = parsed.filter(t => t._start !== null);
+
+    let current = null;
+    if (validDated.length > 0) {
+      current = validDated.find(t => t._start <= now && (!t._end || t._end >= now));
+      if (!current) {
+        const started = validDated.filter(t => t._start <= now).sort((a, b) => b._start - a._start);
+        current = started[0];
+      }
+      if (!current) {
+        current = validDated.sort((a, b) => b._start - a._start)[0];
+      }
+    }
+    // Falls gar keine Datumsangaben brauchbar sind: davon ausgehen, dass die API
+    // die Turniere chronologisch liefert, und einfach das letzte nehmen.
+    if (!current) current = parsed[parsed.length - 1];
 
     const standRes = await fetch(`${ESPORTS_BASE}/getStandings?hl=en-GB&tournamentId=${current.id}`, { headers: HEADERS });
     if (!standRes.ok) throw new Error("Tabelle nicht erreichbar");
@@ -772,6 +864,268 @@
       });
     }
   }
+
+  // ==================== TIPPSPIEL ====================
+  const TIPP_LEAGUES = ["LCK", "LPL", "LEC", "LCS"];
+  // WICHTIG: eigene jsonblob-ID eintragen (siehe TIPPSPIEL-SETUP.md)
+  const JSONBLOB_ID = "019f89e9-ade2-7d41-801f-86ba05498ed2";
+  const BLOB_URL = "https://jsonblob.com/api/jsonBlob/" + JSONBLOB_ID;
+
+  let tippPlayerName = localStorage.getItem("lol_tipp_name") || "";
+  let tippStore = { picks: {} };
+
+  // Runde: Montag 12:00 (lokale Zeit) bis zum nächsten Montag 12:00
+  function getWeekBounds(now) {
+    const d = new Date(now);
+    const day = d.getDay(); // 0=So, 1=Mo, ...
+    const daysSinceMonday = (day + 6) % 7;
+    let weekStart = new Date(d);
+    weekStart.setHours(12, 0, 0, 0);
+    weekStart.setDate(d.getDate() - daysSinceMonday);
+    if (weekStart > d) weekStart.setDate(weekStart.getDate() - 7);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    return { weekStart, weekEnd };
+  }
+
+  async function tippLoadStore() {
+    try {
+      const r = await fetch(BLOB_URL, { cache: "no-store" });
+      if (!r.ok) throw new Error("Speicher nicht erreichbar (" + r.status + ")");
+      return await r.json();
+    } catch (e) {
+      console.warn("Tippspiel-Speicher nicht ladbar:", e);
+      return { picks: {} };
+    }
+  }
+
+  async function tippSaveStore() {
+    await fetch(BLOB_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tippStore)
+    });
+  }
+
+  async function tippSavePick(uid, name, s1, s2) {
+    tippStore = await tippLoadStore();
+    if (!tippStore.picks[uid]) tippStore.picks[uid] = {};
+    tippStore.picks[uid][name] = { s1, s2, ts: Date.now() };
+    await tippSaveStore();
+  }
+
+  function tippComputePoints(pick, m) {
+    if (!pick) return null;
+    const wA = m.teamA.result ? m.teamA.result.gameWins : null;
+    const wB = m.teamB.result ? m.teamB.result.gameWins : null;
+    if (wA === null || wB === null) return null;
+    if (pick.s1 === wA && pick.s2 === wB) return 2;
+    const pickWinnerA = pick.s1 > pick.s2;
+    const actualWinnerA = wA > wB;
+    return pickWinnerA === actualWinnerA ? 1 : 0;
+  }
+
+  function tippPlayerList() {
+    const names = new Set([tippPlayerName]);
+    Object.values(tippStore.picks).forEach(p => Object.keys(p).forEach(n => names.add(n)));
+    return [...names].filter(Boolean);
+  }
+
+  function tippFmtRoundEnd(d) {
+    return d.toLocaleString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+
+  async function loadTipp() {
+    const el = document.getElementById("tipp-body");
+
+    if (JSONBLOB_ID === "REPLACE_WITH_YOUR_BLOB_ID") {
+      el.innerHTML = '<div class="card"><p class="empty-list">Noch keine jsonblob-ID eingetragen (siehe TIPPSPIEL-SETUP.md).</p></div>';
+      return;
+    }
+
+    if (!tippPlayerName) {
+      renderTippGate();
+      return;
+    }
+
+    el.innerHTML = '<p class="status"><span class="dot"></span>Lade Runde…</p>';
+    try {
+      const [events, store] = await Promise.all([loadSchedule(), tippLoadStore()]);
+      tippStore = store;
+
+      const now = new Date();
+      const { weekStart, weekEnd } = getWeekBounds(now);
+
+      const tippEvents = events.filter(e => TIPP_LEAGUES.includes(e.league));
+      const roundMatches = tippEvents
+        .filter(e => e.start >= weekStart && e.start < weekEnd)
+        .sort((a, b) => a.start - b.start);
+
+      const roundCompleted = roundMatches.filter(m => m.state === "completed");
+      const allCompleted = tippEvents.filter(e => e.state === "completed");
+
+      renderTipp(roundMatches, roundCompleted, allCompleted, weekEnd);
+    } catch (e) {
+      el.innerHTML = `<div class="card"><p class="empty-list">Nicht ladbar (${esc(e.message)}).</p></div>`;
+    }
+  }
+
+  function renderTippGate() {
+    const el = document.getElementById("tipp-body");
+    el.innerHTML = `
+      <div class="tipp-gate">
+        <p class="eyebrow" style="margin-bottom:10px">Willkommen</p>
+        <p>Wie heißt du? (gleicher Name = gleiche Tipps)</p>
+        <input type="text" id="tipp-name-input" placeholder="z.B. Basti" maxlength="20">
+        <button class="btn" id="tipp-name-btn" style="width:100%;justify-content:center">Los geht's</button>
+      </div>`;
+    document.getElementById("tipp-name-btn").addEventListener("click", () => {
+      const val = document.getElementById("tipp-name-input").value.trim();
+      if (!val) return;
+      tippPlayerName = val;
+      localStorage.setItem("lol_tipp_name", val);
+      loadTipp();
+    });
+    document.getElementById("tipp-name-input").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("tipp-name-btn").click();
+    });
+  }
+
+  function renderTippBoard(allCompleted, roundCompleted) {
+    const players = tippPlayerList();
+    if (players.length === 0) return "";
+    const totals = {}, weekTotals = {};
+    players.forEach(n => { totals[n] = 0; weekTotals[n] = 0; });
+
+    allCompleted.forEach(m => {
+      const picks = tippStore.picks[m.id] || {};
+      Object.keys(picks).forEach(n => {
+        const pts = tippComputePoints(picks[n], m);
+        if (pts !== null) totals[n] = (totals[n] || 0) + pts;
+      });
+    });
+    roundCompleted.forEach(m => {
+      const picks = tippStore.picks[m.id] || {};
+      Object.keys(picks).forEach(n => {
+        const pts = tippComputePoints(picks[n], m);
+        if (pts !== null) weekTotals[n] = (weekTotals[n] || 0) + pts;
+      });
+    });
+
+    return `<div class="tipp-board">` + players.map(n => `
+      <div class="tipp-board-entry">
+        <div class="pname">${esc(n)}</div>
+        <div class="stat-row">
+          <div class="stat"><div class="n">${weekTotals[n]}</div><div class="l">Woche</div></div>
+          <div class="stat"><div class="n">${totals[n]}</div><div class="l">Gesamt</div></div>
+        </div>
+      </div>`).join("") + `</div>`;
+  }
+
+  function renderTippUpcoming(matches) {
+    const now = new Date();
+    if (matches.length === 0) return '<p class="empty-list">Keine Matches in dieser Runde gefunden.</p>';
+    return matches.map(m => {
+      const picks = tippStore.picks[m.id] || {};
+      const mine = picks[tippPlayerName];
+      const others = Object.entries(picks).filter(([n]) => n !== tippPlayerName);
+      const locked = m.start <= now;
+
+      let bottomHtml;
+      if (locked && !mine) {
+        bottomHtml = '<div class="locked-note">🔒 Zu spät – Match hat schon begonnen</div>';
+      } else if (locked && mine) {
+        bottomHtml = `
+          <div class="pick-row"><span style="font-family:var(--mono);font-size:15px">${mine.s1} : ${mine.s2}</span></div>
+          <div class="saved-note ok">✓ Dein Tipp (gesperrt, Match läuft/lief schon)</div>`;
+      } else {
+        bottomHtml = `
+          <div class="pick-row">
+            <input type="number" min="0" max="9" class="s1" value="${mine ? mine.s1 : ""}">
+            <span class="colon">:</span>
+            <input type="number" min="0" max="9" class="s2" value="${mine ? mine.s2 : ""}">
+            <button class="btn save-btn">${mine ? "Ändern" : "Tippen"}</button>
+          </div>
+          <div class="saved-note ${mine ? "ok" : ""}">${mine ? "✓ Tipp gespeichert" : ""}</div>`;
+      }
+
+      let otherHtml = "";
+      if (mine) {
+        otherHtml = others.length
+          ? '<div class="other-picks">' + others.map(([n, p]) => `<span>${esc(n)}: <b>${p.s1}:${p.s2}</b></span>`).join("") + "</div>"
+          : '<div class="other-picks">Noch niemand sonst hat getippt.</div>';
+      } else if (others.length && !locked) {
+        otherHtml = '<div class="blind-note">🔒 Gib deinen Tipp ab, um die anderen Tipps zu sehen</div>';
+      }
+
+      return `
+        <div class="ticket" data-uid="${esc(m.id)}">
+          <span class="league">${esc(m.league)}</span>
+          <span class="when">${fmtWhen(m.start)}</span>
+          <div class="matchup">
+            ${teamLogoHtml(m.teamA)}<span class="a">${esc(m.teamA.name)}</span>
+            <span style="color:var(--text-dim);font-size:11px;font-weight:400">vs</span>
+            <span class="b">${esc(m.teamB.name)}</span>${teamLogoHtml(m.teamB)}
+          </div>
+          ${bottomHtml}
+          ${otherHtml}
+        </div>`;
+    }).join("");
+  }
+
+  function renderTippCompleted(matches) {
+    if (matches.length === 0) return '<p class="empty-list">Noch keine Ergebnisse in dieser Runde.</p>';
+    return matches.slice().reverse().map(m => {
+      const picks = tippStore.picks[m.id] || {};
+      const names = Object.keys(picks);
+      const wA = m.teamA.result ? m.teamA.result.gameWins : "-";
+      const wB = m.teamB.result ? m.teamB.result.gameWins : "-";
+      const rows = names.map(n => {
+        const pts = tippComputePoints(picks[n], m);
+        const label = pts === 2 ? "Exakt" : pts === 1 ? "Sieger" : "0";
+        return `<div class="pcol"><div class="pname">${esc(n)}</div><div class="pval">${picks[n].s1}:${picks[n].s2}<span class="pts-badge pts-${pts}">${label}</span></div></div>`;
+      }).join("");
+      return `
+        <div class="ticket">
+          <span class="league">${esc(m.league)}</span>
+          <span class="when">${fmtWhen(m.start)}</span>
+          <div class="matchup">
+            ${teamLogoHtml(m.teamA)}<span class="a">${esc(m.teamA.name)}</span>
+            <span style="color:var(--gold);font-family:var(--mono);font-size:14px">${wA}:${wB}</span>
+            <span class="b">${esc(m.teamB.name)}</span>${teamLogoHtml(m.teamB)}
+          </div>
+          <div class="result-row">${rows || '<span style="color:var(--text-dim)">Niemand hat getippt.</span>'}</div>
+        </div>`;
+    }).join("");
+  }
+
+  function renderTipp(roundMatches, roundCompleted, allCompleted, weekEnd) {
+    const el = document.getElementById("tipp-body");
+    const upcoming = roundMatches.filter(m => m.state !== "completed");
+
+    el.innerHTML = `
+      <div class="round-info">Eingeloggt als <b>${esc(tippPlayerName)}</b> · Runde endet <b>${tippFmtRoundEnd(weekEnd)}</b></div>
+      ${renderTippBoard(allCompleted, roundCompleted)}
+      <div class="card"><h2>🎯 Diese Runde tippen</h2>${renderTippUpcoming(upcoming)}</div>
+      <div class="card"><h2>🏆 Ergebnisse dieser Runde</h2>${renderTippCompleted(roundCompleted)}</div>
+    `;
+
+    el.querySelectorAll(".ticket[data-uid]").forEach(ticket => {
+      const btn = ticket.querySelector(".save-btn");
+      if (!btn) return;
+      btn.addEventListener("click", async () => {
+        const uid = ticket.getAttribute("data-uid");
+        const s1 = parseInt(ticket.querySelector(".s1").value, 10);
+        const s2 = parseInt(ticket.querySelector(".s2").value, 10);
+        if (isNaN(s1) || isNaN(s2)) return;
+        btn.disabled = true;
+        btn.textContent = "…";
+        await tippSavePick(uid, tippPlayerName, s1, s2);
+        loadTipp();
+      });
+    });
+  }
+  // ==================== /TIPPSPIEL ====================
 
   loadTab("start");
 })();
