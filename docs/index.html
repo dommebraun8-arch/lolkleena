@@ -6,14 +6,13 @@
 <title>LoL Esports Dashboard</title>
 <style>
   :root {
-    --bg: #17102b;
-    --card: #241a3d;
-    --card-line: #392a5c;
-    --gold: #f2b705;
-    --cyan: #5eead4;
-    --coral: #fb7185;
-    --text: #f1ecff;
-    --text-dim: #a99fc9;
+    --bg: #0b0c0e;
+    --surface: #131417;
+    --line: #262830;
+    --text: #e6e6e8;
+    --text-dim: #85888f;
+    --accent: #b8923f;
+    --live: #c9564a;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
@@ -24,259 +23,280 @@
   .wrap { max-width: 640px; margin: 0 auto; padding: 30px 16px 70px; }
 
   .eyebrow {
-    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--gold); font-weight: 700; margin: 0 0 6px;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); font-weight: 600; margin: 0 0 6px;
   }
-  h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 18px; }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 20px; }
 
   nav.tabs {
-    display: flex; gap: 6px; margin-bottom: 20px;
-    background: var(--card); border: 1px solid var(--card-line);
-    border-radius: 12px; padding: 4px; position: sticky; top: 10px; z-index: 10;
+    display: flex; gap: 18px; margin-bottom: 24px; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
   }
   nav.tabs button {
-    flex: 1; background: transparent; border: none; color: var(--text-dim);
-    font-family: var(--sans); font-weight: 700; font-size: 12px;
-    padding: 9px 4px; border-radius: 9px; cursor: pointer;
+    background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-dim);
+    font-family: var(--sans); font-weight: 600; font-size: 13px;
+    padding: 0 0 10px; cursor: pointer;
   }
-  nav.tabs button.active { background: var(--gold); color: #241a00; }
+  nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
 
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
   .card {
-    background: var(--card); border: 1px solid var(--card-line);
-    border-radius: 16px; padding: 20px; margin-bottom: 14px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 4px; padding: 16px; margin-bottom: 12px;
   }
   .card h2 {
-    font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--text-dim); margin: 0 0 14px; display: flex; align-items: center; gap: 8px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+    color: var(--text-dim); margin: 0 0 12px;
   }
 
   .leagues { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
   .league-chip {
-    font-family: var(--mono); font-size: 12px; padding: 5px 10px; border-radius: 6px;
-    background: #100b1f; border: 1px solid var(--card-line); color: var(--cyan);
+    font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 3px;
+    background: var(--bg); border: 1px solid var(--line); color: var(--text-dim);
   }
 
   .btn {
-    display: inline-flex; align-items: center; gap: 8px; background: var(--gold);
-    color: #241a00; font-weight: 700; font-size: 13px; padding: 10px 18px;
-    border-radius: 10px; text-decoration: none; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px; background: var(--accent);
+    color: #16130a; font-weight: 600; font-size: 13px; padding: 9px 16px;
+    border-radius: 4px; text-decoration: none; border: none; cursor: pointer;
   }
-  .btn:hover { filter: brightness(1.08); }
-  .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--card-line); }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--line); }
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
   .url-box {
-    margin-top: 12px; background: #100b1f; border: 1px solid var(--card-line);
-    border-radius: 8px; padding: 9px 11px; font-family: var(--mono); font-size: 11px;
+    margin-top: 12px; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 4px; padding: 9px 11px; font-family: var(--mono); font-size: 11px;
     color: var(--text-dim); word-break: break-all; display: flex;
     justify-content: space-between; align-items: center; gap: 10px;
   }
   .url-box button {
-    background: var(--card-line); color: var(--text); border: none; border-radius: 6px;
+    background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 3px;
     padding: 6px 10px; font-size: 11px; cursor: pointer; flex-shrink: 0;
   }
-  .url-box button:hover { background: var(--gold); color: #241a00; }
+  .url-box button:hover { border-color: var(--accent); }
 
   .status { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
-  .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); margin-right: 6px; }
-  .status.error .dot { background: var(--coral); }
+  .status .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); margin-right: 6px; }
+  .status.error .dot { background: var(--live); }
 
   .standings-group { margin-bottom: 18px; }
   .standings-group:last-child { margin-bottom: 0; }
   .standings-group h3 {
-    font-family: var(--mono); font-size: 11px; color: var(--gold);
-    text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; font-weight: 600;
   }
 
   table.standings { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.standings th {
     text-align: left; color: var(--text-dim); font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.05em; font-weight: 700; padding: 4px 6px; border-bottom: 1px solid var(--card-line);
+    letter-spacing: 0.05em; font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--line);
   }
-  table.standings td { padding: 7px 6px; border-bottom: 1px solid var(--card-line); }
+  table.standings td { padding: 7px 6px; border-bottom: 1px solid var(--line); }
   table.standings tr:last-child td { border-bottom: none; }
-  table.standings .rank { color: var(--gold); font-family: var(--mono); font-weight: 700; width: 30px; }
-  table.standings .team { font-weight: 600; }
+  table.standings .rank { color: var(--text-dim); font-family: var(--mono); font-weight: 600; width: 30px; }
+  table.standings .team { font-weight: 500; }
   table.standings .record { font-family: var(--mono); color: var(--text-dim); text-align: right; }
-  table.standings tr.highlight td { background: rgba(242, 183, 5, 0.08); }
+  table.standings tr.highlight td { background: rgba(255, 255, 255, 0.03); }
 
   .league-group { margin-bottom: 4px; }
   .league-group-header {
-    display: flex; align-items: center; gap: 6px; padding: 10px 4px 6px;
-    font-family: var(--mono); font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--gold); border-bottom: 1px solid var(--card-line);
+    padding: 10px 4px 6px;
+    font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-dim); border-bottom: 1px solid var(--line);
     margin-bottom: 2px;
   }
 
+  .team-icon-grid { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0 10px; }
+  .team-icon-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; width: 56px;
+    background: transparent; border: none; cursor: pointer; padding: 6px 2px; border-radius: 4px;
+  }
+  .team-icon-btn:hover { background: rgba(255, 255, 255, 0.04); }
+  .team-icon-btn img { width: 30px; height: 30px; object-fit: contain; background: var(--bg); border-radius: 4px; padding: 4px; }
+  .team-icon-btn .tcode { font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+
+  .team-modal-header { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .team-modal-header img { width: 64px; height: 64px; object-fit: contain; background: var(--bg); border-radius: 4px; padding: 8px; }
+  .team-modal-name { font-weight: 600; font-size: 16px; }
+
+  .roster-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .roster-row:last-child { border-bottom: none; }
+  .roster-row img { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; background: var(--bg); flex-shrink: 0; }
+  .roster-row .role {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--text-dim);
+    width: 52px; flex-shrink: 0;
+  }
+  .roster-row .pname { font-weight: 500; font-size: 13px; }
+  .roster-row .real-name { font-size: 11px; color: var(--text-dim); }
+
   .match {
-    padding: 7px 4px; border-bottom: 1px solid var(--card-line); font-size: 12.5px; cursor: pointer;
+    padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 12.5px; cursor: pointer;
   }
   .match:hover { background: rgba(255,255,255,0.03); }
   .match:last-child { border-bottom: none; }
   .match-row { display: flex; align-items: center; gap: 8px; }
   .match .league-tag {
-    font-family: var(--mono); font-size: 10px; color: var(--gold); text-transform: uppercase;
+    font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase;
     letter-spacing: 0.05em; width: 42px; flex-shrink: 0;
   }
   .match .when-col { width: 56px; flex-shrink: 0; font-size: 10px; line-height: 1.3; color: var(--text-dim); text-align: center; }
-  .match .teams { flex: 1; font-weight: 600; display: flex; align-items: center; gap: 5px; min-width: 0; }
+  .match .teams { flex: 1; font-weight: 500; display: flex; align-items: center; gap: 5px; min-width: 0; }
   .match .teams span.a, .match .teams span.b {
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%; color: var(--text);
   }
-  .match .teams img { width: 15px; height: 15px; border-radius: 3px; object-fit: contain; background: #100b1f; flex-shrink: 0; }
-  .match .teams .a { color: var(--cyan); }
-  .match .teams .b { color: var(--coral); }
+  .match .teams img { width: 15px; height: 15px; border-radius: 2px; object-fit: contain; background: var(--bg); flex-shrink: 0; }
   .match .vs-sep { color: var(--text-dim); font-size: 10px; font-weight: 400; flex-shrink: 0; }
-  .match .result-col { width: 44px; flex-shrink: 0; text-align: right; font-family: var(--mono); font-weight: 700; color: var(--gold); font-size: 12.5px; }
-  .match.live .when-col { color: var(--coral); font-weight: 700; }
+  .match .result-col { width: 44px; flex-shrink: 0; text-align: right; font-family: var(--mono); font-weight: 600; color: var(--text); font-size: 12.5px; }
+  .match.live .when-col { color: var(--live); font-weight: 600; }
   .live-dot {
-    display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--coral);
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--live);
     margin-right: 3px;
   }
   .empty-list { color: var(--text-dim); font-size: 13px; padding: 6px 0; }
 
   .live-card { margin-bottom: 12px; }
   .live-card .games-score {
-    text-align: center; font-family: var(--mono); font-size: 22px; font-weight: 800;
-    color: var(--gold); margin: 8px 0;
+    text-align: center; font-family: var(--mono); font-size: 20px; font-weight: 700;
+    color: var(--text); margin: 8px 0;
   }
   .live-kills { display: flex; justify-content: center; gap: 30px; font-size: 12px; color: var(--text-dim); }
   .live-kills b { color: var(--text); font-family: var(--mono); font-size: 16px; }
   .live-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
 
   footer { margin-top: 30px; font-size: 12px; color: var(--text-dim); text-align: center; }
-  footer a { color: var(--gold); text-decoration: none; }
+  footer a { color: var(--text-dim); text-decoration: underline; }
 
   /* ---- Match Detail Modal ---- */
   .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(10, 6, 20, 0.75);
+    display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
     z-index: 100; padding: 20px 12px; overflow-y: auto;
   }
   .modal-overlay.open { display: block; }
   .modal-box {
-    max-width: 480px; margin: 20px auto 40px; background: var(--card);
-    border: 1px solid var(--card-line); border-radius: 20px; padding: 20px; position: relative;
+    max-width: 480px; margin: 20px auto 40px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px; padding: 20px; position: relative;
   }
   .modal-close {
-    position: absolute; top: 14px; right: 14px; background: var(--card-line); color: var(--text);
-    border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px;
+    position: absolute; top: 14px; right: 14px; background: transparent; color: var(--text-dim);
+    border: 1px solid var(--line); width: 26px; height: 26px; border-radius: 3px; cursor: pointer; font-size: 14px;
   }
+  .modal-close:hover { color: var(--text); border-color: var(--accent); }
   .modal-league {
-    font-family: var(--mono); font-size: 11px; color: var(--gold); text-transform: uppercase;
-    letter-spacing: 0.1em; text-align: center; margin-bottom: 10px;
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: 0.08em; text-align: center; margin-bottom: 10px;
   }
   .modal-teams { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 10px; }
   .modal-team { text-align: center; flex: 1; max-width: 140px; }
   .modal-team img {
-    width: 56px; height: 56px; object-fit: contain; background: #100b1f; border-radius: 12px;
+    width: 56px; height: 56px; object-fit: contain; background: var(--bg); border-radius: 4px;
     padding: 6px; margin-bottom: 6px;
   }
-  .modal-team .tname { font-weight: 700; font-size: 13px; }
+  .modal-team .tname { font-weight: 600; font-size: 13px; }
   .modal-score {
-    font-family: var(--mono); font-size: 30px; font-weight: 800; color: var(--gold);
+    font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--text);
     min-width: 70px; text-align: center;
   }
   .modal-meta {
     text-align: center; font-size: 12px; color: var(--text-dim); margin-bottom: 16px;
   }
   .modal-badge {
-    display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px;
-    font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;
+    display: inline-block; font-size: 10px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;
   }
-  .badge-upcoming { background: var(--card-line); color: var(--text-dim); }
-  .badge-live { background: var(--coral); color: #2a0a0a; }
-  .badge-completed { background: var(--gold); color: #241a00; }
+  .badge-upcoming { color: var(--text-dim); }
+  .badge-live { color: var(--live); }
+  .badge-completed { color: var(--text); }
 
   .modal-subtabs {
-    display: flex; gap: 4px; background: #100b1f; border-radius: 10px; padding: 4px; margin-bottom: 14px;
+    display: flex; gap: 16px; border-bottom: 1px solid var(--line); margin-bottom: 14px;
   }
   .modal-subtabs button {
-    flex: 1; background: transparent; border: none; color: var(--text-dim); font-weight: 700;
-    font-size: 11px; padding: 8px 4px; border-radius: 7px; cursor: pointer; font-family: var(--sans);
+    background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); font-weight: 600;
+    font-size: 11px; padding: 0 0 8px; cursor: pointer; font-family: var(--sans);
   }
-  .modal-subtabs button.active { background: var(--gold); color: #241a00; }
+  .modal-subtabs button.active { color: var(--text); border-bottom-color: var(--accent); }
   .modal-subpanel { display: none; font-size: 13px; }
   .modal-subpanel.active { display: block; }
 
-  .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--card-line); font-size: 13px; }
+  .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
   .info-row:last-child { border-bottom: none; }
   .info-row .k { color: var(--text-dim); }
-  .info-row .v { font-weight: 600; }
+  .info-row .v { font-weight: 500; }
 
-  .h2h-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--card-line); font-size: 12px; }
+  .h2h-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
   .h2h-row:last-child { border-bottom: none; }
-  .h2h-row .r { font-family: var(--mono); color: var(--gold); font-weight: 700; }
+  .h2h-row .r { font-family: var(--mono); color: var(--text); font-weight: 600; }
 
   /* ---- Tippspiel ---- */
 
   .round-info {
     text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 14px;
   }
-  .round-info b { color: var(--gold); }
+  .round-info b { color: var(--text); }
 
   .tipp-board {
     display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
   }
   .tipp-board-entry {
-    flex: 1; min-width: 130px; background: var(--card); border: 1px solid var(--card-line);
-    border-radius: 12px; padding: 12px; text-align: center;
+    flex: 1; min-width: 130px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 4px; padding: 12px; text-align: center;
   }
   .tipp-board-entry .pname { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
   .tipp-board-entry .stat-row { display: flex; justify-content: center; gap: 14px; }
   .tipp-board-entry .stat { text-align: center; }
-  .tipp-board-entry .stat .n { font-family: var(--mono); font-size: 20px; font-weight: 800; color: var(--gold); }
+  .tipp-board-entry .stat .n { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent); }
   .tipp-board-entry .stat .l { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
 
   .ticket {
-    background: var(--card); border: 1px solid var(--card-line); border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
     padding: 14px 16px; margin-bottom: 10px;
   }
   .ticket .league {
-    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); font-weight: 700;
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); font-weight: 600;
   }
   .ticket .when { font-size: 11px; color: var(--text-dim); float: right; }
   .ticket .matchup {
     display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0 12px;
-    font-weight: 700; font-size: 14px;
+    font-weight: 600; font-size: 14px; color: var(--text);
   }
-  .ticket .matchup img { width: 22px; height: 22px; border-radius: 5px; object-fit: contain; background: #100b1f; }
-  .ticket .matchup .a { color: var(--cyan); text-align: right; }
-  .ticket .matchup .b { color: var(--coral); text-align: left; }
+  .ticket .matchup img { width: 22px; height: 22px; border-radius: 3px; object-fit: contain; background: var(--bg); }
+  .ticket .matchup .a { text-align: right; }
+  .ticket .matchup .b { text-align: left; }
   .ticket .pick-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
   .ticket .pick-row input {
-    width: 44px; text-align: center; background: #100b1f; border: 1px solid var(--card-line);
-    color: var(--text); border-radius: 8px; padding: 8px 0; font-family: var(--mono); font-size: 15px;
+    width: 44px; text-align: center; background: var(--bg); border: 1px solid var(--line);
+    color: var(--text); border-radius: 3px; padding: 8px 0; font-family: var(--mono); font-size: 15px;
   }
   .ticket .pick-row .colon { color: var(--text-dim); font-family: var(--mono); }
   .ticket .bo-label { text-align: center; font-size: 10px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
   .ticket .bo-options { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
   .ticket .bo-chip {
-    font-family: var(--mono); font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 8px;
-    background: #100b1f; border: 1px solid var(--card-line); color: var(--text); cursor: pointer;
+    font-family: var(--mono); font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 3px;
+    background: var(--bg); border: 1px solid var(--line); color: var(--text); cursor: pointer;
   }
-  .ticket .bo-chip:hover { border-color: var(--gold); }
-  .ticket .bo-chip.selected { background: var(--gold); color: #241a00; border-color: var(--gold); }
+  .ticket .bo-chip:hover { border-color: var(--accent); }
+  .ticket .bo-chip.selected { background: var(--accent); color: #16130a; border-color: var(--accent); }
   .ticket .bo-chip:disabled { opacity: 0.5; cursor: default; }
   .ticket .saved-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
-  .ticket .saved-note.ok { color: var(--cyan); }
+  .ticket .saved-note.ok { color: var(--text); }
   .ticket .locked-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
   .ticket .other-picks {
-    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--card-line); font-size: 12px;
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 12px;
     color: var(--text-dim); display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;
   }
   .ticket .other-picks b { color: var(--text); font-family: var(--mono); }
-  .ticket .blind-note { text-align: center; font-size: 11px; color: var(--gold-dim, #6b5a1f); margin-top: 10px; }
+  .ticket .blind-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 10px; }
   .ticket .result-row { display: flex; justify-content: center; gap: 22px; font-size: 12px; margin-top: 10px; flex-wrap: wrap; }
   .ticket .result-row .pcol { text-align: center; }
   .ticket .result-row .pcol .pname { color: var(--text-dim); }
   .ticket .result-row .pcol .pval { font-family: var(--mono); font-size: 14px; }
-  .pts-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; font-size: 10px; font-weight: 700; }
-  .pts-2 { background: var(--gold); color: #241a00; }
-  .pts-1 { background: var(--card-line); color: var(--cyan); }
-  .pts-0 { background: var(--card-line); color: var(--text-dim); }
+  .pts-badge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 600; }
+  .pts-2 { color: var(--accent); }
+  .pts-1 { color: var(--text-dim); }
+  .pts-0 { color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -294,34 +314,39 @@
 
   <div class="tab-panel active" id="tab-start">
     <div class="card">
-      <h2>📅 Kalender abonnieren</h2>
+      <h2>Kalender abonnieren</h2>
       <div class="leagues">
         <span class="league-chip">LEC</span><span class="league-chip">LCS</span>
         <span class="league-chip">LCK</span><span class="league-chip">LPL</span>
         <span class="league-chip">MSI</span><span class="league-chip">Worlds</span>
       </div>
       <div class="btn-row">
-        <a class="btn" id="subscribe-btn" href="#">📲 Jetzt abonnieren</a>
+        <a class="btn" id="subscribe-btn" href="#">Jetzt abonnieren</a>
         <a class="btn secondary" id="view-btn" href="#" target="_blank">.ics ansehen</a>
       </div>
       <div class="url-box"><span id="webcal-url">webcal://…</span><button id="copy-btn">Kopieren</button></div>
     </div>
     <div class="card">
-      <h2>⏰ Nächste 24 Stunden</h2>
+      <h2>Nächste 24 Stunden</h2>
       <div id="start-list"><p class="status"><span class="dot"></span>Lade Spiele…</p></div>
+    </div>
+    <div class="card">
+      <h2>Lieblingsteam</h2>
+      <p class="live-note" style="margin-bottom:10px">Team anklicken für den Kader dieser Saison</p>
+      <div id="team-browser"><p class="status"><span class="dot"></span>Lade Teams…</p></div>
     </div>
   </div>
 
   <div class="tab-panel" id="tab-live">
     <div class="card">
-      <h2>🔴 Gerade live</h2>
+      <h2>Gerade live</h2>
       <div id="live-list"><p class="status"><span class="dot"></span>Prüfe auf laufende Spiele…</p></div>
     </div>
   </div>
 
   <div class="tab-panel" id="tab-results">
     <div class="card">
-      <h2>🏁 Letzte Ergebnisse</h2>
+      <h2>Letzte Ergebnisse</h2>
       <p class="live-note" style="margin-bottom:10px">Auf ein Match tippen für Details</p>
       <div id="results-list"><p class="status"><span class="dot"></span>Lade Ergebnisse…</p></div>
     </div>
@@ -329,7 +354,7 @@
 
   <div class="tab-panel" id="tab-standings">
     <div class="card">
-      <h2>🏆 Tabellen</h2>
+      <h2>Tabellen</h2>
       <div id="standings-list"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div>
     </div>
   </div>
@@ -346,7 +371,7 @@
 <!-- Match Detail Modal -->
 <div class="modal-overlay" id="match-modal">
   <div class="modal-box">
-    <button class="modal-close" id="modal-close">✕</button>
+    <button class="modal-close" id="modal-close">&times;</button>
     <div class="modal-league" id="modal-league"></div>
     <div class="modal-teams">
       <div class="modal-team"><img id="modal-logo-a" src=""><div class="tname" id="modal-name-a"></div></div>
@@ -362,6 +387,19 @@
     <div class="modal-subpanel active" id="modal-info"></div>
     <div class="modal-subpanel" id="modal-h2h"><p class="empty-list">Lade…</p></div>
     <div class="modal-subpanel" id="modal-table"><p class="empty-list">Lade…</p></div>
+  </div>
+</div>
+
+<!-- Team Roster Modal -->
+<div class="modal-overlay" id="team-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="team-modal-close">&times;</button>
+    <div class="modal-league" id="team-modal-league"></div>
+    <div class="team-modal-header">
+      <img id="team-modal-logo" src="">
+      <div class="team-modal-name" id="team-modal-name"></div>
+    </div>
+    <div id="team-modal-roster"><p class="empty-list">Lade…</p></div>
   </div>
 </div>
 
@@ -397,7 +435,7 @@
   document.getElementById("copy-btn").addEventListener("click", () => {
     navigator.clipboard.writeText(webcalUrl).then(() => {
       const btn = document.getElementById("copy-btn");
-      btn.textContent = "Kopiert ✓";
+      btn.textContent = "Kopiert";
       setTimeout(() => (btn.textContent = "Kopieren"), 1500);
     });
   });
@@ -557,6 +595,7 @@
   // ---- START TAB ----
   async function loadStart() {
     const el = document.getElementById("start-list");
+    loadTeamBrowser();
     try {
       const events = await loadSchedule();
       const now = new Date();
@@ -573,6 +612,105 @@
       attachRowClicks(el);
     } catch (e) {
       el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  // ---- LIEBLINGSTEAM / KADER-BROWSER ----
+  let teamsByLeagueCache = null;
+  async function getTeamsByLeague() {
+    if (teamsByLeagueCache) return teamsByLeagueCache;
+    const allLeagues = await getAllLeagues();
+    teamsByLeagueCache = Promise.all(STANDINGS_LEAGUES.map(async name => {
+      try {
+        const { rankings } = await fetchStandingsForLeagueName(name, allLeagues);
+        const teams = [];
+        const seen = new Set();
+        (rankings || []).forEach(r => (r.teams || []).forEach(t => {
+          if (!seen.has(t.id)) { seen.add(t.id); teams.push(t); }
+        }));
+        return { name, teams };
+      } catch (e) {
+        return { name, teams: [], error: e.message };
+      }
+    }));
+    return teamsByLeagueCache;
+  }
+
+  function renderTeamBrowser(groups) {
+    return groups.map(g => `
+      <div class="league-group">
+        <div class="league-group-header">${esc(g.name)}</div>
+        <div class="team-icon-grid">
+          ${g.teams.length ? g.teams.map(t => `
+            <button class="team-icon-btn" data-team-id="${esc(t.id)}" data-team-league="${esc(g.name)}">
+              <img src="${esc(t.image || fallbackLogo(t.name))}" onerror="this.src='${fallbackLogo(t.name)}'">
+              <span class="tcode">${esc(t.code || t.name)}</span>
+            </button>`).join("") : `<p class="empty-list">${esc(g.error || "Keine Teams gefunden.")}</p>`}
+        </div>
+      </div>`).join("");
+  }
+
+  async function loadTeamBrowser() {
+    const el = document.getElementById("team-browser");
+    try {
+      const groups = await getTeamsByLeague();
+      el.innerHTML = renderTeamBrowser(groups);
+      el.querySelectorAll(".team-icon-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          openTeamModal(btn.getAttribute("data-team-id"), btn.getAttribute("data-team-league"));
+        });
+      });
+    } catch (e) {
+      el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  const ROLE_LABELS = { top: "Top", jungle: "Jungle", mid: "Mid", bottom: "Bot", support: "Support" };
+  const teamRosterCache = {};
+
+  async function fetchTeamRoster(teamId) {
+    if (teamRosterCache[teamId]) return teamRosterCache[teamId];
+    const r = await fetch(`${ESPORTS_BASE}/getTeams?hl=en-GB&id=${teamId}`, { headers: HEADERS });
+    if (!r.ok) throw new Error("Kader nicht erreichbar (" + r.status + ")");
+    const data = await r.json();
+    const team = (data.data.teams || [])[0];
+    teamRosterCache[teamId] = team;
+    return team;
+  }
+
+  const teamModal = document.getElementById("team-modal");
+  document.getElementById("team-modal-close").addEventListener("click", () => teamModal.classList.remove("open"));
+  teamModal.addEventListener("click", e => { if (e.target === teamModal) teamModal.classList.remove("open"); });
+
+  async function openTeamModal(teamId, leagueName) {
+    document.getElementById("team-modal-league").textContent = leagueName;
+    document.getElementById("team-modal-name").textContent = "Lade…";
+    document.getElementById("team-modal-logo").src = fallbackLogo("?");
+    document.getElementById("team-modal-roster").innerHTML = '<p class="empty-list">Lade Kader…</p>';
+    teamModal.classList.add("open");
+
+    try {
+      const team = await fetchTeamRoster(teamId);
+      if (!team) throw new Error("Team nicht gefunden");
+      document.getElementById("team-modal-name").textContent = team.name;
+      document.getElementById("team-modal-logo").src = team.image || fallbackLogo(team.name);
+      const players = team.players || [];
+      const rosterEl = document.getElementById("team-modal-roster");
+      if (players.length === 0) {
+        rosterEl.innerHTML = '<p class="empty-list">Kein Kader verfügbar.</p>';
+        return;
+      }
+      rosterEl.innerHTML = players.map(p => `
+        <div class="roster-row">
+          <img src="${esc(p.image || fallbackLogo(p.summonerName))}" onerror="this.src='${fallbackLogo(p.summonerName)}'">
+          <span class="role">${esc(ROLE_LABELS[p.role] || p.role || "")}</span>
+          <div>
+            <div class="pname">${esc(p.summonerName)}</div>
+            ${p.firstName || p.lastName ? `<div class="real-name">${esc([p.firstName, p.lastName].filter(Boolean).join(" "))}</div>` : ""}
+          </div>
+        </div>`).join("");
+    } catch (e) {
+      document.getElementById("team-modal-roster").innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
   }
 
@@ -1036,7 +1174,7 @@
               <td class="rank">${i + 1}</td>
               <td class="team">${esc(n)}</td>
               <td class="record">${stats.exactCount[n]}/${stats.playedCount[n]}</td>
-              <td class="record" style="color:var(--gold);font-weight:700">${stats.totals[n]}</td>
+              <td class="record" style="color:var(--accent);font-weight:700">${stats.totals[n]}</td>
             </tr>`).join("")}
         </tbody>
       </table>`;
@@ -1063,11 +1201,11 @@
 
       let bottomHtml;
       if (locked && !mine) {
-        bottomHtml = '<div class="locked-note">🔒 Zu spät – Match hat schon begonnen</div>';
+        bottomHtml = '<div class="locked-note">Zu spät – Match hat schon begonnen</div>';
       } else if (locked && mine) {
         bottomHtml = `
           <div class="pick-row"><span style="font-family:var(--mono);font-size:15px">${mine.s1} : ${mine.s2}</span></div>
-          <div class="saved-note ok">✓ Dein Tipp (gesperrt, Match läuft/lief schon)</div>`;
+          <div class="saved-note ok">Dein Tipp (gesperrt, Match läuft/lief schon)</div>`;
       } else {
         bottomHtml = `
           <div class="bo-label">${esc(bo.label)}</div>
@@ -1077,7 +1215,7 @@
               return `<button class="bo-chip ${isSelected ? "selected" : ""}" data-s1="${s1}" data-s2="${s2}">${s1}:${s2}</button>`;
             }).join("")}
           </div>
-          <div class="saved-note ${mine ? "ok" : ""}">${mine ? "✓ Tipp gespeichert" : ""}</div>`;
+          <div class="saved-note ${mine ? "ok" : ""}">${mine ? "Tipp gespeichert" : ""}</div>`;
       }
 
       let otherHtml = "";
@@ -1086,7 +1224,7 @@
           ? '<div class="other-picks">' + others.map(([n, p]) => `<span>${esc(n)}: <b>${p.s1}:${p.s2}</b></span>`).join("") + "</div>"
           : '<div class="other-picks">Noch niemand sonst hat getippt.</div>';
       } else if (others.length && !locked) {
-        otherHtml = '<div class="blind-note">🔒 Gib deinen Tipp ab, um die anderen Tipps zu sehen</div>';
+        otherHtml = '<div class="blind-note">Gib deinen Tipp ab, um die anderen Tipps zu sehen</div>';
       }
 
       return `
@@ -1122,7 +1260,7 @@
           <span class="when">${fmtWhen(m.start)}</span>
           <div class="matchup">
             ${teamLogoHtml(m.teamA)}<span class="a">${esc(m.teamA.name)}</span>
-            <span style="color:var(--gold);font-family:var(--mono);font-size:14px">${wA}:${wB}</span>
+            <span style="color:var(--text);font-family:var(--mono);font-size:14px">${wA}:${wB}</span>
             <span class="b">${esc(m.teamB.name)}</span>${teamLogoHtml(m.teamB)}
           </div>
           <div class="result-row">${rows || '<span style="color:var(--text-dim)">Niemand hat getippt.</span>'}</div>
@@ -1139,12 +1277,12 @@
     el.innerHTML = `
       <div class="round-info">Eingeloggt als <b>${esc(tippPlayerName)}</b> · Runde endet <b>${tippFmtRoundEnd(weekEnd)}</b></div>
       ${renderTippBoard(stats)}
-      <div class="card"><h2>🏅 All-Time Bestenliste</h2>${renderTippAllTimeTable(stats)}</div>
-      <div class="card"><h2>⏰ Nächste 24 Stunden</h2>${next24h.length ? renderGrouped(next24h) : '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>'}</div>
-      <div class="card"><h2>🎯 Diese Runde tippen</h2>${renderTippUpcoming(upcoming)}</div>
-      <div class="card"><h2>🏆 Ergebnisse dieser Runde</h2>${renderTippCompleted(roundCompleted)}</div>
-      <div class="card"><h2>📜 Vergangene Spiele</h2>${pastBroader.length ? renderGrouped(pastBroader) : '<p class="empty-list">Noch keine abgeschlossenen Matches.</p>'}</div>
-      <div class="card"><h2>🏆 Tabellen</h2><div id="tipp-standings"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div></div>
+      <div class="card"><h2>All-Time Bestenliste</h2>${renderTippAllTimeTable(stats)}</div>
+      <div class="card"><h2>Nächste 24 Stunden</h2>${next24h.length ? renderGrouped(next24h) : '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>'}</div>
+      <div class="card"><h2>Diese Runde tippen</h2>${renderTippUpcoming(upcoming)}</div>
+      <div class="card"><h2>Ergebnisse dieser Runde</h2>${renderTippCompleted(roundCompleted)}</div>
+      <div class="card"><h2>Vergangene Spiele</h2>${pastBroader.length ? renderGrouped(pastBroader) : '<p class="empty-list">Noch keine abgeschlossenen Matches.</p>'}</div>
+      <div class="card"><h2>Tabellen</h2><div id="tipp-standings"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div></div>
     `;
 
     attachRowClicks(el);
