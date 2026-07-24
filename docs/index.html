@@ -294,6 +294,7 @@
   .pts-2 { color: var(--accent); }
   .pts-1 { color: var(--text-dim); }
   .pts-0 { color: var(--text-dim); }
+  .tipp-cell-dim { color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -1255,6 +1256,47 @@
     return { players, totals, weekTotals, exactCount, playedCount };
   }
 
+  function tippSummaryCellHtml(m, playerName) {
+    const picks = tippStore.picks[m.id] || {};
+    const pick = picks[playerName];
+    if (!pick) return '<span class="tipp-cell-dim">–</span>';
+    const mine = picks[tippPlayerName];
+    const isCompleted = m.state === "completed";
+    const canSee = isCompleted || !!mine || playerName === tippPlayerName;
+    if (!canSee) return '<span class="tipp-cell-dim">?</span>';
+    const pts = isCompleted ? tippComputePoints(pick, m) : null;
+    const ptsHtml = pts !== null ? `<span class="pts-badge pts-${pts}">${pts > 0 ? "+" + pts : "0"}</span>` : "";
+    return `${pick.s1}:${pick.s2}${ptsHtml}`;
+  }
+
+  function renderTippSummaryTable(roundMatches) {
+    if (roundMatches.length === 0) return '<p class="empty-list">Keine Matches in dieser Runde.</p>';
+    const sorted = roundMatches.slice().sort((a, b) => a.start - b.start);
+    const players = tippPlayerList();
+    return `
+      <table class="standings" id="tipp-summary-table">
+        <thead><tr><th>Match</th>${players.map(p => `<th style="text-align:right">${esc(p)}</th>`).join("")}</tr></thead>
+        <tbody>
+          ${sorted.map(m => `
+            <tr data-match-id="${esc(m.id)}">
+              <td>${esc(m.teamA.code || m.teamA.name)}&nbsp;–&nbsp;${esc(m.teamB.code || m.teamB.name)}</td>
+              ${players.map(p => `<td class="record" data-player="${esc(p)}">${tippSummaryCellHtml(m, p)}</td>`).join("")}
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  }
+
+  function updateTippSummaryRow(m) {
+    const table = document.getElementById("tipp-summary-table");
+    if (!table) return;
+    const row = Array.from(table.querySelectorAll("tr[data-match-id]")).find(r => r.getAttribute("data-match-id") === String(m.id));
+    if (!row) return;
+    tippPlayerList().forEach(p => {
+      const cell = Array.from(row.querySelectorAll("td[data-player]")).find(c => c.getAttribute("data-player") === p);
+      if (cell) cell.innerHTML = tippSummaryCellHtml(m, p);
+    });
+  }
+
   function renderTippBoard(stats) {
     if (stats.players.length === 0) return "";
     return `<div class="tipp-board">` + stats.players.map(n => `
@@ -1357,6 +1399,7 @@
         await tippSavePick(m.id, tippPlayerName, s1, s2);
         ticketEl.innerHTML = ticketUpcomingBodyHtml(m);
         wireTicketUpcoming(ticketEl, m);
+        updateTippSummaryRow(m);
       });
     });
   }
@@ -1400,6 +1443,7 @@
 
     el.innerHTML = `
       <div class="round-info">Eingeloggt als <b>${esc(tippPlayerName)}</b> · Runde endet <b>${tippFmtRoundEnd(weekEnd)}</b></div>
+      <div class="card"><h2>Tipps dieser Woche</h2>${renderTippSummaryTable(roundMatches)}</div>
       ${renderTippBoard(stats)}
       <div class="card"><h2>All-Time Bestenliste</h2>${renderTippAllTimeTable(stats)}</div>
       <div class="card"><h2>Nächste 24 Stunden</h2>${next24h.length ? renderGrouped(next24h) : '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>'}</div>
