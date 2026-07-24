@@ -284,14 +284,12 @@
   .ticket .locked-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
   .ticket .other-picks {
     margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 12px;
-    color: var(--text-dim); display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;
   }
-  .ticket .other-picks b { color: var(--text); font-family: var(--mono); }
   .ticket .blind-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 10px; }
-  .ticket .result-row { display: flex; justify-content: center; gap: 22px; font-size: 12px; margin-top: 10px; flex-wrap: wrap; }
-  .ticket .result-row .pcol { text-align: center; }
-  .ticket .result-row .pcol .pname { color: var(--text-dim); }
-  .ticket .result-row .pcol .pval { font-family: var(--mono); font-size: 14px; }
+  .ticket .result-row { margin-top: 10px; font-size: 12px; }
+  .pick-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .pick-line .pname { color: var(--text-dim); flex-shrink: 0; }
+  .pick-line .pval { font-family: var(--mono); font-weight: 600; text-align: right; }
   .pts-badge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 600; }
   .pts-2 { color: var(--accent); }
   .pts-1 { color: var(--text-dim); }
@@ -1295,57 +1293,77 @@
     return { label: "Format unbekannt · Bo3 angenommen", scores: [[2, 0], [2, 1], [1, 2], [0, 2]] };
   }
 
-  function renderTippUpcoming(matches) {
+  function scoreWithTeams(m, s1, s2) {
+    return `${esc(m.teamA.code || m.teamA.name)} ${s1}:${s2} ${esc(m.teamB.code || m.teamB.name)}`;
+  }
+
+  function ticketUpcomingBodyHtml(m) {
     const now = new Date();
+    const picks = tippStore.picks[m.id] || {};
+    const mine = picks[tippPlayerName];
+    const others = Object.entries(picks).filter(([n]) => n !== tippPlayerName && ALLOWED_TIPP_PLAYERS.includes(n));
+    const locked = m.start <= now;
+    const bo = getBestOfOptions(m);
+
+    let bottomHtml;
+    if (locked && !mine) {
+      bottomHtml = '<div class="locked-note">Zu spät – Match hat schon begonnen</div>';
+    } else if (locked && mine) {
+      bottomHtml = `
+        <div class="pick-row"><span style="font-family:var(--mono);font-size:15px">${scoreWithTeams(m, mine.s1, mine.s2)}</span></div>
+        <div class="saved-note ok">Dein Tipp (gesperrt, Match läuft/lief schon)</div>`;
+    } else {
+      bottomHtml = `
+        <div class="bo-label">${esc(bo.label)}</div>
+        <div class="bo-options">
+          ${bo.scores.map(([s1, s2]) => {
+            const isSelected = mine && mine.s1 === s1 && mine.s2 === s2;
+            return `<button class="bo-chip ${isSelected ? "selected" : ""}" data-s1="${s1}" data-s2="${s2}">${s1}:${s2}</button>`;
+          }).join("")}
+        </div>
+        <div class="saved-note ${mine ? "ok" : ""}">${mine ? "Tipp gespeichert" : ""}</div>`;
+    }
+
+    let otherHtml = "";
+    if (mine) {
+      otherHtml = others.length
+        ? '<div class="other-picks">' + others.map(([n, p]) =>
+            `<div class="pick-line"><span class="pname">${esc(n)}</span><span class="pval">${scoreWithTeams(m, p.s1, p.s2)}</span></div>`
+          ).join("") + "</div>"
+        : '<div class="other-picks">Noch niemand sonst hat getippt.</div>';
+    } else if (others.length && !locked) {
+      otherHtml = '<div class="blind-note">Gib deinen Tipp ab, um die anderen Tipps zu sehen</div>';
+    }
+
+    return `
+      <span class="league">${esc(m.league)}</span>
+      <span class="when">${fmtWhen(m.start)}</span>
+      <div class="matchup">
+        ${teamLogoHtml(m.teamA)}<span class="a">${esc(m.teamA.name)}</span>
+        <span style="color:var(--text-dim);font-size:11px;font-weight:400">vs</span>
+        <span class="b">${esc(m.teamB.name)}</span>${teamLogoHtml(m.teamB)}
+      </div>
+      ${bottomHtml}
+      ${otherHtml}`;
+  }
+
+  function wireTicketUpcoming(ticketEl, m) {
+    ticketEl.querySelectorAll(".bo-chip").forEach(chip => {
+      chip.addEventListener("click", async () => {
+        const s1 = parseInt(chip.getAttribute("data-s1"), 10);
+        const s2 = parseInt(chip.getAttribute("data-s2"), 10);
+        ticketEl.querySelectorAll(".bo-chip").forEach(c => c.disabled = true);
+        chip.textContent = "…";
+        await tippSavePick(m.id, tippPlayerName, s1, s2);
+        ticketEl.innerHTML = ticketUpcomingBodyHtml(m);
+        wireTicketUpcoming(ticketEl, m);
+      });
+    });
+  }
+
+  function renderTippUpcoming(matches) {
     if (matches.length === 0) return '<p class="empty-list">Keine Matches in dieser Runde gefunden.</p>';
-    return matches.map(m => {
-      const picks = tippStore.picks[m.id] || {};
-      const mine = picks[tippPlayerName];
-      const others = Object.entries(picks).filter(([n]) => n !== tippPlayerName && ALLOWED_TIPP_PLAYERS.includes(n));
-      const locked = m.start <= now;
-      const bo = getBestOfOptions(m);
-
-      let bottomHtml;
-      if (locked && !mine) {
-        bottomHtml = '<div class="locked-note">Zu spät – Match hat schon begonnen</div>';
-      } else if (locked && mine) {
-        bottomHtml = `
-          <div class="pick-row"><span style="font-family:var(--mono);font-size:15px">${mine.s1} : ${mine.s2}</span></div>
-          <div class="saved-note ok">Dein Tipp (gesperrt, Match läuft/lief schon)</div>`;
-      } else {
-        bottomHtml = `
-          <div class="bo-label">${esc(bo.label)}</div>
-          <div class="bo-options">
-            ${bo.scores.map(([s1, s2]) => {
-              const isSelected = mine && mine.s1 === s1 && mine.s2 === s2;
-              return `<button class="bo-chip ${isSelected ? "selected" : ""}" data-s1="${s1}" data-s2="${s2}">${s1}:${s2}</button>`;
-            }).join("")}
-          </div>
-          <div class="saved-note ${mine ? "ok" : ""}">${mine ? "Tipp gespeichert" : ""}</div>`;
-      }
-
-      let otherHtml = "";
-      if (mine) {
-        otherHtml = others.length
-          ? '<div class="other-picks">' + others.map(([n, p]) => `<span>${esc(n)}: <b>${p.s1}:${p.s2}</b></span>`).join("") + "</div>"
-          : '<div class="other-picks">Noch niemand sonst hat getippt.</div>';
-      } else if (others.length && !locked) {
-        otherHtml = '<div class="blind-note">Gib deinen Tipp ab, um die anderen Tipps zu sehen</div>';
-      }
-
-      return `
-        <div class="ticket" data-uid="${esc(m.id)}">
-          <span class="league">${esc(m.league)}</span>
-          <span class="when">${fmtWhen(m.start)}</span>
-          <div class="matchup">
-            ${teamLogoHtml(m.teamA)}<span class="a">${esc(m.teamA.name)}</span>
-            <span style="color:var(--text-dim);font-size:11px;font-weight:400">vs</span>
-            <span class="b">${esc(m.teamB.name)}</span>${teamLogoHtml(m.teamB)}
-          </div>
-          ${bottomHtml}
-          ${otherHtml}
-        </div>`;
-    }).join("");
+    return matches.map(m => `<div class="ticket" data-uid="${esc(m.id)}">${ticketUpcomingBodyHtml(m)}</div>`).join("");
   }
 
   function renderTippCompleted(matches) {
@@ -1358,7 +1376,7 @@
       const rows = names.map(n => {
         const pts = tippComputePoints(picks[n], m);
         const label = pts === 2 ? "Exakt" : pts === 1 ? "Sieger" : "0";
-        return `<div class="pcol"><div class="pname">${esc(n)}</div><div class="pval">${picks[n].s1}:${picks[n].s2}<span class="pts-badge pts-${pts}">${label}</span></div></div>`;
+        return `<div class="pick-line"><span class="pname">${esc(n)}</span><span class="pval">${scoreWithTeams(m, picks[n].s1, picks[n].s2)}<span class="pts-badge pts-${pts}">${label}</span></span></div>`;
       }).join("");
       return `
         <div class="ticket">
@@ -1393,18 +1411,9 @@
 
     attachRowClicks(el);
 
-    el.querySelectorAll(".ticket[data-uid]").forEach(ticket => {
-      const uid = ticket.getAttribute("data-uid");
-      ticket.querySelectorAll(".bo-chip").forEach(chip => {
-        chip.addEventListener("click", async () => {
-          const s1 = parseInt(chip.getAttribute("data-s1"), 10);
-          const s2 = parseInt(chip.getAttribute("data-s2"), 10);
-          ticket.querySelectorAll(".bo-chip").forEach(c => c.disabled = true);
-          chip.textContent = "…";
-          await tippSavePick(uid, tippPlayerName, s1, s2);
-          loadTipp();
-        });
-      });
+    const ticketEls = Array.from(el.querySelectorAll(".ticket[data-uid]"));
+    upcoming.forEach((m, i) => {
+      if (ticketEls[i]) wireTicketUpcoming(ticketEls[i], m);
     });
 
     const tippStandingsEl = document.getElementById("tipp-standings");
