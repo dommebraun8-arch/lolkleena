@@ -1173,11 +1173,24 @@
     await tippSaveStore();
   }
 
-  function tippComputePoints(pick, m) {
-    if (!pick) return null;
+  // Riot markiert Matches manchmal schon als "completed", bevor der finale
+  // Spielstand durchsynchronisiert ist (z.B. gameWins 0:1 statt eines echten
+  // Bo3-Endstands wie 2:0/2:1). Ohne diese Prüfung würden in solchen Fällen
+  // Punkte anhand eines Zwischenstands statt des echten Ergebnisses vergeben.
+  function isValidFinalScore(m) {
     const wA = m.teamA.result ? m.teamA.result.gameWins : null;
     const wB = m.teamB.result ? m.teamB.result.gameWins : null;
-    if (wA === null || wB === null) return null;
+    if (wA === null || wB === null) return false;
+    const count = (m.strategy && m.strategy.count) || 3;
+    const majority = Math.floor(count / 2) + 1;
+    return wA >= majority || wB >= majority;
+  }
+
+  function tippComputePoints(pick, m) {
+    if (!pick) return null;
+    if (!isValidFinalScore(m)) return null;
+    const wA = m.teamA.result.gameWins;
+    const wB = m.teamB.result.gameWins;
     if (pick.s1 === wA && pick.s2 === wB) return 2;
     const pickWinnerA = pick.s1 > pick.s2;
     const actualWinnerA = wA > wB;
