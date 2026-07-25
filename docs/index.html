@@ -299,8 +299,13 @@
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">Inoffizieller LoL Esports Feed</p>
-  <h1>Dashboard</h1>
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:10px;">
+    <div>
+      <p class="eyebrow">Inoffizieller LoL Esports Feed</p>
+      <h1>Dashboard</h1>
+    </div>
+    <button class="btn secondary" id="refresh-btn" style="flex-shrink:0; margin-top:2px;">Aktualisieren</button>
+  </div>
 
   <nav class="tabs">
     <button data-tab="start" class="active">Start</button>
@@ -459,12 +464,39 @@
   function loadTab(tab) {
     if (loaded[tab]) return;
     loaded[tab] = true;
-    if (tab === "start") loadStart();
-    if (tab === "live") loadLive();
-    if (tab === "results") loadResults();
-    if (tab === "standings") loadStandings();
-    if (tab === "tipp") loadTipp();
+    if (tab === "start") return loadStart();
+    if (tab === "live") return loadLive();
+    if (tab === "results") return loadResults();
+    if (tab === "standings") return loadStandings();
+    if (tab === "tipp") return loadTipp();
   }
+
+  // ---- Refresh-Button: wirft alle Zwischenspeicher weg und lädt den
+  // aktuell offenen Tab frisch von der API, ohne die Seite neu zu laden.
+  function resetAllCaches() {
+    allLeaguesCache = null;
+    scheduleCache = null;
+    teamsByLeagueCache = null;
+    allTournamentsCache = null;
+    Object.keys(resultsByYearCache).forEach(k => delete resultsByYearCache[k]);
+  }
+
+  document.getElementById("refresh-btn").addEventListener("click", async () => {
+    const btn = document.getElementById("refresh-btn");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Aktualisiere…";
+    resetAllCaches();
+    Object.keys(loaded).forEach(k => loaded[k] = false);
+    const activeBtn = document.querySelector("nav.tabs button.active");
+    const activeTab = activeBtn ? activeBtn.getAttribute("data-tab") : "start";
+    try {
+      await loadTab(activeTab);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
 
   // ---- Geteilte Schedule-Daten ----
   let allLeaguesCache = null;
@@ -855,7 +887,7 @@
       const years = Array.from(new Set(tournaments.map(tournamentYear).filter(Boolean))).sort((a, b) => b - a);
       const thisYear = String(new Date().getFullYear());
       yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === thisYear ? "selected" : ""}>${y}</option>`).join("");
-      yearSelect.addEventListener("change", renderResultsForSelectedYear);
+      yearSelect.onchange = renderResultsForSelectedYear;
       await renderResultsForSelectedYear();
     } catch (e) {
       el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
