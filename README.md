@@ -128,6 +128,22 @@ läuft die Zugriffskontrolle über einen kostenlosen Cloudflare Worker
    Danach ist der Worker unter `https://lolkleena-gate.<dein-subdomain>.workers.dev`
    erreichbar.
 
+### Nach einem Update: Worker neu deployen
+
+Der Worker beantwortet seit dem Worlds-Tippspiel zusätzlich
+`POST /api/tipp/pick`. Dort mergt er einen einzelnen Tipp serverseitig und
+schreibt dabei nur die Felder des eingeloggten Nutzers - vorher lud jeder
+Browser den kompletten Speicher hoch und konnte damit die Tipps des anderen
+überschreiben, wenn beide gleichzeitig offen waren.
+
+```bash
+wrangler deploy
+```
+
+Vergisst man das, bleibt die Seite benutzbar: sie merkt am 404 des Endpunkts,
+dass noch die alte Worker-Version läuft, und fällt automatisch auf den früheren
+Weg (`PUT /api/tipp`) zurück.
+
 ### Nutzung
 
 - Ab jetzt **diese Worker-URL** statt der GitHub-Pages-URL besuchen/abonnieren
@@ -137,3 +153,61 @@ läuft die Zugriffskontrolle über einen kostenlosen Cloudflare Worker
   eingebettet werden: `webcal://domi:PASSWORT@lolkleena-gate.<sub>.workers.dev/lol-schedule.ics`.
 - Die alte jsonblob-ID braucht niemand mehr - der Worker übernimmt den
   Speicher automatisch.
+
+## Worlds-Tippspiel
+
+Eigener Tab **Worlds**, getrennt vom wöchentlichen Liga-Tippspiel. Ein Turnier
+hat keine sinnvollen Kalenderwochen, deshalb sind die Runden hier die
+Turnierphasen: Play-In, Swiss-Stage, Viertelfinale, Halbfinale, Finale.
+
+### Wetten und Punkte
+
+| Wette | Punkte | Gesperrt ab |
+| --- | --- | --- |
+| Match-Tipp (exaktes Ergebnis) | 2 | Anpfiff des Matches |
+| Match-Tipp (nur Sieger richtig) | 1 | Anpfiff des Matches |
+| Champion (wer gewinnt Worlds) | 10 | erstem Spiel des Turniers |
+| Swiss: geht 3:0 durch (2 Teams) | 3 je Treffer | erstem Swiss-Spiel |
+| Swiss: fliegt 0:3 raus (2 Teams) | 3 je Treffer | erstem Swiss-Spiel |
+| Swiss: kommt ins Viertelfinale (8 Teams) | 1 je Treffer | erstem Swiss-Spiel |
+| Bracket: Viertelfinale | 1 je Treffer | erstem Viertelfinale |
+| Bracket: Halbfinale | 2 je Treffer | erstem Viertelfinale |
+| Bracket: Finale | 3 | erstem Viertelfinale |
+
+Das Bracket wird kaskadierend getippt: die Halbfinal-Auswahl besteht aus den
+eigenen Viertelfinal-Siegern, die Final-Auswahl aus den eigenen Halbfinal-
+Siegern. Tippt man ein Viertelfinale um, verfallen automatisch die Folgetipps,
+die dieses Team gebraucht hätten.
+
+Wie im Liga-Tippspiel sieht man fremde Tipps erst, wenn man selbst getippt hat
+(oder die Sperre durch ist).
+
+### Woher die Daten kommen
+
+- Spielplan und Ergebnisse: `getSchedule` (laufend/kommend) zusammengeführt mit
+  `getCompletedEvents` (das ganze Turnier, auch ältere Runden).
+- Turnierphase: aus `blockName` des Spiels ("Swiss Stage Round 2",
+  "Quarterfinals", …), für die KO-Runden bevorzugt aus der Bracket-Struktur von
+  `getStandings`.
+- KO-Baum inkl. Zuordnung, welcher Sieger in welches Halbfinale rückt: aus
+  `previousMatchIds` von `getStandings`. Liefert die API dazu noch nichts, wird
+  der Baum aus der Spielplan-Reihenfolge abgeleitet und die Seite weist darauf
+  hin.
+- Swiss-Bilanzen (3:0, 0:3, weiter) werden aus den Spielergebnissen selbst
+  gerechnet, nicht aus der Tabelle - die Ergebnisse liegen ohnehin vor.
+
+Fehlt eines dieser Felder, bricht nichts: die betroffene Wette meldet sich mit
+einem Hinweis ab, der Rest bleibt bedienbar.
+
+Über die Auswahl unter der Kopfzeile lässt sich auch ein vergangenes Worlds
+ansehen; Tipps werden pro Jahrgang gespeichert.
+
+## Design
+
+`.claude/skills/apple-design/SKILL.md` hält fest, nach welchen Regeln die
+Oberfläche gebaut ist. Im Kern: die Seite läuft am Handy, dort gibt es kein
+Hover - also hängt die Rückmeldung am Fingerdruck, und ein Tipp erscheint
+sofort statt erst nach der Serverantwort (schlägt das Speichern fehl, wird er
+sichtbar zurückgenommen). Dazu durchscheinende Tab-Leiste statt undurchsichtiger
+Streifen und Unterstützung für `prefers-reduced-motion`,
+`prefers-reduced-transparency` und `prefers-contrast`.
