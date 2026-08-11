@@ -212,6 +212,17 @@ Oberfläche gebaut ist. Umgesetzt ist:
   Rechner). Der Inhalt liegt in Boxen ungleicher Breite, teils eingerückt,
   statt in gleich breiten Streifen untereinander. Oben steht eine Hero-Kachel
   mit dem Spiel, das als Nächstes ansteht.
+- **Lieblingsteam als feste Spalte.** Rechts neben dem Inhalt steht die
+  Teamauswahl. Einmal gewählt, merkt der Browser sich das Team
+  (`localStorage`, Schlüssel `lolkleena.favTeam`) und die Spalte zeigt von da
+  an dauerhaft dessen Spiele - live, kommend und die letzten Ergebnisse.
+  Über "Ändern" kommt die Auswahl zurück. Ist `localStorage` gesperrt (privates
+  Fenster), verhält sich die Spalte wie vorher und fragt jedes Mal neu.
+- **Kalender im eigenen Fenster.** Das Abo braucht man einmal, danach nie
+  wieder - deshalb liegt es hinter dem Knopf *Kalender* statt dauerhaft im
+  Start-Tab. Dort steht auch ein Countdown bis zum ersten Worlds-Spiel; in der
+  Kopfzeile bleibt eine Kurzfassung sichtbar. Der Termin kommt aus dem ersten
+  angesetzten Anpfiff, ersatzweise aus dem Turnierdatum der API.
 - **Material statt Rechteck (§12).** Flächen haben Tiefe: abgestufte
   Schichten (`--mat-1/2/3`), Schatten, die mit der Flächengröße zunehmen, und
   ein hellerer Rand an der Oberkante, als fiele Licht von oben darauf. Die

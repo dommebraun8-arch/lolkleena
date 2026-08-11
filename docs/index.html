@@ -124,12 +124,71 @@
   nav.tabs button.active { background: rgba(255, 255, 255, 0.09); color: var(--text); }
   nav.tabs button.active .ic { opacity: 1; color: var(--accent); }
 
-  .main { flex: 1; min-width: 0; padding: var(--s5) var(--s4) var(--s6); }
-  .main > .head, .main > .tab-panel, .main > footer { max-width: 820px; margin-left: auto; margin-right: auto; }
+  /* Der Inhalt sitzt links an der Leiste, nicht mittig - rechts steht dafür
+     die Spalte mit dem Lieblingsteam. */
+  .main { flex: 1; min-width: 0; padding: var(--s5) var(--s4) var(--s6); max-width: 1500px; }
   .head {
     display: flex; align-items: flex-start; justify-content: space-between;
-    gap: var(--s3); margin-bottom: var(--s5);
+    gap: var(--s3); margin-bottom: var(--s5); flex-wrap: wrap;
   }
+  .head-actions { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+
+  /* Zwei Spalten: Inhalt links, Lieblingsteam rechts. Unter 900px stapeln sie. */
+  .split { display: flex; gap: var(--s4); align-items: flex-start; }
+  .col-main { flex: 1 1 auto; min-width: 0; }
+  .col-side { flex: 0 0 320px; max-width: 320px; position: sticky; top: var(--s4); }
+  @media (max-width: 900px) {
+    .split { display: block; }
+    .col-side { max-width: none; position: static; margin-top: var(--s3); }
+  }
+
+  /* Countdown-Pille in der Kopfzeile */
+  .cd-pill {
+    display: inline-flex; align-items: center; gap: var(--s2); background: var(--accent-soft);
+    border: 1px solid var(--accent-line); color: var(--accent); border-radius: 100px;
+    padding: 0.45rem 0.9rem; font-family: var(--sans); font-size: 0.75rem; font-weight: 640; cursor: pointer;
+    white-space: nowrap;
+  }
+  @media (max-width: 560px) { .cd-pill { display: none; } }
+
+  /* Countdown im Kalenderfenster */
+  .cd-label { text-align: center; font-size: 0.75rem; color: var(--text-dim); margin-bottom: var(--s3); }
+  .cd-row { display: flex; justify-content: center; gap: var(--s2); }
+  .cd-cell {
+    flex: 1; max-width: 78px; background: var(--mat-2); border: 1px solid var(--line);
+    border-radius: var(--r-md); padding: var(--s2) var(--s1); text-align: center;
+  }
+  .cd-n {
+    font-family: var(--mono); font-size: 1.5rem; font-weight: 740; letter-spacing: -0.035em;
+    color: var(--text); line-height: 1.15; font-variant-numeric: tabular-nums;
+  }
+  .cd-l { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-dim); }
+  .cd-when { text-align: center; font-size: 0.6875rem; color: var(--text-dim); margin-top: var(--s3); }
+  .cd-live { text-align: center; font-size: 0.9375rem; font-weight: 680; color: var(--live); }
+  .cal-h {
+    font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+    color: var(--text-dim); margin: var(--s5) 0 var(--s3); padding-top: var(--s4);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Lieblingsteam-Spalte */
+  .fav-head { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s3); }
+  .fav-head img {
+    width: 44px; height: 44px; object-fit: contain; background: var(--mat-2);
+    border-radius: 13px; padding: var(--s1); flex-shrink: 0; box-shadow: var(--shadow-1);
+  }
+  .fav-meta { flex: 1; min-width: 0; }
+  .fav-name { font-weight: 680; font-size: 0.9375rem; letter-spacing: -0.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fav-league { font-family: var(--mono); font-size: 0.625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; }
+  .fav-change {
+    flex-shrink: 0; background: var(--mat-2); border: 1px solid var(--line-strong); color: var(--text-dim);
+    border-radius: 100px; padding: 5px 11px; font-family: var(--sans); font-size: 0.6875rem; font-weight: 600; cursor: pointer;
+  }
+  .fav-sec {
+    font-family: var(--mono); font-size: 0.5938rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-dim); font-weight: 600; margin: var(--s3) 0 var(--s1);
+  }
+  .fav-sec:first-child { margin-top: 0; }
 
   @media (max-width: 560px) {
     /* Am Telefon zählt jede Zeile: die Zierzeile fliegt raus, die Marke steht
@@ -324,13 +383,6 @@
     font-family: var(--mono); font-size: 0.5625rem; color: var(--text-dim);
     text-transform: uppercase; letter-spacing: 0.03em;
   }
-
-  .team-modal-header { display: flex; flex-direction: column; align-items: center; gap: var(--s2); margin-bottom: var(--s4); }
-  .team-modal-header img {
-    width: 68px; height: 68px; object-fit: contain; background: var(--mat-2);
-    border-radius: 16px; padding: var(--s2); box-shadow: var(--shadow-2);
-  }
-  .team-modal-name { font-weight: 650; font-size: 1.0625rem; letter-spacing: -0.02em; }
 
   /* ---- Match-Zeilen ---- */
   .match {
@@ -765,34 +817,30 @@
         <p class="eyebrow">Inoffizieller LoL Esports Feed</p>
         <h1>Dashboard</h1>
       </div>
-      <button class="btn secondary" id="refresh-btn">Aktualisieren</button>
+      <div class="head-actions">
+        <button class="cd-pill" id="countdown-pill" hidden></button>
+        <button class="btn secondary" id="calendar-btn">Kalender</button>
+        <button class="btn secondary" id="refresh-btn">Aktualisieren</button>
+      </div>
     </div>
 
     <div class="tab-panel active" id="tab-start">
-      <div id="start-hero"></div>
-      <div class="flow">
-        <div class="card twothird">
-          <h2>Kalender abonnieren</h2>
-          <div class="leagues">
-            <span class="league-chip">LEC</span><span class="league-chip">LCS</span>
-            <span class="league-chip">LCK</span><span class="league-chip">LPL</span>
-            <span class="league-chip">MSI</span><span class="league-chip">Worlds</span>
+      <div class="split">
+        <div class="col-main">
+          <div id="start-hero"></div>
+          <div class="flow">
+            <div class="card">
+              <h2>Nächste 24 Stunden</h2>
+              <div id="start-list"><p class="status"><span class="dot"></span>Lade Spiele…</p></div>
+            </div>
           </div>
-          <div class="btn-row">
-            <a class="btn" id="subscribe-btn" href="#">Jetzt abonnieren</a>
-            <a class="btn secondary" id="view-btn" href="#" target="_blank">.ics ansehen</a>
+        </div>
+        <aside class="col-side">
+          <div class="card">
+            <h2>Lieblingsteam</h2>
+            <div id="fav-body"><p class="status"><span class="dot"></span>Lade Teams…</p></div>
           </div>
-          <div class="url-box"><span id="webcal-url">webcal://…</span><button id="copy-btn">Kopieren</button></div>
-        </div>
-        <div class="card shift">
-          <h2>Nächste 24 Stunden</h2>
-          <div id="start-list"><p class="status"><span class="dot"></span>Lade Spiele…</p></div>
-        </div>
-        <div class="card">
-          <h2>Lieblingsteam</h2>
-          <p class="live-note" style="margin-bottom:10px">Team anklicken für alle Spiele dieser Saison</p>
-          <div id="team-browser"><p class="status"><span class="dot"></span>Lade Teams…</p></div>
-        </div>
+        </aside>
       </div>
     </div>
 
@@ -863,16 +911,24 @@
   </div>
 </div>
 
-<!-- Team Roster Modal -->
-<div class="modal-overlay" id="team-modal">
+<!-- Kalender + Worlds-Countdown -->
+<div class="modal-overlay" id="calendar-modal">
   <div class="modal-box">
-    <button class="modal-close" id="team-modal-close">&times;</button>
-    <div class="modal-league" id="team-modal-league"></div>
-    <div class="team-modal-header">
-      <img id="team-modal-logo" src="">
-      <div class="team-modal-name" id="team-modal-name"></div>
+    <button class="modal-close" id="calendar-modal-close">&times;</button>
+    <div class="modal-league">Worlds-Countdown</div>
+    <div id="countdown"><p class="empty-list">Lade Termin…</p></div>
+
+    <h3 class="cal-h">Kalender abonnieren</h3>
+    <div class="leagues">
+      <span class="league-chip">LEC</span><span class="league-chip">LCS</span>
+      <span class="league-chip">LCK</span><span class="league-chip">LPL</span>
+      <span class="league-chip">MSI</span><span class="league-chip">Worlds</span>
     </div>
-    <div id="team-modal-games"><p class="empty-list">Lade…</p></div>
+    <div class="btn-row">
+      <a class="btn" id="subscribe-btn" href="#">Jetzt abonnieren</a>
+      <a class="btn secondary" id="view-btn" href="#" target="_blank">.ics ansehen</a>
+    </div>
+    <div class="url-box"><span id="webcal-url">webcal://…</span><button id="copy-btn">Kopieren</button></div>
   </div>
 </div>
 
@@ -963,6 +1019,115 @@
       setTimeout(() => (btn.textContent = "Kopieren"), 1500);
     });
   });
+
+  // ---- Kalenderfenster mit Worlds-Countdown ----
+  // Der Abo-Kram braucht man einmal, danach nie wieder - deshalb liegt er in
+  // einem eigenen Fenster statt dauerhaft im Start-Tab. Der Countdown steht
+  // dort groß, in der Kopfzeile bleibt eine kurze Fassung sichtbar.
+  const calendarModal = document.getElementById("calendar-modal");
+  const calendarBtn = document.getElementById("calendar-btn");
+  const countdownPill = document.getElementById("countdown-pill");
+  let worldsStartPromise = null;
+  let countdownTimer = null;
+
+  async function getWorldsStart() {
+    if (worldsStartPromise) return worldsStartPromise;
+    worldsStartPromise = (async () => {
+      const tournaments = await getWorldsTournaments();
+      const t = pickWorldsTournament(tournaments);
+      if (!t) return null;
+      const label = splitLabel(t, WORLDS_LEAGUE_NAME);
+      const season = String(t.startDate || "").slice(0, 4);
+      // Der erste angesetzte Anpfiff ist genauer als das Turnierdatum, das die
+      // API nur tagesgenau führt. Gibt es noch keinen Spielplan, tut es das
+      // Turnierdatum mit Mittag als Uhrzeit.
+      try {
+        const evs = (await loadSchedule())
+          .filter(e => e.league === WORLDS_LEAGUE_NAME && String(e.start.getFullYear()) === season);
+        const first = earliestStart(evs);
+        if (first) return { at: first, label, exact: true };
+      } catch (e) {}
+      const d = t.startDate ? new Date(t.startDate + "T12:00:00") : null;
+      return d && !isNaN(d.getTime()) ? { at: d, label, exact: false } : null;
+    })().catch(() => null);
+    return worldsStartPromise;
+  }
+
+  function countdownParts(ms) {
+    const total = Math.floor(ms / 1000);
+    return {
+      d: Math.floor(total / 86400),
+      h: Math.floor((total % 86400) / 3600),
+      m: Math.floor((total % 3600) / 60),
+      s: total % 60
+    };
+  }
+
+  function renderCountdown(info) {
+    const el = document.getElementById("countdown");
+    if (!el) return;
+    if (!info) {
+      el.innerHTML = '<p class="empty-list" style="text-align:center">Für Worlds steht noch kein Termin in der API.</p>';
+      return;
+    }
+    const ms = info.at - new Date();
+    if (ms <= 0) {
+      el.innerHTML = `<div class="cd-live"><span class="live-dot"></span>${esc(info.label)} läuft bereits</div>`;
+      return;
+    }
+    const p = countdownParts(ms);
+    const cells = [[p.d, "Tage"], [p.h, "Std"], [p.m, "Min"], [p.s, "Sek"]];
+    el.innerHTML = `
+      <div class="cd-label">${esc(info.label)} beginnt in</div>
+      <div class="cd-row">
+        ${cells.map(([n, l]) => `
+          <div class="cd-cell">
+            <div class="cd-n">${String(n).padStart(2, "0")}</div>
+            <div class="cd-l">${l}</div>
+          </div>`).join("")}
+      </div>
+      <div class="cd-when">${esc(fmtWhen(info.at))}${info.exact ? "" : " (Tagesangabe der API)"}</div>`;
+  }
+
+  function renderCountdownPill(info) {
+    if (!countdownPill) return;
+    if (!info) { countdownPill.hidden = true; return; }
+    const ms = info.at - new Date();
+    countdownPill.hidden = false;
+    if (ms <= 0) {
+      countdownPill.innerHTML = '<span class="live-dot"></span>Worlds läuft';
+      return;
+    }
+    const p = countdownParts(ms);
+    countdownPill.textContent = p.d >= 1
+      ? `Worlds in ${p.d} ${p.d === 1 ? "Tag" : "Tagen"}`
+      : `Worlds in ${p.h} Std ${p.m} Min`;
+  }
+
+  async function refreshCountdown() {
+    const info = await getWorldsStart();
+    renderCountdownPill(info);
+    if (calendarModal.classList.contains("open")) renderCountdown(info);
+  }
+
+  function openCalendar() {
+    getWorldsStart().then(renderCountdown);
+    openOverlay(calendarModal, calendarBtn);
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => getWorldsStart().then(renderCountdown), 1000);
+  }
+  function closeCalendar() {
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    closeOverlay(calendarModal);
+  }
+
+  if (calendarBtn) calendarBtn.addEventListener("click", openCalendar);
+  if (countdownPill) countdownPill.addEventListener("click", openCalendar);
+  document.getElementById("calendar-modal-close").addEventListener("click", closeCalendar);
+  calendarModal.addEventListener("click", e => { if (e.target === calendarModal) closeCalendar(); });
+
+  // Gestartet wird der Countdown erst ganz unten: er greift auf Variablen des
+  // Worlds-Teils zu, die hier oben noch nicht initialisiert sind.
 
   // ---- Tabs ----
   const tabButtons = document.querySelectorAll("nav.tabs button");
@@ -1201,7 +1366,7 @@
   // ---- START TAB ----
   async function loadStart() {
     const el = document.getElementById("start-list");
-    loadTeamBrowser();
+    renderFavPanel();
     try {
       const events = await loadSchedule();
       const now = new Date();
@@ -1271,26 +1436,6 @@
       </div>`).join("");
   }
 
-  async function loadTeamBrowser() {
-    const el = document.getElementById("team-browser");
-    try {
-      const groups = await getTeamsByLeague();
-      el.innerHTML = renderTeamBrowser(groups);
-      el.querySelectorAll(".team-icon-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const idx = parseInt(btn.getAttribute("data-tidx"), 10);
-          openTeamModal(teamRegistry[idx], btn);
-        });
-      });
-    } catch (e) {
-      el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
-    }
-  }
-
-  const teamModal = document.getElementById("team-modal");
-  document.getElementById("team-modal-close").addEventListener("click", () => closeOverlay(teamModal));
-  teamModal.addEventListener("click", e => { if (e.target === teamModal) closeOverlay(teamModal); });
-
   function findTeamMatches(events, team) {
     return events
       .filter(e => team.code
@@ -1299,29 +1444,86 @@
       .sort((a, b) => a.start - b.start);
   }
 
-  async function openTeamModal(team, originEl) {
-    document.getElementById("team-modal-league").textContent = team.league;
-    document.getElementById("team-modal-name").textContent = team.name;
-    setLogo(document.getElementById("team-modal-logo"), team.name, team.image);
-    const gamesEl = document.getElementById("team-modal-games");
-    gamesEl.innerHTML = '<p class="empty-list">Lade Spiele…</p>';
-    openOverlay(teamModal, originEl);
+  // ---- LIEBLINGSTEAM ----
+  // Die Wahl bleibt im Browser gespeichert, damit die rechte Spalte dauerhaft
+  // die Spiele des eigenen Teams zeigt, statt bei jedem Besuch wieder die
+  // Teamauswahl. localStorage kann gesperrt sein (privates Fenster), deshalb
+  // ist jeder Zugriff abgesichert - dann verhält es sich wie vorher.
+  const FAV_KEY = "lolkleena.favTeam";
 
+  function loadFavTeam() {
     try {
-      const events = await loadSchedule();
-      const matches = findTeamMatches(events, team);
-      if (matches.length === 0) {
-        gamesEl.innerHTML = '<p class="empty-list">Keine Spiele in diesem Zeitraum gefunden.</p>';
-        return;
-      }
-      gamesEl.innerHTML = matches.map(matchRow).join("");
-      gamesEl.querySelectorAll(".match[data-ridx]").forEach(row => {
-        row.addEventListener("click", () => {
-          const idx = parseInt(row.getAttribute("data-ridx"), 10);
-          closeOverlay(teamModal);
-          openMatchModal(matchRegistry[idx], row);
+      const raw = window.localStorage.getItem(FAV_KEY);
+      if (!raw) return null;
+      const t = JSON.parse(raw);
+      return t && (t.code || t.name) ? t : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveFavTeam(t) {
+    try {
+      if (t) window.localStorage.setItem(FAV_KEY, JSON.stringify(t));
+      else window.localStorage.removeItem(FAV_KEY);
+    } catch (e) {}
+  }
+
+  async function renderTeamPicker(el) {
+    el.innerHTML = `
+      <p class="live-note" style="text-align:left;margin:0 0 10px">Team wählen - die Auswahl bleibt gespeichert.</p>
+      <div id="team-browser"><p class="status"><span class="dot"></span>Lade Teams…</p></div>`;
+    const box = document.getElementById("team-browser");
+    try {
+      const groups = await getTeamsByLeague();
+      box.innerHTML = renderTeamBrowser(groups);
+      box.querySelectorAll(".team-icon-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          saveFavTeam(teamRegistry[parseInt(btn.getAttribute("data-tidx"), 10)]);
+          renderFavPanel();
         });
       });
+    } catch (e) {
+      box.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
+    }
+  }
+
+  async function renderFavPanel() {
+    const el = document.getElementById("fav-body");
+    if (!el) return;
+    const fav = loadFavTeam();
+    if (!fav) return renderTeamPicker(el);
+
+    el.innerHTML = `
+      <div class="fav-head">
+        <img src="${esc(fav.image || fallbackLogo(fav.name))}" onerror="this.src='${fallbackLogo(fav.name)}'">
+        <div class="fav-meta">
+          <div class="fav-name">${esc(fav.name)}</div>
+          <div class="fav-league">${esc(fav.league || "")}</div>
+        </div>
+        <button class="fav-change" id="fav-change">Ändern</button>
+      </div>
+      <div id="fav-games"><p class="status"><span class="dot"></span>Lade Spiele…</p></div>`;
+
+    document.getElementById("fav-change").addEventListener("click", () => {
+      saveFavTeam(null);
+      renderFavPanel();
+    });
+
+    const gamesEl = document.getElementById("fav-games");
+    try {
+      const matches = findTeamMatches(await loadSchedule(), fav);
+      if (matches.length === 0) {
+        gamesEl.innerHTML = '<p class="empty-list">Keine Spiele im geladenen Zeitraum.</p>';
+        return;
+      }
+      const now = new Date();
+      const live = matches.filter(m => m.state === "inProgress");
+      const upcoming = matches.filter(m => m.state !== "completed" && m.start >= now).slice(0, 6);
+      const past = matches.filter(m => m.state === "completed").sort((a, b) => b.start - a.start).slice(0, 6);
+      const section = (title, list) =>
+        list.length ? `<div class="fav-sec">${title}</div>` + list.map(matchRow).join("") : "";
+      gamesEl.innerHTML = section("Live", live) + section("Kommt", upcoming) + section("Zuletzt", past);
+      attachRowClicks(gamesEl);
     } catch (e) {
       gamesEl.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
@@ -3148,6 +3350,8 @@
   // ==================== /WORLDS-TIPPSPIEL ====================
 
   loadTab("start");
+  refreshCountdown();
+  setInterval(refreshCountdown, 60000);
 })();
 </script>
 </body>
