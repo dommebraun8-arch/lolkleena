@@ -205,9 +205,27 @@ ansehen; Tipps werden pro Jahrgang gespeichert.
 ## Design
 
 `.claude/skills/apple-design/SKILL.md` hält fest, nach welchen Regeln die
-Oberfläche gebaut ist. Im Kern: die Seite läuft am Handy, dort gibt es kein
-Hover - also hängt die Rückmeldung am Fingerdruck, und ein Tipp erscheint
-sofort statt erst nach der Serverantwort (schlägt das Speichern fehl, wird er
-sichtbar zurückgenommen). Dazu durchscheinende Tab-Leiste statt undurchsichtiger
-Streifen und Unterstützung für `prefers-reduced-motion`,
-`prefers-reduced-transparency` und `prefers-contrast`.
+Oberfläche gebaut ist. Umgesetzt ist:
+
+- **Material statt Rechteck (§12).** Flächen haben Tiefe: abgestufte
+  Schichten (`--mat-1/2/3`), Schatten, die mit der Flächengröße zunehmen, und
+  ein hellerer Rand an der Oberkante, als fiele Licht von oben darauf. Die
+  Tab-Leiste ist durchscheinend, der Inhalt läuft sichtbar darunter durch, und
+  statt einer harten Trennlinie steht dort ein weicher Verlauf.
+- **Bewegung aus Federn (§4).** Die `--ease-*`-Kurven sind keine geratenen
+  Béziers, sondern aus Apples Dämpfung/Response ausgerechnet und als CSS
+  `linear()` abgetastet: 1.0 (kein Überschwingen) für den Normalfall, 0.8 für
+  Flächen, die auftauchen.
+- **Sofortige Rückmeldung (§1, §10).** Die Seite läuft am Handy, dort gibt es
+  kein Hover - die Rückmeldung hängt deshalb am Fingerdruck. Ein Tipp erscheint
+  sofort statt erst nach der Serverantwort und wird bei fehlgeschlagenem
+  Speichern sichtbar zurückgenommen.
+- **Räumliche Konsistenz (§7).** Modals wachsen aus dem angetippten Element
+  heraus und verschwinden auf demselben Weg wieder.
+- **Typografie (§15).** Laufweite und Zeilenhöhe hängen an der Schriftgröße:
+  große Schrift enger und dichter, Kleinschrift offener. Abstände in `rem`,
+  damit eine größere Systemschrift das Layout mitnimmt.
+- **Systemeinstellungen (§14).** `prefers-reduced-motion`,
+  `prefers-reduced-transparency` und `prefers-contrast` sind bedient, Hover-
+  Effekte nur unter `@media (hover: hover)`, Tastaturfokus sichtbar, Escape
+  schließt offene Panels.
