@@ -142,34 +142,43 @@
     .col-side { max-width: none; position: static; margin-top: var(--s3); }
   }
 
-  /* Countdown-Pille in der Kopfzeile */
-  .cd-pill {
-    display: inline-flex; align-items: center; gap: var(--s2); background: var(--accent-soft);
-    border: 1px solid var(--accent-line); color: var(--accent); border-radius: 100px;
-    padding: 0.45rem 0.9rem; font-family: var(--sans); font-size: 0.75rem; font-weight: 640; cursor: pointer;
-    white-space: nowrap;
+  /* ---- Großes Countdown-Feld ----
+     Die verbleibende Zeit bis Worlds ist das, was man beim Öffnen als Erstes
+     wissen will - also groß und ganz oben, nicht hinter einem Knopf. */
+  .cd-hero {
+    border-radius: 26px; padding: var(--s5) var(--s4); margin-bottom: var(--s3);
+    position: relative; overflow: hidden; text-align: center;
+    background: linear-gradient(150deg, rgba(224, 171, 90, 0.26), rgba(136, 120, 238, 0.20) 65%, rgba(255, 255, 255, 0.03));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), var(--shadow-3);
   }
-  @media (max-width: 560px) { .cd-pill { display: none; } }
-
-  /* Countdown im Kalenderfenster */
-  .cd-label { text-align: center; font-size: 0.75rem; color: var(--text-dim); margin-bottom: var(--s3); }
-  .cd-row { display: flex; justify-content: center; gap: var(--s2); }
-  .cd-cell {
-    flex: 1; max-width: 78px; background: var(--mat-2); border: 1px solid var(--line);
-    border-radius: var(--r-md); padding: var(--s2) var(--s1); text-align: center;
+  .cd-hero::after {
+    content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%;
+    left: 50%; top: -180px; transform: translateX(-50%); pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.14), transparent 70%);
   }
-  .cd-n {
-    font-family: var(--mono); font-size: 1.5rem; font-weight: 740; letter-spacing: -0.035em;
-    color: var(--text); line-height: 1.15; font-variant-numeric: tabular-nums;
+  .cd-hero-label {
+    font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.13em; font-weight: 660;
+    color: rgba(255, 255, 255, 0.75); margin-bottom: var(--s4);
   }
-  .cd-l { font-size: 0.5625rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-dim); }
-  .cd-when { text-align: center; font-size: 0.6875rem; color: var(--text-dim); margin-top: var(--s3); }
-  .cd-live { text-align: center; font-size: 0.9375rem; font-weight: 680; color: var(--live); }
-  .cal-h {
-    font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
-    color: var(--text-dim); margin: var(--s5) 0 var(--s3); padding-top: var(--s4);
-    border-top: 1px solid var(--line);
+  .cd-hero-row { display: flex; justify-content: center; gap: var(--s2); }
+  .cd-hero-cell {
+    flex: 1 1 0; max-width: 116px; background: rgba(0, 0, 0, 0.26); border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: var(--r-md); padding: var(--s3) var(--s1); backdrop-filter: blur(6px);
   }
+  .cd-hero-cell .n {
+    font-family: var(--mono); font-size: clamp(1.9rem, 8.5vw, 3.1rem); font-weight: 760;
+    letter-spacing: -0.045em; line-height: 1.05; color: #fff; font-variant-numeric: tabular-nums;
+  }
+  .cd-hero-cell .l {
+    font-size: 0.5938rem; text-transform: uppercase; letter-spacing: 0.11em; font-weight: 620;
+    color: rgba(255, 255, 255, 0.62); margin-top: var(--s1);
+  }
+  .cd-hero-when { font-size: 0.75rem; color: rgba(255, 255, 255, 0.62); margin-top: var(--s4); }
+  .cd-hero-live {
+    display: flex; align-items: center; justify-content: center; gap: var(--s2);
+    font-size: 1.375rem; font-weight: 740; letter-spacing: -0.03em; color: #fff;
+  }
+  .cd-hero-none { font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
 
   /* Lieblingsteam-Spalte */
   .fav-head { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s3); }
@@ -818,7 +827,6 @@
         <h1>Dashboard</h1>
       </div>
       <div class="head-actions">
-        <button class="cd-pill" id="countdown-pill" hidden></button>
         <button class="btn secondary" id="calendar-btn">Kalender</button>
         <button class="btn secondary" id="refresh-btn">Aktualisieren</button>
       </div>
@@ -827,6 +835,7 @@
     <div class="tab-panel active" id="tab-start">
       <div class="split">
         <div class="col-main">
+          <div id="countdown-big"></div>
           <div id="start-hero"></div>
           <div class="flow">
             <div class="card">
@@ -915,10 +924,8 @@
 <div class="modal-overlay" id="calendar-modal">
   <div class="modal-box">
     <button class="modal-close" id="calendar-modal-close">&times;</button>
-    <div class="modal-league">Worlds-Countdown</div>
-    <div id="countdown"><p class="empty-list">Lade Termin…</p></div>
-
-    <h3 class="cal-h">Kalender abonnieren</h3>
+    <div class="modal-league">Kalender abonnieren</div>
+    <p class="live-note" style="margin-bottom:14px">Spielplan als Abo im iPhone-Kalender - aktualisiert sich von selbst.</p>
     <div class="leagues">
       <span class="league-chip">LEC</span><span class="league-chip">LCS</span>
       <span class="league-chip">LCK</span><span class="league-chip">LPL</span>
@@ -1026,9 +1033,7 @@
   // dort groß, in der Kopfzeile bleibt eine kurze Fassung sichtbar.
   const calendarModal = document.getElementById("calendar-modal");
   const calendarBtn = document.getElementById("calendar-btn");
-  const countdownPill = document.getElementById("countdown-pill");
   let worldsStartPromise = null;
-  let countdownTimer = null;
 
   async function getWorldsStart() {
     if (worldsStartPromise) return worldsStartPromise;
@@ -1064,70 +1069,58 @@
   }
 
   function renderCountdown(info) {
-    const el = document.getElementById("countdown");
+    const el = document.getElementById("countdown-big");
     if (!el) return;
     if (!info) {
-      el.innerHTML = '<p class="empty-list" style="text-align:center">Für Worlds steht noch kein Termin in der API.</p>';
+      el.innerHTML = '<div class="cd-hero"><div class="cd-hero-none">Für Worlds steht noch kein Termin in der API.</div></div>';
       return;
     }
     const ms = info.at - new Date();
     if (ms <= 0) {
-      el.innerHTML = `<div class="cd-live"><span class="live-dot"></span>${esc(info.label)} läuft bereits</div>`;
+      el.innerHTML = `
+        <div class="cd-hero">
+          <div class="cd-hero-label">${esc(info.label)}</div>
+          <div class="cd-hero-live"><span class="live-dot"></span>läuft gerade</div>
+        </div>`;
       return;
     }
     const p = countdownParts(ms);
     const cells = [[p.d, "Tage"], [p.h, "Std"], [p.m, "Min"], [p.s, "Sek"]];
     el.innerHTML = `
-      <div class="cd-label">${esc(info.label)} beginnt in</div>
-      <div class="cd-row">
-        ${cells.map(([n, l]) => `
-          <div class="cd-cell">
-            <div class="cd-n">${String(n).padStart(2, "0")}</div>
-            <div class="cd-l">${l}</div>
-          </div>`).join("")}
-      </div>
-      <div class="cd-when">${esc(fmtWhen(info.at))}${info.exact ? "" : " (Tagesangabe der API)"}</div>`;
+      <div class="cd-hero">
+        <div class="cd-hero-label">${esc(info.label)} beginnt in</div>
+        <div class="cd-hero-row">
+          ${cells.map(([n, l]) => `
+            <div class="cd-hero-cell">
+              <div class="n">${String(n).padStart(2, "0")}</div>
+              <div class="l">${l}</div>
+            </div>`).join("")}
+        </div>
+        <div class="cd-hero-when">${esc(fmtWhen(info.at))}${info.exact ? "" : " · Tagesangabe der API"}</div>
+      </div>`;
   }
 
-  function renderCountdownPill(info) {
-    if (!countdownPill) return;
-    if (!info) { countdownPill.hidden = true; return; }
-    const ms = info.at - new Date();
-    countdownPill.hidden = false;
-    if (ms <= 0) {
-      countdownPill.innerHTML = '<span class="live-dot"></span>Worlds läuft';
-      return;
-    }
-    const p = countdownParts(ms);
-    countdownPill.textContent = p.d >= 1
-      ? `Worlds in ${p.d} ${p.d === 1 ? "Tag" : "Tagen"}`
-      : `Worlds in ${p.h} Std ${p.m} Min`;
-  }
-
-  async function refreshCountdown() {
-    const info = await getWorldsStart();
-    renderCountdownPill(info);
-    if (calendarModal.classList.contains("open")) renderCountdown(info);
+  // Sekundengenau, aber nur solange das Feld auch sichtbar ist - im Hintergrund
+  // jede Sekunde neu zu zeichnen wäre reine Batterieverschwendung.
+  function startCountdownTicker() {
+    setInterval(() => {
+      const panel = document.getElementById("tab-start");
+      if (!panel || !panel.classList.contains("active")) return;
+      if (document.hidden) return;
+      getWorldsStart().then(renderCountdown);
+    }, 1000);
   }
 
   function openCalendar() {
-    getWorldsStart().then(renderCountdown);
     openOverlay(calendarModal, calendarBtn);
-    if (countdownTimer) clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => getWorldsStart().then(renderCountdown), 1000);
   }
   function closeCalendar() {
-    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
     closeOverlay(calendarModal);
   }
 
   if (calendarBtn) calendarBtn.addEventListener("click", openCalendar);
-  if (countdownPill) countdownPill.addEventListener("click", openCalendar);
   document.getElementById("calendar-modal-close").addEventListener("click", closeCalendar);
   calendarModal.addEventListener("click", e => { if (e.target === calendarModal) closeCalendar(); });
-
-  // Gestartet wird der Countdown erst ganz unten: er greift auf Variablen des
-  // Worlds-Teils zu, die hier oben noch nicht initialisiert sind.
 
   // ---- Tabs ----
   const tabButtons = document.querySelectorAll("nav.tabs button");
@@ -3350,8 +3343,8 @@
   // ==================== /WORLDS-TIPPSPIEL ====================
 
   loadTab("start");
-  refreshCountdown();
-  setInterval(refreshCountdown, 60000);
+  getWorldsStart().then(renderCountdown);
+  startCountdownTicker();
 })();
 </script>
 </body>
