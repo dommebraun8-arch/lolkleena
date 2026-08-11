@@ -207,6 +207,11 @@ ansehen; Tipps werden pro Jahrgang gespeichert.
 `.claude/skills/apple-design/SKILL.md` hält fest, nach welchen Regeln die
 Oberfläche gebaut ist. Umgesetzt ist:
 
+- **Seitenleiste statt Tab-Reihe.** Die Navigation steht links, bleibt beim
+  Scrollen stehen und wächst auf breiten Schirmen mit (66px am Telefon, 92px am
+  Rechner). Der Inhalt liegt in Boxen ungleicher Breite, teils eingerückt,
+  statt in gleich breiten Streifen untereinander. Oben steht eine Hero-Kachel
+  mit dem Spiel, das als Nächstes ansteht.
 - **Material statt Rechteck (§12).** Flächen haben Tiefe: abgestufte
   Schichten (`--mat-1/2/3`), Schatten, die mit der Flächengröße zunehmen, und
   ein hellerer Rand an der Oberkante, als fiele Licht von oben darauf. Die
