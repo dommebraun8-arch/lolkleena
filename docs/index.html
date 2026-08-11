@@ -295,6 +295,139 @@
   .pts-1 { color: var(--text-dim); }
   .pts-0 { color: var(--text-dim); }
   .tipp-cell-dim { color: var(--text-dim); }
+
+  /* ---- Worlds-Tippspiel ---- */
+  .w-head { text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 14px; line-height: 1.6; }
+  .w-head b { color: var(--text); }
+  .w-head select { margin-left: 6px; }
+
+  .w-phasenav { display: flex; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .w-phasenav button {
+    background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-dim);
+    font-family: var(--sans); font-weight: 600; font-size: 11px; padding: 0 0 8px; cursor: pointer;
+  }
+  .w-phasenav button.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  .w-sub {
+    font-size: 11px; color: var(--text-dim); margin: 0 0 10px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .w-sub b { color: var(--text); }
+  .w-counter { font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; }
+  .w-counter.done { color: var(--accent); }
+  .w-section { margin-bottom: 16px; }
+  .w-section:last-child { margin-bottom: 0; }
+  .w-section h4 {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-dim); margin: 0 0 4px; font-weight: 600;
+  }
+  .w-savehint { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+  .w-savehint.err { color: var(--live); }
+
+  .team-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+  .team-pick {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; width: 58px;
+    background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; padding: 6px 2px;
+  }
+  .team-pick img { width: 28px; height: 28px; object-fit: contain; background: var(--bg); border-radius: 4px; padding: 3px; }
+  .team-pick .tcode { font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+  .team-pick:hover:not(:disabled) { background: rgba(255, 255, 255, 0.04); }
+  .team-pick.selected { border-color: var(--accent); background: rgba(184, 146, 63, 0.12); }
+  .team-pick.selected .tcode { color: var(--accent); }
+  .team-pick:disabled { cursor: default; }
+  .team-pick.hit { border-color: var(--accent); }
+  .team-pick.miss { opacity: 0.4; }
+
+  .bracket-slot {
+    border: 1px solid var(--line); border-radius: 4px; padding: 9px 10px; margin-bottom: 6px; background: var(--bg);
+  }
+  .bracket-slot .slot-label { font-size: 10px; color: var(--text-dim); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .bracket-slot .slot-options { display: flex; gap: 6px; flex-wrap: wrap; }
+  .slot-opt {
+    display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 3px; padding: 5px 9px; cursor: pointer; color: var(--text);
+    font-family: var(--sans); font-size: 12px; font-weight: 500;
+  }
+  .slot-opt img { width: 16px; height: 16px; object-fit: contain; background: var(--bg); border-radius: 2px; }
+  .slot-opt:hover:not(:disabled) { border-color: var(--accent); }
+  .slot-opt.selected { border-color: var(--accent); background: rgba(184, 146, 63, 0.14); }
+  .slot-opt:disabled { cursor: default; }
+  .slot-opt.hit { border-color: var(--accent); }
+  .slot-opt.miss { opacity: 0.45; }
+  .slot-res { font-size: 10px; margin-top: 7px; color: var(--text-dim); font-family: var(--mono); }
+  .slot-res.ok { color: var(--accent); }
+
+  .w-reveal { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 12px; }
+  /* .blind-note ist im Tippen-Tab an .ticket gebunden - hier wird der Hinweis
+     auch außerhalb eines Tickets verwendet und braucht deshalb eine eigene Regel. */
+  .blind-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 10px; }
+  table.standings td.num { font-family: var(--mono); text-align: right; }
+  table.standings td.num.total { color: var(--accent); font-weight: 700; }
+
+  /* ---- Anfassbarkeit ----
+     Die Seite wird fast nur am iPhone benutzt, dort gibt es kein :hover. Die
+     Rückmeldung muss deshalb am Fingerdruck hängen und sofort kommen, nicht
+     erst beim Loslassen oder gar nach dem Speichern. */
+  .btn, .url-box button, .modal-close, .filter-select, nav.tabs button, .w-phasenav button,
+  .modal-subtabs button, .team-icon-btn, .team-pick, .slot-opt, .ticket .bo-chip, .match {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .btn, .url-box button, .modal-close, .team-icon-btn, .team-pick, .slot-opt, .ticket .bo-chip {
+    transition: transform 110ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                background-color 160ms ease-out, border-color 160ms ease-out;
+  }
+  .btn:active, .url-box button:active, .modal-close:active { transform: scale(0.97); }
+  .team-icon-btn:active,
+  .team-pick:not(:disabled):active,
+  .slot-opt:not(:disabled):active,
+  .ticket .bo-chip:not(:disabled):active { transform: scale(0.94); }
+  .match:active { background: rgba(255, 255, 255, 0.06); }
+  .team-pick:disabled, .slot-opt:disabled, .ticket .bo-chip:disabled { opacity: 0.5; }
+  .team-pick.selected:disabled, .slot-opt.selected:disabled,
+  .team-pick.hit:disabled, .slot-opt.hit:disabled { opacity: 1; }
+  .saved-note.err, .w-savehint.err { color: var(--live); }
+
+  /* Schwebende Leiste als durchscheinendes Material statt undurchsichtigem
+     Streifen: der Inhalt läuft sichtbar darunter durch. */
+  nav.tabs {
+    background: rgba(11, 12, 14, 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom-color: rgba(38, 40, 48, 0.8);
+  }
+  nav.tabs::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 12px;
+    background: linear-gradient(to bottom, rgba(11, 12, 14, 0.85), rgba(11, 12, 14, 0));
+    pointer-events: none;
+  }
+
+  /* Typografie: Laufweite gehört zur Schriftgröße - große Schrift enger,
+     kleine Schrift etwas offener. */
+  body { -webkit-font-smoothing: antialiased; font-optical-sizing: auto; }
+  h1 { letter-spacing: -0.022em; }
+  .tipp-board-entry .stat .n, .live-card .games-score, .modal-score { letter-spacing: -0.015em; }
+  .live-note, .empty-list, .w-head { line-height: 1.55; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .url-box button, .modal-close, .team-icon-btn, .team-pick, .slot-opt, .ticket .bo-chip {
+      transition: background-color 120ms ease-out, border-color 120ms ease-out;
+    }
+    .btn:active, .url-box button:active, .modal-close:active, .team-icon-btn:active,
+    .team-pick:not(:disabled):active, .slot-opt:not(:disabled):active,
+    .ticket .bo-chip:not(:disabled):active { transform: none; }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    nav.tabs {
+      background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none;
+      border-bottom-color: var(--line);
+    }
+    nav.tabs::after { display: none; }
+  }
+  @media (prefers-contrast: more) {
+    :root { --line: #4b4e59; --text-dim: #a8acb5; }
+    .team-pick.selected, .slot-opt.selected, .ticket .bo-chip.selected { outline: 1px solid var(--accent); }
+  }
 </style>
 </head>
 <body>
@@ -313,6 +446,7 @@
     <button data-tab="results">Ergebnisse</button>
     <button data-tab="standings">Tabellen</button>
     <button data-tab="tipp">Tippen</button>
+    <button data-tab="worlds">Worlds</button>
   </nav>
 
   <div class="tab-panel active" id="tab-start">
@@ -367,6 +501,10 @@
 
   <div class="tab-panel" id="tab-tipp">
     <div id="tipp-body"><p class="status"><span class="dot"></span>Lade…</p></div>
+  </div>
+
+  <div class="tab-panel" id="tab-worlds">
+    <div id="worlds-body"><p class="status"><span class="dot"></span>Lade…</p></div>
   </div>
 
   <footer>
@@ -425,9 +563,12 @@
     return d.toLocaleString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
   }
   function fallbackLogo(name) {
-    // 1x1 transparent pixel als Platzhalter, falls kein Logo geladen werden kann
+    // Platzhalter mit Anfangsbuchstaben, falls kein Logo geladen werden kann.
+    // Die Rautezeichen müssen hier unkodiert stehen - encodeURIComponent macht
+    // daraus %23; schreibt man schon %23 hin, landet man bei %2523 und die
+    // Farbe ist ungültig (das Logo bleibt dann schwarz).
     return "data:image/svg+xml;utf8," + encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="56" height="56" rx="10" fill="%23392a5c"/><text x="28" y="34" font-size="20" text-anchor="middle" fill="%23a99fc9" font-family="sans-serif">${(name||"?").slice(0,1)}</text></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="56" height="56" rx="10" fill="#392a5c"/><text x="28" y="34" font-size="20" text-anchor="middle" fill="#a99fc9" font-family="sans-serif">${(name||"?").slice(0,1)}</text></svg>`
     );
   }
 
@@ -448,7 +589,7 @@
 
   // ---- Tabs ----
   const tabButtons = document.querySelectorAll("nav.tabs button");
-  const loaded = { start: false, live: false, results: false, standings: false, tipp: false };
+  const loaded = { start: false, live: false, results: false, standings: false, tipp: false, worlds: false };
 
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -469,6 +610,7 @@
     if (tab === "results") return loadResults();
     if (tab === "standings") return loadStandings();
     if (tab === "tipp") return loadTipp();
+    if (tab === "worlds") return loadWorlds();
   }
 
   // ---- Refresh-Button: wirft alle Zwischenspeicher weg und lädt den
@@ -478,6 +620,7 @@
     scheduleCache = null;
     teamsByLeagueCache = null;
     allTournamentsCache = null;
+    resetWorldsCaches();
     Object.keys(resultsByYearCache).forEach(k => delete resultsByYearCache[k]);
   }
 
@@ -518,12 +661,13 @@
     return {
       id: match.id,
       league: ev.league ? ev.league.name : "",
+      blockName: ev.blockName || "",
       start: new Date(ev.startTime),
       state: ev.state,
       strategy: match.strategy || {},
       games: match.games || [],
-      teamA: { name: tA.name || tA.code || "TBD", code: tA.code || "", image: tA.image || "", result: tA.result },
-      teamB: { name: tB.name || tB.code || "TBD", code: tB.code || "", image: tB.image || "", result: tB.result }
+      teamA: { id: tA.id || "", name: tA.name || tA.code || "TBD", code: tA.code || "", image: tA.image || "", result: tA.result },
+      teamB: { id: tB.id || "", name: tB.name || tB.code || "TBD", code: tB.code || "", image: tB.image || "", result: tB.result }
     };
   }
 
@@ -1153,6 +1297,7 @@
   // Speicher + Identität laufen über den Cloudflare Worker (Basic-Auth-Login),
   // siehe README.md "Tippspiel absichern (Cloudflare Worker)".
   const TIPP_API_URL = "/api/tipp";
+  const TIPP_PICK_URL = "/api/tipp/pick";
   const WHOAMI_URL = "/api/whoami";
 
   let tippPlayerName = "";
@@ -1163,6 +1308,13 @@
     if (!r.ok) throw new Error("Login nicht erkannt (" + r.status + ")");
     const data = await r.json();
     return data.name;
+  }
+
+  async function ensureTippIdentity() {
+    if (!tippPlayerName || !ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
+      tippPlayerName = await tippWhoAmI();
+    }
+    return tippPlayerName;
   }
 
   // Runde: Montag 12:00 (lokale Zeit) bis zum nächsten Montag 12:00
@@ -1179,14 +1331,21 @@
     return { weekStart, weekEnd };
   }
 
+  function normalizeStore(raw) {
+    const store = raw && typeof raw === "object" ? raw : {};
+    if (!store.picks || typeof store.picks !== "object") store.picks = {};
+    if (!store.worlds || typeof store.worlds !== "object") store.worlds = {};
+    return store;
+  }
+
   async function tippLoadStore() {
     try {
       const r = await fetch(TIPP_API_URL, { cache: "no-store" });
       if (!r.ok) throw new Error("Speicher nicht erreichbar (" + r.status + ")");
-      return await r.json();
+      return normalizeStore(await r.json());
     } catch (e) {
       console.warn("Tippspiel-Speicher nicht ladbar:", e);
-      return { picks: {} };
+      return normalizeStore(null);
     }
   }
 
@@ -1198,10 +1357,38 @@
     });
   }
 
-  async function tippSavePick(uid, name, s1, s2) {
+  // Tipps werden bevorzugt über /api/tipp/pick gespeichert: der Worker mergt
+  // dort serverseitig und schreibt nur die Felder des eingeloggten Spielers.
+  // Das verhindert, dass zwei gleichzeitig offene Browser sich gegenseitig
+  // die Tipps überschreiben. Kennt der Worker den Endpunkt noch nicht (alte
+  // Version deployt), fällt der Aufruf auf das frühere Lesen-Ändern-Schreiben
+  // über PUT /api/tipp zurück.
+  let tippPatchSupported = true;
+
+  async function tippPatch(patch, applyLocally) {
+    if (tippPatchSupported) {
+      let r;
+      try {
+        r = await fetch(TIPP_PICK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch)
+        });
+      } catch (e) {
+        r = null;
+      }
+      if (r && r.ok) {
+        tippStore = normalizeStore(await r.json());
+        return;
+      }
+      if (r && (r.status === 404 || r.status === 405)) {
+        tippPatchSupported = false;
+      } else {
+        throw new Error("Tipp konnte nicht gespeichert werden" + (r ? " (" + r.status + ")" : ""));
+      }
+    }
     tippStore = await tippLoadStore();
-    if (!tippStore.picks[uid]) tippStore.picks[uid] = {};
-    tippStore.picks[uid][name] = { s1, s2, ts: Date.now() };
+    applyLocally(tippStore);
     await tippSaveStore();
   }
 
@@ -1242,9 +1429,7 @@
 
     el.innerHTML = '<p class="status"><span class="dot"></span>Lade Runde…</p>';
     try {
-      if (!tippPlayerName || !ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
-        tippPlayerName = await tippWhoAmI();
-      }
+      await ensureTippIdentity();
       if (!ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
         el.innerHTML = `<div class="card"><p class="empty-list">Eingeloggt als "${esc(tippPlayerName)}" - für diesen Login ist das Tippspiel nicht freigeschaltet.</p></div>`;
         return;
@@ -1434,18 +1619,25 @@
       ${otherHtml}`;
   }
 
-  function wireTicketUpcoming(ticketEl, m) {
+  // Gemeinsam für Liga- und Worlds-Tickets: der Tipp erscheint sofort, das
+  // Speichern läuft dahinter (siehe commitPick).
+  function wireTicketPicks(ticketEl, m, afterRender) {
     ticketEl.querySelectorAll(".bo-chip").forEach(chip => {
-      chip.addEventListener("click", async () => {
+      chip.addEventListener("click", () => {
         const s1 = parseInt(chip.getAttribute("data-s1"), 10);
         const s2 = parseInt(chip.getAttribute("data-s2"), 10);
-        ticketEl.querySelectorAll(".bo-chip").forEach(c => c.disabled = true);
-        chip.textContent = "…";
-        await tippSavePick(m.id, tippPlayerName, s1, s2);
-        ticketEl.innerHTML = ticketUpcomingBodyHtml(m);
-        wireTicketUpcoming(ticketEl, m);
-        updateTippSummaryRow(m);
+        commitPick(ticketEl, matchWrite(m, s1, s2), () => {
+          ticketEl.innerHTML = ticketUpcomingBodyHtml(m);
+          if (afterRender) afterRender();
+        });
       });
+    });
+  }
+
+  function wireTicketUpcoming(ticketEl, m) {
+    wireTicketPicks(ticketEl, m, () => {
+      wireTicketUpcoming(ticketEl, m);
+      updateTippSummaryRow(m);
     });
   }
 
@@ -1509,6 +1701,984 @@
     if (tippStandingsEl) renderStandingsInto(tippStandingsEl);
   }
   // ==================== /TIPPSPIEL ====================
+
+  // ==================== WORLDS-TIPPSPIEL ====================
+  // Eigener Turniermodus: Runden richten sich nach der Turnierphase
+  // (Play-In / Swiss / Viertel- / Halbfinale / Finale) statt nach Kalender-
+  // wochen. Dazu drei Sonderwetten, die jeweils vor Beginn ihrer Phase
+  // gesperrt werden: Champion, Swiss-Prognose und Bracket.
+  //
+  // Die Riot-API liefert für Worlds nicht immer alle Felder (blockName fehlt
+  // gelegentlich, das Bracket steht erst nach der Auslosung). Deshalb hat hier
+  // jeder Schritt einen Fallback, statt sich auf eine Form zu verlassen.
+
+  const WORLDS_LEAGUE_NAME = "Worlds";
+  const WORLDS_PTS = { champion: 10, swissPerfect: 3, swissWinless: 3, swissAdvance: 1, qf: 1, sf: 2, final: 3 };
+  const SWISS_CATEGORIES = [
+    { key: "perfect", label: "Geht 3:0 durch", limit: 2, pts: WORLDS_PTS.swissPerfect },
+    { key: "winless", label: "Fliegt 0:3 raus", limit: 2, pts: WORLDS_PTS.swissWinless },
+    { key: "advance", label: "Kommt ins Viertelfinale", limit: 8, pts: WORLDS_PTS.swissAdvance }
+  ];
+  const PHASE_LABEL = {
+    playin: "Play-In", swiss: "Swiss-Stage", qf: "Viertelfinale",
+    sf: "Halbfinale", final: "Finale", other: "Weitere Spiele"
+  };
+  const PHASE_ORDER = ["playin", "swiss", "qf", "sf", "final", "other"];
+  const KO_SLOT_PTS = { qf: WORLDS_PTS.qf, sf: WORLDS_PTS.sf, final: WORLDS_PTS.final };
+
+  // ---- Team-Identität ----
+  // Je nach Endpunkt kommt ein Team mal mit id, mal nur mit code/name. Damit
+  // ein Tipp aus dem Bracket später gegen ein Spielplan-Ergebnis vergleichbar
+  // bleibt, laufen alle Schreibweisen über einen gemeinsamen Schlüssel.
+  let worldsTeamAlias = new Map();
+  let worldsTeamInfo = new Map();
+
+  function isTbdName(v) {
+    const s = String(v == null ? "" : v).trim().toLowerCase();
+    return s === "" || s === "0" || s === "tbd" || s === "tbc" || s === "to be determined";
+  }
+  function worldsTeamAliases(t) {
+    if (!t) return [];
+    return [t.id, t.code, t.name].filter(v => !isTbdName(v)).map(v => String(v));
+  }
+  function registerWorldsTeam(t) {
+    const aliases = worldsTeamAliases(t);
+    if (!aliases.length) return "";
+    let key = null;
+    for (const a of aliases) {
+      const found = worldsTeamAlias.get(a.toLowerCase());
+      if (found) { key = found; break; }
+    }
+    if (!key) key = aliases[0];
+    aliases.forEach(a => worldsTeamAlias.set(a.toLowerCase(), key));
+    const prev = worldsTeamInfo.get(key) || {};
+    worldsTeamInfo.set(key, {
+      key,
+      name: (!isTbdName(t.name) && String(t.name)) || prev.name || key,
+      code: (!isTbdName(t.code) && String(t.code)) || prev.code || "",
+      image: t.image || prev.image || ""
+    });
+    return key;
+  }
+  function worldsTeamKey(t) {
+    const aliases = worldsTeamAliases(t);
+    for (const a of aliases) {
+      const found = worldsTeamAlias.get(a.toLowerCase());
+      if (found) return found;
+    }
+    return aliases[0] || "";
+  }
+  function worldsTeam(key) {
+    return worldsTeamInfo.get(key) || { key: key || "", name: key || "?", code: "", image: "" };
+  }
+  function teamPickHtml(key, opts) {
+    const t = worldsTeam(key);
+    const o = opts || {};
+    const cls = ["team-pick", o.selected ? "selected" : "", o.mark || ""].filter(Boolean).join(" ");
+    return `
+      <button class="${cls}" data-team="${esc(key)}" ${o.disabled ? "disabled" : ""} title="${esc(t.name)}">
+        <img src="${esc(t.image || fallbackLogo(t.name))}" onerror="this.src='${fallbackLogo(t.name)}'">
+        <span class="tcode">${esc(t.code || t.name)}</span>
+      </button>`;
+  }
+
+  // ---- Phasen-Erkennung ----
+  function detectPhaseFromBlock(blockName) {
+    const b = String(blockName || "").toLowerCase();
+    if (/play[-\s_]?in/.test(b)) return "playin";
+    if (/quarter/.test(b)) return "qf";
+    if (/semi/.test(b)) return "sf";
+    if (/final/.test(b)) return "final";
+    if (/swiss|group|round/.test(b)) return "swiss";
+    return "other";
+  }
+  function bracketRoundPhase(section, idxFromEnd) {
+    const n = String(section.name || "").toLowerCase();
+    if (/quarter/.test(n)) return "qf";
+    if (/semi/.test(n)) return "sf";
+    if (/final/.test(n)) return "final";
+    return ["final", "sf", "qf"][idxFromEnd] || "qf";
+  }
+
+  // ---- Daten laden ----
+  let worldsTournamentsCache = null;
+  const worldsDataByTournament = {};
+  let worldsSelectedTournamentId = null;
+  let worldsActivePhase = null;
+
+  function resetWorldsCaches() {
+    worldsTournamentsCache = null;
+    Object.keys(worldsDataByTournament).forEach(k => delete worldsDataByTournament[k]);
+  }
+
+  async function getWorldsTournaments() {
+    if (worldsTournamentsCache) return worldsTournamentsCache;
+    worldsTournamentsCache = (async () => {
+      const allLeagues = await getAllLeagues();
+      const tournaments = await getTournamentsForLeagueName(WORLDS_LEAGUE_NAME, allLeagues);
+      return tournaments
+        .filter(t => t && t.id)
+        .slice()
+        .sort((a, b) => new Date(b.startDate || 0) - new Date(a.startDate || 0));
+    })();
+    return worldsTournamentsCache;
+  }
+
+  // Anders als bei den Ligen ist hier das *kommende* Turnier interessant:
+  // Champion-Tipps sollen schon vor dem ersten Spieltag abgegeben werden.
+  function pickWorldsTournament(tournaments) {
+    const now = new Date();
+    const dated = tournaments
+      .map(t => ({ t, start: t.startDate ? new Date(t.startDate) : null, end: t.endDate ? new Date(t.endDate) : null }))
+      .filter(x => x.start && !isNaN(x.start.getTime()));
+    const running = dated.find(x => x.start <= now && (!x.end || isNaN(x.end.getTime()) || x.end >= now));
+    if (running) return running.t;
+    const upcoming = dated.filter(x => x.start > now).sort((a, b) => a.start - b.start)[0];
+    if (upcoming) return upcoming.t;
+    const latest = dated.sort((a, b) => b.start - a.start)[0];
+    return latest ? latest.t : tournaments[0];
+  }
+
+  function mergeEventsById(lists) {
+    const rank = s => (s === "completed" ? 2 : s === "inProgress" ? 1 : 0);
+    const byId = new Map();
+    lists.flat().forEach(ev => {
+      if (!ev || !ev.id) return;
+      const prev = byId.get(String(ev.id));
+      if (!prev) { byId.set(String(ev.id), ev); return; }
+      const keep = rank(ev.state) > rank(prev.state) ? ev : prev;
+      const drop = keep === ev ? prev : ev;
+      if (!keep.blockName && drop.blockName) keep.blockName = drop.blockName;
+      byId.set(String(ev.id), keep);
+    });
+    return Array.from(byId.values()).sort((a, b) => a.start - b.start);
+  }
+
+  async function fetchBracketRounds(tournamentId) {
+    const r = await fetch(`${ESPORTS_BASE}/getStandings?hl=en-GB&tournamentId=${tournamentId}`, { headers: HEADERS });
+    if (!r.ok) throw new Error("Bracket nicht erreichbar (" + r.status + ")");
+    const data = await r.json();
+    const standings = data.data && data.data.standings && data.data.standings[0];
+    const stages = (standings && standings.stages) || [];
+    const stage = stages.find(s => s.type === "bracket") ||
+      stages.find(s => /knockout|bracket/i.test(`${s.name || ""} ${s.slug || ""}`));
+    if (!stage) return [];
+    return (stage.sections || [])
+      .map(sec => ({ name: sec.name || sec.slug || "", matches: (sec.matches || []).filter(m => m && m.id) }))
+      .filter(sec => sec.matches.length > 0);
+  }
+
+  // Baut aus Bracket-Daten (bevorzugt) oder dem Spielplan (Fallback) den
+  // KO-Baum: welche Partien es gibt und welche Sieger in welches Halbfinale
+  // bzw. Finale weiterrücken.
+  function buildBracketTree(rounds, events) {
+    const eventById = new Map(events.map(e => [String(e.id), e]));
+    const byPhase = { qf: [], sf: [], final: [] };
+
+    rounds.forEach((sec, i) => {
+      const phase = bracketRoundPhase(sec, rounds.length - 1 - i);
+      if (!byPhase[phase]) return;
+      sec.matches.forEach(m => {
+        (m.teams || []).forEach(registerWorldsTeam);
+        byPhase[phase].push({
+          id: String(m.id),
+          prev: (m.previousMatchIds || []).map(String),
+          event: eventById.get(String(m.id)) || null,
+          raw: m
+        });
+      });
+    });
+
+    ["qf", "sf", "final"].forEach(phase => {
+      if (byPhase[phase].length) return;
+      events
+        .filter(e => e.phase === phase)
+        .sort((a, b) => a.start - b.start)
+        .forEach(e => byPhase[phase].push({ id: String(e.id), prev: [], event: e, raw: null }));
+    });
+
+    const idIndex = phase => {
+      const map = new Map();
+      byPhase[phase].forEach((s, i) => map.set(s.id, i));
+      return map;
+    };
+    const qfIdx = idIndex("qf");
+    const sfIdx = idIndex("sf");
+
+    // Ohne previousMatchIds bleibt nur die übliche Anordnung: die ersten
+    // beiden Viertelfinals speisen das erste Halbfinale usw.
+    byPhase.sf.forEach((slot, j) => {
+      const feeds = slot.prev.map(id => qfIdx.get(id)).filter(i => i !== undefined);
+      slot.feeds = feeds.length === 2 ? feeds : [2 * j, 2 * j + 1];
+      slot.feedsGuessed = feeds.length !== 2;
+    });
+    byPhase.final.forEach(slot => {
+      const feeds = slot.prev.map(id => sfIdx.get(id)).filter(i => i !== undefined);
+      slot.feeds = feeds.length === 2 ? feeds : [0, 1];
+      slot.feedsGuessed = feeds.length !== 2;
+    });
+
+    byPhase.qf.forEach((s, i) => { s.key = "qf" + i; s.phase = "qf"; });
+    byPhase.sf.forEach((s, i) => { s.key = "sf" + i; s.phase = "sf"; });
+    byPhase.final.forEach((s, i) => { s.key = i === 0 ? "final" : "final" + i; s.phase = "final"; });
+
+    return byPhase;
+  }
+
+  function slotTeamKeys(slot) {
+    if (!slot) return [];
+    if (slot.event) {
+      return [worldsTeamKey(slot.event.teamA), worldsTeamKey(slot.event.teamB)].filter(Boolean);
+    }
+    if (slot.raw && slot.raw.teams) {
+      return slot.raw.teams.map(worldsTeamKey).filter(Boolean);
+    }
+    return [];
+  }
+
+  function slotWinnerKey(slot) {
+    if (!slot) return "";
+    if (slot.event && slot.event.state === "completed" && isValidFinalScore(slot.event)) {
+      const wA = slot.event.teamA.result.gameWins;
+      const wB = slot.event.teamB.result.gameWins;
+      if (wA === wB) return "";
+      return worldsTeamKey(wA > wB ? slot.event.teamA : slot.event.teamB);
+    }
+    if (slot.raw && slot.raw.state === "completed" && slot.raw.teams) {
+      const won = slot.raw.teams.find(t => t.result && t.result.outcome === "win");
+      if (won) return worldsTeamKey(won);
+    }
+    return "";
+  }
+
+  async function getWorldsData(tournamentId) {
+    if (worldsDataByTournament[tournamentId]) return worldsDataByTournament[tournamentId];
+    worldsDataByTournament[tournamentId] = (async () => {
+      const tournaments = await getWorldsTournaments();
+      const tourn = tournaments.find(t => t.id === tournamentId) || tournaments[0];
+      const season = (tourn && tourn.startDate ? String(tourn.startDate).slice(0, 4) : "") ||
+        String(new Date().getFullYear());
+
+      const [completed, scheduled, rounds] = await Promise.all([
+        fetchCompletedEventsForTournament(tournamentId).catch(() => []),
+        loadSchedule().then(evs => evs.filter(e => e.league === WORLDS_LEAGUE_NAME)).catch(() => []),
+        fetchBracketRounds(tournamentId).catch(() => [])
+      ]);
+
+      // Der Spielplan gilt für die ganze Liga. Läuft ein älteres Turnier, darf
+      // er nicht dazugemischt werden - sonst landen aktuelle Spiele in einer
+      // vergangenen Saison.
+      const completedIds = new Set(completed.map(e => String(e.id)));
+      const sameSeason = scheduled.filter(e =>
+        completedIds.has(String(e.id)) || String(e.start.getFullYear()) === season);
+
+      const events = mergeEventsById([completed, sameSeason]);
+      events.forEach(e => {
+        registerWorldsTeam(e.teamA);
+        registerWorldsTeam(e.teamB);
+      });
+
+      const bracketPhaseById = new Map();
+      rounds.forEach((sec, i) => {
+        const phase = bracketRoundPhase(sec, rounds.length - 1 - i);
+        sec.matches.forEach(m => bracketPhaseById.set(String(m.id), phase));
+      });
+      events.forEach(e => {
+        e.phase = bracketPhaseById.get(String(e.id)) || detectPhaseFromBlock(e.blockName);
+      });
+
+      const tree = buildBracketTree(rounds, events);
+      return { tourn, tournamentId, season, events, tree };
+    })();
+    return worldsDataByTournament[tournamentId];
+  }
+
+  // ---- Ableitungen aus den Turnierdaten ----
+  function phasesWithMatches(events) {
+    const present = new Set(events.map(e => e.phase));
+    return PHASE_ORDER.filter(p => present.has(p));
+  }
+  function earliestStart(events) {
+    const times = events.map(e => e.start).filter(d => d && !isNaN(d.getTime()));
+    return times.length ? new Date(Math.min.apply(null, times)) : null;
+  }
+  function phaseStart(events, phases) {
+    return earliestStart(events.filter(e => phases.includes(e.phase)));
+  }
+  function isLocked(lockDate) {
+    return !!lockDate && lockDate <= new Date();
+  }
+  function lockNote(lockDate, whatOpen) {
+    if (!lockDate) return whatOpen;
+    if (isLocked(lockDate)) return `Gesperrt seit ${tippFmtRoundEnd(lockDate)}`;
+    return `${whatOpen} · Sperre ${tippFmtRoundEnd(lockDate)}`;
+  }
+
+  function swissTeamPool(data) {
+    const pool = [];
+    const seen = new Set();
+    data.events.filter(e => e.phase === "swiss").forEach(e => {
+      [e.teamA, e.teamB].forEach(t => {
+        const k = worldsTeamKey(t);
+        if (k && !seen.has(k)) { seen.add(k); pool.push(k); }
+      });
+    });
+    return pool.sort((a, b) => worldsTeam(a).name.localeCompare(worldsTeam(b).name, "de", { numeric: true }));
+  }
+  function allWorldsTeams(data) {
+    const pool = [];
+    const seen = new Set();
+    data.events.forEach(e => {
+      [e.teamA, e.teamB].forEach(t => {
+        const k = worldsTeamKey(t);
+        if (k && !seen.has(k)) { seen.add(k); pool.push(k); }
+      });
+    });
+    return pool.sort((a, b) => worldsTeam(a).name.localeCompare(worldsTeam(b).name, "de", { numeric: true }));
+  }
+
+  // Bilanzen direkt aus den Spielergebnissen rechnen statt aus getStandings -
+  // die Ergebnisse liegen ohnehin vor und die Stage-Struktur variiert.
+  function swissRecords(data) {
+    const rec = new Map();
+    const bump = (t, field) => {
+      const k = worldsTeamKey(t);
+      if (!k) return;
+      if (!rec.has(k)) rec.set(k, { key: k, wins: 0, losses: 0 });
+      rec.get(k)[field]++;
+    };
+    data.events
+      .filter(e => e.phase === "swiss" && e.state === "completed" && isValidFinalScore(e))
+      .forEach(m => {
+        const wA = m.teamA.result.gameWins;
+        const wB = m.teamB.result.gameWins;
+        if (wA === wB) return;
+        const winner = wA > wB ? m.teamA : m.teamB;
+        const loser = wA > wB ? m.teamB : m.teamA;
+        bump(winner, "wins");
+        bump(loser, "losses");
+      });
+    return rec;
+  }
+  function swissOutcome(data) {
+    const rec = swissRecords(data);
+    const list = Array.from(rec.values());
+    const resolved = list.length >= 8 && list.every(t => t.wins >= 3 || t.losses >= 3);
+    return {
+      resolved,
+      perfect: list.filter(t => t.wins >= 3 && t.losses === 0).map(t => t.key),
+      winless: list.filter(t => t.losses >= 3 && t.wins === 0).map(t => t.key),
+      advance: list.filter(t => t.wins >= 3).map(t => t.key)
+    };
+  }
+  function worldsChampionKey(data) {
+    const finals = data.tree.final || [];
+    for (const slot of finals) {
+      const w = slotWinnerKey(slot);
+      if (w) return w;
+    }
+    return "";
+  }
+
+  // ---- Gespeicherte Tipps lesen ----
+  function worldsSeasonStore(season) {
+    const s = (tippStore.worlds && tippStore.worlds[season]) || {};
+    return {
+      champion: s.champion || {},
+      swiss: s.swiss || {},
+      bracket: s.bracket || {}
+    };
+  }
+  function championPick(season, player) {
+    return worldsSeasonStore(season).champion[player] || null;
+  }
+  function swissPick(season, player) {
+    const p = worldsSeasonStore(season).swiss[player] || {};
+    return {
+      perfect: Array.isArray(p.perfect) ? p.perfect : [],
+      winless: Array.isArray(p.winless) ? p.winless : [],
+      advance: Array.isArray(p.advance) ? p.advance : []
+    };
+  }
+  function bracketPick(season, player) {
+    const p = worldsSeasonStore(season).bracket[player] || {};
+    return p.picks && typeof p.picks === "object" ? p.picks : {};
+  }
+
+  // ---- Punkte ----
+  function worldsMatchPoints(player, data) {
+    let pts = 0, exact = 0, played = 0;
+    data.events.filter(e => e.state === "completed").forEach(m => {
+      const pick = (tippStore.picks[m.id] || {})[player];
+      const p = tippComputePoints(pick, m);
+      if (p === null) return;
+      pts += p;
+      played++;
+      if (p === 2) exact++;
+    });
+    return { pts, exact, played };
+  }
+  function worldsChampionPoints(player, data) {
+    const actual = worldsChampionKey(data);
+    if (!actual) return 0;
+    const pick = championPick(data.season, player);
+    return pick && pick.teamKey === actual ? WORLDS_PTS.champion : 0;
+  }
+  function worldsSwissPoints(player, data) {
+    const outcome = swissOutcome(data);
+    if (!outcome.resolved) return 0;
+    const pick = swissPick(data.season, player);
+    let pts = 0;
+    SWISS_CATEGORIES.forEach(cat => {
+      const actual = outcome[cat.key] || [];
+      pick[cat.key].slice(0, cat.limit).forEach(k => {
+        if (actual.includes(k)) pts += cat.pts;
+      });
+    });
+    return pts;
+  }
+  function worldsBracketPoints(player, data) {
+    const picks = bracketPick(data.season, player);
+    let pts = 0;
+    ["qf", "sf", "final"].forEach(phase => {
+      (data.tree[phase] || []).forEach(slot => {
+        const actual = slotWinnerKey(slot);
+        if (actual && picks[slot.key] === actual) pts += KO_SLOT_PTS[phase];
+      });
+    });
+    return pts;
+  }
+  function worldsStats(data) {
+    return tippPlayerList().map(name => {
+      const match = worldsMatchPoints(name, data);
+      const champion = worldsChampionPoints(name, data);
+      const swiss = worldsSwissPoints(name, data);
+      const bracket = worldsBracketPoints(name, data);
+      return { name, match, champion, swiss, bracket, total: match.pts + champion + swiss + bracket };
+    });
+  }
+
+  // ---- Speichern ----
+  // Jeder Schreibvorgang liefert seine lokale Änderung gleich mit. Damit kann
+  // derselbe Code den Tipp sofort anzeigen (siehe commitPick) und ihn danach
+  // - oder im Fallback-Pfad ein zweites Mal - auf den Server schreiben.
+  function ensureWorldsSeason(store, season) {
+    if (!store.worlds) store.worlds = {};
+    if (!store.worlds[season]) store.worlds[season] = {};
+    const s = store.worlds[season];
+    ["champion", "swiss", "bracket"].forEach(k => { if (!s[k]) s[k] = {}; });
+    return s;
+  }
+
+  function championWrite(season, teamKey) {
+    const t = worldsTeam(teamKey);
+    const mutate = store => {
+      ensureWorldsSeason(store, season).champion[tippPlayerName] =
+        { teamKey, teamName: t.name, ts: Date.now() };
+    };
+    return { mutate, persist: () => tippPatch({ kind: "champion", season, teamKey, teamName: t.name }, mutate) };
+  }
+  function swissWrite(season, pick) {
+    const mutate = store => {
+      ensureWorldsSeason(store, season).swiss[tippPlayerName] = { ...pick, ts: Date.now() };
+    };
+    return { mutate, persist: () => tippPatch({ kind: "swiss", season, ...pick }, mutate) };
+  }
+  function bracketWrite(season, picks) {
+    const mutate = store => {
+      ensureWorldsSeason(store, season).bracket[tippPlayerName] = { picks, ts: Date.now() };
+    };
+    return { mutate, persist: () => tippPatch({ kind: "bracket", season, picks }, mutate) };
+  }
+  function matchWrite(m, s1, s2) {
+    const mutate = store => {
+      if (!store.picks) store.picks = {};
+      if (!store.picks[m.id]) store.picks[m.id] = {};
+      store.picks[m.id][tippPlayerName] = { s1, s2, ts: Date.now() };
+    };
+    return { mutate, persist: () => tippPatch({ kind: "match", matchId: m.id, s1, s2 }, mutate) };
+  }
+
+  // Ein Tipp muss sich sofort anfühlen: die Auswahl wird lokal übernommen und
+  // direkt neu gezeichnet, gespeichert wird im Hintergrund. Geht das Speichern
+  // schief, holen wir den Serverstand zurück, damit nichts Falsches stehen
+  // bleibt, und sagen es deutlich.
+  async function commitPick(el, write, rerender) {
+    write.mutate(tippStore);
+    rerender();
+    try {
+      await write.persist();
+    } catch (e) {
+      tippStore = await tippLoadStore();
+      rerender();
+      const hint = el.querySelector(".w-savehint") || el.querySelector(".saved-note");
+      if (hint) {
+        hint.textContent = "Nicht gespeichert: " + e.message;
+        hint.classList.add("err");
+      }
+      return;
+    }
+    rerender();
+  }
+
+  // ---- Rendering ----
+  function renderWorldsScoreboard(data) {
+    const el = document.getElementById("w-scoreboard");
+    if (!el) return;
+    const stats = worldsStats(data).sort((a, b) => b.total - a.total);
+    el.innerHTML = `
+      <table class="standings">
+        <thead>
+          <tr>
+            <th></th><th>Spieler</th>
+            <th style="text-align:right">Matches</th>
+            <th style="text-align:right">Champ</th>
+            <th style="text-align:right">Swiss</th>
+            <th style="text-align:right">Bracket</th>
+            <th style="text-align:right">Gesamt</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${stats.map((s, i) => `
+            <tr>
+              <td class="rank">${i + 1}</td>
+              <td class="team">${esc(s.name)}</td>
+              <td class="num">${s.match.pts}</td>
+              <td class="num">${s.champion}</td>
+              <td class="num">${s.swiss}</td>
+              <td class="num">${s.bracket}</td>
+              <td class="num total">${s.total}</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+      <p class="live-note" style="margin-top:10px">
+        Match exakt 2 · Sieger 1 · Champion ${WORLDS_PTS.champion} ·
+        Swiss 3:0/0:3 je ${WORLDS_PTS.swissPerfect}, Weiterkommen je ${WORLDS_PTS.swissAdvance} ·
+        Bracket VF ${WORLDS_PTS.qf}/HF ${WORLDS_PTS.sf}/Finale ${WORLDS_PTS.final}
+      </p>`;
+  }
+
+  function renderWorldsChampion(data) {
+    const el = document.getElementById("w-champion");
+    if (!el) return;
+    const pool = allWorldsTeams(data);
+    const lock = earliestStart(data.events);
+    const locked = isLocked(lock);
+    const mine = championPick(data.season, tippPlayerName);
+    const actual = worldsChampionKey(data);
+
+    if (pool.length === 0) {
+      el.innerHTML = '<p class="empty-list">Die Teilnehmer stehen noch nicht fest.</p>';
+      return;
+    }
+
+    const canPick = !locked;
+    const grid = pool.map(k => teamPickHtml(k, {
+      selected: mine && mine.teamKey === k,
+      disabled: !canPick,
+      mark: actual ? (k === actual ? "hit" : (mine && mine.teamKey === k ? "miss" : "")) : ""
+    })).join("");
+
+    const others = tippPlayerList()
+      .filter(n => n !== tippPlayerName)
+      .map(n => [n, championPick(data.season, n)])
+      .filter(([, p]) => p);
+    const canSeeOthers = locked || !!mine;
+    let revealHtml = "";
+    if (others.length && canSeeOthers) {
+      revealHtml = '<div class="w-reveal">' + others.map(([n, p]) => {
+        const hit = actual && p.teamKey === actual;
+        return `<div class="pick-line"><span class="pname">${esc(n)}</span><span class="pval">${esc(worldsTeam(p.teamKey).name)}${hit ? `<span class="pts-badge pts-2">+${WORLDS_PTS.champion}</span>` : ""}</span></div>`;
+      }).join("") + "</div>";
+    } else if (others.length) {
+      revealHtml = '<div class="blind-note">Tippe selbst, um die anderen Tipps zu sehen</div>';
+    }
+
+    el.innerHTML = `
+      <div class="w-sub">
+        <span>${esc(lockNote(lock, "Wer gewinnt Worlds?"))}</span>
+        <span class="w-counter ${mine ? "done" : ""}">${mine ? esc(worldsTeam(mine.teamKey).name) : "kein Tipp"}</span>
+      </div>
+      <div class="team-grid">${grid}</div>
+      <div class="w-savehint"></div>
+      ${revealHtml}`;
+
+    if (!canPick) return;
+    el.querySelectorAll(".team-pick").forEach(btn => {
+      btn.addEventListener("click", () => {
+        commitPick(el, championWrite(data.season, btn.getAttribute("data-team")), () => {
+          renderWorldsChampion(data);
+          renderWorldsScoreboard(data);
+        });
+      });
+    });
+  }
+
+  function renderWorldsSwiss(data) {
+    const el = document.getElementById("w-swiss");
+    if (!el) return;
+    const pool = swissTeamPool(data);
+    const lock = phaseStart(data.events, ["swiss"]);
+    const locked = isLocked(lock);
+    const mine = swissPick(data.season, tippPlayerName);
+    const outcome = swissOutcome(data);
+
+    if (pool.length === 0) {
+      el.innerHTML = `<p class="empty-list">Das Swiss-Teilnehmerfeld steht noch nicht fest${
+        data.events.some(e => e.phase === "playin") ? " (erst nach dem Play-In)" : ""}.</p>`;
+      return;
+    }
+
+    const sections = SWISS_CATEGORIES.map(cat => {
+      const chosen = mine[cat.key];
+      const actual = outcome.resolved ? (outcome[cat.key] || []) : null;
+      const full = chosen.length >= cat.limit;
+      const grid = pool.map(k => {
+        const selected = chosen.includes(k);
+        let mark = "";
+        if (actual) {
+          if (selected) mark = actual.includes(k) ? "hit" : "miss";
+          else if (actual.includes(k)) mark = "hit";
+        }
+        return teamPickHtml(k, { selected, disabled: locked || (!selected && full), mark });
+      }).join("");
+      return `
+        <div class="w-section" data-cat="${cat.key}">
+          <div class="w-sub">
+            <span><b>${esc(cat.label)}</b> · ${cat.pts} Pkt je Treffer</span>
+            <span class="w-counter ${full ? "done" : ""}">${chosen.length}/${cat.limit}</span>
+          </div>
+          <div class="team-grid">${grid}</div>
+        </div>`;
+    }).join("");
+
+    const others = tippPlayerList().filter(n => n !== tippPlayerName);
+    const hasMine = mine.perfect.length || mine.winless.length || mine.advance.length;
+    let revealHtml = "";
+    if (locked || hasMine) {
+      const lines = others.map(n => {
+        const p = swissPick(data.season, n);
+        if (!p.perfect.length && !p.winless.length && !p.advance.length) return "";
+        const fmt = keys => keys.map(k => worldsTeam(k).code || worldsTeam(k).name).join(", ") || "–";
+        return `
+          <div class="pick-line"><span class="pname">${esc(n)} · 3:0</span><span class="pval">${esc(fmt(p.perfect))}</span></div>
+          <div class="pick-line"><span class="pname">${esc(n)} · 0:3</span><span class="pval">${esc(fmt(p.winless))}</span></div>
+          <div class="pick-line"><span class="pname">${esc(n)} · VF</span><span class="pval">${esc(fmt(p.advance))}</span></div>`;
+      }).filter(Boolean).join("");
+      if (lines) revealHtml = `<div class="w-reveal">${lines}</div>`;
+    } else {
+      revealHtml = '<div class="blind-note">Tippe selbst, um die anderen Tipps zu sehen</div>';
+    }
+
+    el.innerHTML = `
+      <div class="w-sub"><span>${esc(lockNote(lock, "Prognose vor der Swiss-Stage"))}</span></div>
+      ${sections}
+      <div class="w-savehint"></div>
+      ${revealHtml}`;
+
+    if (locked) return;
+    el.querySelectorAll(".w-section").forEach(sec => {
+      const catKey = sec.getAttribute("data-cat");
+      const cat = SWISS_CATEGORIES.find(c => c.key === catKey);
+      sec.querySelectorAll(".team-pick").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const key = btn.getAttribute("data-team");
+          const next = {
+            perfect: mine.perfect.slice(),
+            winless: mine.winless.slice(),
+            advance: mine.advance.slice()
+          };
+          const list = next[catKey];
+          const at = list.indexOf(key);
+          if (at >= 0) list.splice(at, 1);
+          else if (list.length < cat.limit) list.push(key);
+          else return;
+
+          // 3:0 heißt zwangsläufig weiter, 0:3 zwangsläufig raus - diese
+          // Kombinationen werden gleich mitgeführt bzw. ausgeschlossen.
+          if (at < 0) {
+            if (catKey === "perfect") {
+              next.winless = next.winless.filter(k => k !== key);
+              if (!next.advance.includes(key) && next.advance.length < 8) next.advance.push(key);
+            } else if (catKey === "winless") {
+              next.perfect = next.perfect.filter(k => k !== key);
+              next.advance = next.advance.filter(k => k !== key);
+            } else if (catKey === "advance") {
+              next.winless = next.winless.filter(k => k !== key);
+            }
+          } else if (catKey === "advance") {
+            next.perfect = next.perfect.filter(k => k !== key);
+          }
+
+          commitPick(el, swissWrite(data.season, next), () => {
+            renderWorldsSwiss(data);
+            renderWorldsScoreboard(data);
+          });
+        });
+      });
+    });
+  }
+
+  function renderWorldsBracket(data) {
+    const el = document.getElementById("w-bracket");
+    if (!el) return;
+    const slots = [].concat(data.tree.qf || [], data.tree.sf || [], data.tree.final || []);
+    if (slots.length === 0) {
+      el.innerHTML = '<p class="empty-list">Der KO-Baum steht erst nach der Swiss-Stage fest.</p>';
+      return;
+    }
+
+    const lock = phaseStart(data.events, ["qf"]) || phaseStart(data.events, ["qf", "sf", "final"]);
+    const locked = isLocked(lock);
+    const picks = bracketPick(data.season, tippPlayerName);
+    const guessed = slots.some(s => s.feedsGuessed && s.phase !== "qf");
+
+    const candidatesFor = slot => {
+      if (slot.phase === "qf") return slotTeamKeys(slot);
+      const source = slot.phase === "sf" ? data.tree.qf : data.tree.sf;
+      return (slot.feeds || [])
+        .map(i => (source[i] ? picks[source[i].key] : null))
+        .filter(Boolean);
+    };
+
+    const renderRound = (phase, title) => {
+      const list = data.tree[phase] || [];
+      if (!list.length) return "";
+      return `
+        <div class="w-section">
+          <h4>${esc(title)} · ${KO_SLOT_PTS[phase]} Pkt pro Treffer</h4>
+          ${list.map((slot, i) => {
+            const cands = candidatesFor(slot);
+            const chosen = picks[slot.key] || "";
+            const actual = slotWinnerKey(slot);
+            const label = list.length > 1 ? `${title} ${i + 1}` : title;
+            let body;
+            if (cands.length === 0) {
+              body = `<p class="empty-list" style="padding:0">${
+                slot.phase === "qf"
+                  ? "Paarung steht noch nicht fest."
+                  : "Erst die vorherige Runde tippen."}</p>`;
+            } else {
+              body = `<div class="slot-options">${cands.map(k => {
+                const t = worldsTeam(k);
+                const sel = chosen === k;
+                let mark = "";
+                if (actual) mark = k === actual ? "hit" : (sel ? "miss" : "");
+                return `
+                  <button class="slot-opt ${sel ? "selected" : ""} ${mark}" data-slot="${esc(slot.key)}" data-team="${esc(k)}" ${locked ? "disabled" : ""}>
+                    <img src="${esc(t.image || fallbackLogo(t.name))}" onerror="this.src='${fallbackLogo(t.name)}'">
+                    <span>${esc(t.name)}</span>
+                  </button>`;
+              }).join("")}</div>`;
+            }
+            let res = "";
+            if (actual) {
+              const hit = chosen === actual;
+              res = `<div class="slot-res ${hit ? "ok" : ""}">Sieger: ${esc(worldsTeam(actual).name)}${
+                chosen ? (hit ? ` · +${KO_SLOT_PTS[phase]}` : " · 0") : ""}</div>`;
+            }
+            return `
+              <div class="bracket-slot">
+                <div class="slot-label">${esc(label)}</div>
+                ${body}
+                ${res}
+              </div>`;
+          }).join("")}
+        </div>`;
+    };
+
+    const others = tippPlayerList().filter(n => n !== tippPlayerName);
+    const hasMine = Object.keys(picks).length > 0;
+    let revealHtml = "";
+    if (locked || hasMine) {
+      const lines = others.map(n => {
+        const p = bracketPick(data.season, n);
+        const fin = p["final"];
+        if (!Object.keys(p).length) return "";
+        return `<div class="pick-line"><span class="pname">${esc(n)} · Finalsieger</span><span class="pval">${esc(fin ? worldsTeam(fin).name : "–")}</span></div>`;
+      }).filter(Boolean).join("");
+      if (lines) revealHtml = `<div class="w-reveal">${lines}</div>`;
+    } else {
+      revealHtml = '<div class="blind-note">Tippe selbst, um die anderen Tipps zu sehen</div>';
+    }
+
+    el.innerHTML = `
+      <div class="w-sub"><span>${esc(lockNote(lock, "Kompletter KO-Baum"))}</span></div>
+      ${guessed ? '<p class="live-note" style="margin-bottom:10px">Hinweis: Die Zuordnung der Halbfinals wurde aus der Spielplan-Reihenfolge abgeleitet, die API liefert dafür noch keine Bracket-Daten.</p>' : ""}
+      ${renderRound("qf", "Viertelfinale")}
+      ${renderRound("sf", "Halbfinale")}
+      ${renderRound("final", "Finale")}
+      <div class="w-savehint"></div>
+      ${revealHtml}`;
+
+    if (locked) return;
+    el.querySelectorAll(".slot-opt").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const slotKey = btn.getAttribute("data-slot");
+        const teamKey = btn.getAttribute("data-team");
+        const next = { ...picks };
+        if (next[slotKey] === teamKey) delete next[slotKey];
+        else next[slotKey] = teamKey;
+
+        // Ein geänderter Sieger kann Folgetipps ungültig machen: wer nicht mehr
+        // weiterkommt, darf auch nicht mehr im Halbfinale oder Finale stehen.
+        const prune = () => {
+          let changed = false;
+          [].concat(data.tree.sf || [], data.tree.final || []).forEach(slot => {
+            const source = slot.phase === "sf" ? data.tree.qf : data.tree.sf;
+            const allowed = (slot.feeds || [])
+              .map(i => (source[i] ? next[source[i].key] : null))
+              .filter(Boolean);
+            if (next[slot.key] && !allowed.includes(next[slot.key])) {
+              delete next[slot.key];
+              changed = true;
+            }
+          });
+          return changed;
+        };
+        while (prune()) { /* bis sich nichts mehr ändert */ }
+
+        commitPick(el, bracketWrite(data.season, next), () => {
+          renderWorldsBracket(data);
+          renderWorldsScoreboard(data);
+        });
+      });
+    });
+  }
+
+  function wireWorldsTicket(ticketEl, m, data) {
+    wireTicketPicks(ticketEl, m, () => {
+      wireWorldsTicket(ticketEl, m, data);
+      renderWorldsScoreboard(data);
+    });
+  }
+
+  function renderWorldsMatches(data) {
+    const el = document.getElementById("w-matches");
+    if (!el) return;
+    const phases = phasesWithMatches(data.events);
+    if (phases.length === 0) {
+      el.innerHTML = '<p class="empty-list">Für dieses Turnier ist noch kein Spielplan veröffentlicht.</p>';
+      return;
+    }
+    if (!phases.includes(worldsActivePhase)) worldsActivePhase = currentWorldsPhase(data, phases);
+
+    const inPhase = data.events.filter(e => e.phase === worldsActivePhase);
+    const upcoming = inPhase.filter(m => m.state !== "completed").sort((a, b) => a.start - b.start);
+    const completed = inPhase.filter(m => m.state === "completed").sort((a, b) => a.start - b.start);
+
+    el.innerHTML = `
+      <div class="w-phasenav">
+        ${phases.map(p => `<button data-phase="${p}" class="${p === worldsActivePhase ? "active" : ""}">${esc(PHASE_LABEL[p])}</button>`).join("")}
+      </div>
+      <div class="w-section">
+        <h4>Offen</h4>
+        ${upcoming.length ? renderTippUpcoming(upcoming) : '<p class="empty-list">Keine offenen Spiele in dieser Phase.</p>'}
+      </div>
+      <div class="w-section">
+        <h4>Ergebnisse</h4>
+        ${completed.length ? renderTippCompleted(completed) : '<p class="empty-list">Noch keine Ergebnisse in dieser Phase.</p>'}
+      </div>`;
+
+    const ticketEls = Array.from(el.querySelectorAll(".ticket[data-uid]"));
+    upcoming.forEach((m, i) => {
+      if (ticketEls[i]) wireWorldsTicket(ticketEls[i], m, data);
+    });
+    el.querySelectorAll(".w-phasenav button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        worldsActivePhase = btn.getAttribute("data-phase");
+        renderWorldsMatches(data);
+      });
+    });
+  }
+
+  // Aktive Phase = die mit dem nächsten anstehenden Spiel, sonst die letzte,
+  // in der schon gespielt wurde.
+  function currentWorldsPhase(data, phases) {
+    const now = new Date();
+    const next = data.events
+      .filter(e => e.state !== "completed" && e.start >= now)
+      .sort((a, b) => a.start - b.start)[0];
+    if (next && phases.includes(next.phase)) return next.phase;
+    const live = data.events.find(e => e.state === "inProgress");
+    if (live && phases.includes(live.phase)) return live.phase;
+    const played = data.events.filter(e => e.state === "completed");
+    if (played.length) {
+      const last = played.sort((a, b) => b.start - a.start)[0];
+      if (phases.includes(last.phase)) return last.phase;
+    }
+    return phases[0];
+  }
+
+  async function loadWorlds() {
+    const el = document.getElementById("worlds-body");
+    el.innerHTML = '<p class="status"><span class="dot"></span>Lade Turnier…</p>';
+    try {
+      await ensureTippIdentity();
+      if (!ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
+        el.innerHTML = `<div class="card"><p class="empty-list">Eingeloggt als "${esc(tippPlayerName)}" - für diesen Login ist das Tippspiel nicht freigeschaltet.</p></div>`;
+        return;
+      }
+
+      const tournaments = await getWorldsTournaments();
+      if (!tournaments.length) {
+        el.innerHTML = '<div class="card"><p class="empty-list">Die API kennt aktuell kein Worlds-Turnier.</p></div>';
+        return;
+      }
+      if (!worldsSelectedTournamentId || !tournaments.some(t => t.id === worldsSelectedTournamentId)) {
+        const auto = pickWorldsTournament(tournaments);
+        worldsSelectedTournamentId = auto ? auto.id : tournaments[0].id;
+      }
+
+      const [data, store] = await Promise.all([
+        getWorldsData(worldsSelectedTournamentId),
+        tippLoadStore()
+      ]);
+      tippStore = store;
+      renderWorlds(data, tournaments);
+    } catch (e) {
+      el.innerHTML = `<div class="card"><p class="empty-list">Nicht ladbar (${esc(e.message)}).</p></div>`;
+    }
+  }
+
+  function renderWorlds(data, tournaments) {
+    const el = document.getElementById("worlds-body");
+    const phases = phasesWithMatches(data.events);
+    const phaseNow = phases.length ? PHASE_LABEL[currentWorldsPhase(data, phases)] : "noch kein Spielplan";
+    const next = data.events
+      .filter(e => e.state !== "completed" && e.start >= new Date())
+      .sort((a, b) => a.start - b.start)[0];
+
+    el.innerHTML = `
+      <div class="w-head">
+        Eingeloggt als <b>${esc(tippPlayerName)}</b> · Phase <b>${esc(phaseNow)}</b>
+        ${next ? `<br>Nächstes Spiel <b>${esc(fmtWhen(next.start))}</b>` : ""}
+        <br><select id="worlds-season-select" class="filter-select">
+          ${tournaments.map(t => `<option value="${esc(t.id)}" ${t.id === data.tournamentId ? "selected" : ""}>${esc(splitLabel(t, WORLDS_LEAGUE_NAME))}</option>`).join("")}
+        </select>
+      </div>
+      <div class="card"><h2>Wertung</h2><div id="w-scoreboard"></div></div>
+      <div class="card"><h2>Champion-Tipp</h2><div id="w-champion"></div></div>
+      <div class="card"><h2>Swiss-Prognose</h2><div id="w-swiss"></div></div>
+      <div class="card"><h2>Bracket</h2><div id="w-bracket"></div></div>
+      <div class="card"><h2>Matches tippen</h2><div id="w-matches"></div></div>`;
+
+    renderWorldsScoreboard(data);
+    renderWorldsChampion(data);
+    renderWorldsSwiss(data);
+    renderWorldsBracket(data);
+    renderWorldsMatches(data);
+
+    const sel = document.getElementById("worlds-season-select");
+    if (sel) {
+      sel.addEventListener("change", () => {
+        worldsSelectedTournamentId = sel.value;
+        worldsActivePhase = null;
+        loadWorlds();
+      });
+    }
+  }
+  // ==================== /WORLDS-TIPPSPIEL ====================
 
   loadTab("start");
 })();
