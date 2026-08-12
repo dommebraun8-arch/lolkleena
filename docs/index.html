@@ -553,6 +553,32 @@
     font-size: 0.5625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
   }
 
+  /* Führer der Woche auf der Startseite - gleiche Optik wie das Tipp-Board,
+     der Führende bekommt zusätzlich Krone und Akzentrahmen. */
+  .card[hidden] { display: none; }
+  .tipp-lead { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .tipp-lead-entry {
+    flex: 1; min-width: 140px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0) 42%), var(--mat-1);
+    border: 1px solid var(--line); border-top-color: var(--line-strong);
+    border-radius: var(--r-lg); padding: var(--s3); text-align: center; box-shadow: var(--shadow-2);
+  }
+  .tipp-lead-entry.is-leader { border-color: var(--accent-line); background: var(--accent-soft); }
+  .tipp-lead-entry .pname {
+    font-size: 0.8125rem; font-weight: 650; color: var(--text); margin-bottom: var(--s1);
+  }
+  .tipp-lead-entry.is-leader .pname { color: var(--accent); }
+  .tipp-lead-entry .crown { margin-right: 4px; }
+  .tipp-lead-entry .stat-row { display: flex; justify-content: center; gap: var(--s4); }
+  .tipp-lead-entry .stat { text-align: center; }
+  .tipp-lead-entry .stat .n {
+    font-family: var(--mono); font-size: 1.375rem; font-weight: 700; color: var(--accent);
+    letter-spacing: -0.025em; line-height: 1.15;
+  }
+  .tipp-lead-entry .stat .l {
+    font-size: 0.5625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
   .ticket {
     background: var(--mat-1); border: 1px solid var(--line); border-top-color: var(--line-strong);
     border-radius: var(--r-lg); padding: var(--s3) var(--s4); margin-bottom: var(--s2);
@@ -838,6 +864,10 @@
           <div id="countdown-big"></div>
           <div id="start-hero"></div>
           <div class="flow">
+            <div class="card" id="start-tipp-card" hidden>
+              <h2>Tippspiel · Diese Woche</h2>
+              <div id="start-tipp"></div>
+            </div>
             <div class="card">
               <h2>Nächste 24 Stunden</h2>
               <div id="start-list"><p class="status"><span class="dot"></span>Lade Spiele…</p></div>
@@ -1135,8 +1165,12 @@
       // gewählten Tab mitziehen, damit er nicht halb abgeschnitten stehen bleibt.
       if (btn.scrollIntoView) btn.scrollIntoView({ inline: "nearest", block: "nearest" });
       const tab = btn.getAttribute("data-tab");
+      const wasLoaded = loaded[tab];
       document.getElementById("tab-" + tab).classList.add("active");
       loadTab(tab);
+      // Zurück auf Start nach dem Tippen: Punktestand frisch rechnen, statt den
+      // Stand von vorhin stehen zu lassen (Spielplan kommt aus dem Cache).
+      if (tab === "start" && wasLoaded) loadSchedule().then(renderStartTippLeader).catch(() => {});
     });
   });
 
@@ -1374,6 +1408,8 @@
         wireHero(heroEl);
       }
 
+      renderStartTippLeader(events);
+
       if (upcoming.length === 0) {
         el.innerHTML = '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>';
         return;
@@ -1383,6 +1419,61 @@
     } catch (e) {
       el.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
+  }
+
+  // ---- TIPPSPIEL-FÜHRER AUF DER STARTSEITE ----
+  // Zeigt beide Spieler mit ihren Punkten; wer in der laufenden Woche vorne
+  // liegt, bekommt die Krone. Ohne Login (Worker antwortet dann nicht mit
+  // Tipps) bleibt die Karte ausgeblendet, statt eine leere 0:0-Tabelle zu zeigen.
+  async function renderStartTippLeader(events) {
+    const card = document.getElementById("start-tipp-card");
+    const el = document.getElementById("start-tipp");
+    if (!card || !el) return;
+    try {
+      const store = await tippLoadStore();
+      if (Object.keys(store.picks).length === 0) { card.hidden = true; return; }
+      tippStore = store;
+
+      const { weekStart, weekEnd } = getWeekBounds(new Date());
+      const tippEvents = events.filter(e => TIPP_LEAGUES.includes(e.league));
+      const allCompleted = tippEvents.filter(e => e.state === "completed");
+      const roundCompleted = allCompleted.filter(e => e.start >= weekStart && e.start < weekEnd);
+
+      el.innerHTML = renderTippLeaderBoard(computeTippTotals(allCompleted, roundCompleted), weekEnd);
+      card.hidden = false;
+    } catch (e) {
+      card.hidden = true;
+    }
+  }
+
+  function renderTippLeaderBoard(stats, weekEnd) {
+    const players = stats.players;
+    if (players.length === 0) return "";
+    const best = Math.max(...players.map(n => stats.weekTotals[n]));
+    const leaders = players.filter(n => stats.weekTotals[n] === best);
+    // Solange in der Woche noch niemand gepunktet hat, wäre eine Krone irreführend.
+    const hasLeader = best > 0;
+    const ranked = players.slice().sort((a, b) =>
+      stats.weekTotals[b] - stats.weekTotals[a] || stats.totals[b] - stats.totals[a]);
+    const note = !hasLeader
+      ? "Diese Woche noch keine Punkte vergeben."
+      : (leaders.length > 1 ? "Gleichstand - beide führen." : `${leaders[0]} führt diese Woche.`);
+
+    return `
+      <div class="tipp-lead">
+        ${ranked.map(n => {
+          const crown = hasLeader && stats.weekTotals[n] === best;
+          return `
+          <div class="tipp-lead-entry${crown ? " is-leader" : ""}">
+            <div class="pname">${crown ? '<span class="crown" title="Führt diese Woche">👑</span>' : ""}${esc(n)}</div>
+            <div class="stat-row">
+              <div class="stat"><div class="n">${stats.weekTotals[n]}</div><div class="l">Woche</div></div>
+              <div class="stat"><div class="n">${stats.totals[n]}</div><div class="l">Gesamt</div></div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+      <p class="round-info" style="margin:var(--s3) 0 0">${esc(note)} Runde endet <b>${esc(tippFmtRoundEnd(weekEnd))}</b>.</p>`;
   }
 
   // ---- LIEBLINGSTEAM / KADER-BROWSER ----
