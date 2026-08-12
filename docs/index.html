@@ -364,6 +364,20 @@
   table.standings .team { font-weight: 550; letter-spacing: -0.005em; }
   table.standings .record { font-family: var(--mono); color: var(--text-2); text-align: right; }
   table.standings tr.highlight td { background: rgba(255, 255, 255, 0.035); }
+
+  /* Playoff-Markierung: farbiger Balken am Platz, plus eine kräftigere Linie
+     unter dem letzten Platz, der noch weiterkommt. */
+  table.standings tr.po-direct .rank { box-shadow: inset 2px 0 0 var(--accent); color: var(--accent); }
+  table.standings tr.po-in .rank { box-shadow: inset 2px 0 0 var(--good); color: var(--good); }
+  table.standings tr.po-cut td { border-bottom: 1px solid var(--accent-line); }
+  .po-legend {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3);
+    margin-top: var(--s2); font-size: 0.625rem; color: var(--text-dim); line-height: 1.6;
+  }
+  .po-legend .k { display: inline-flex; align-items: center; gap: 5px; }
+  .po-legend .sw { width: 3px; height: 11px; border-radius: 2px; background: var(--text-dim); }
+  .po-legend .sw.direct { background: var(--accent); }
+  .po-legend .sw.in { background: var(--good); }
   table.standings td.num { font-family: var(--mono); text-align: right; color: var(--text-2); }
   table.standings td.num.total {
     color: var(--accent); font-weight: 700; font-size: 0.9375rem; letter-spacing: -0.015em;
@@ -1825,7 +1839,42 @@
     return stage.sections[0].rankings || [];
   }
 
-  function renderStandingsTable(rankings, highlightNames) {
+  // ---- Playoff-Plätze (Stand Saison 2026) ----
+  // "direct": Plätze, die direkt im Playoff-Bracket stehen. "last": letzter
+  // Platz, der überhaupt noch weiterkommt (Play-In bzw. Lower Bracket).
+  // Die Formate wechseln von Saison zu Saison - bei einer Änderung reicht es,
+  // diese Tabelle anzupassen.
+  //
+  // "teams" ist bewusst eine Sicherung: markiert wird nur, wenn die Tabelle
+  // genau so viele Zeilen hat. Eine Playoff- oder Gruppentabelle mit anderer
+  // Länge bleibt dadurch unmarkiert, statt einen falschen Schnitt zu zeigen.
+  const PLAYOFF_SPOTS = {
+    LEC: [{ teams: 10, direct: 4, last: 6, directLabel: "Upper Bracket", inLabel: "Lower Bracket", hint: "Top 6 der Regular Season" }],
+    LCS: [{ teams: 8, direct: 4, last: 6, directLabel: "Upper Bracket", inLabel: "Lower Bracket", hint: "Top 6 der Regular Season" }],
+    LCK: [{ teams: 10, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Top 4 direkt, 5–8 über das Play-In" }],
+    // LPL spielt in Gruppen, deshalb hängt der Schnitt an der Gruppengröße:
+    // Split 3 2026 hat Ascend mit 8 und Nirvana mit 6 Teams.
+    LPL: [
+      { teams: 8, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Gruppe Ascend" },
+      { teams: 6, direct: 0, last: 4, directLabel: "", inLabel: "Play-In", hint: "Gruppe Nirvana" }
+    ]
+  };
+
+  function playoffSpotsFor(leagueName, rowCount) {
+    const variants = PLAYOFF_SPOTS[leagueName];
+    if (!variants) return null;
+    return variants.find(v => v.teams === rowCount) || null;
+  }
+
+  function playoffLegendHtml(spots) {
+    if (!spots) return "";
+    const keys = [];
+    if (spots.direct > 0) keys.push(`<span class="k"><span class="sw direct"></span>${esc(spots.directLabel)}</span>`);
+    if (spots.last > spots.direct) keys.push(`<span class="k"><span class="sw in"></span>${esc(spots.inLabel)}</span>`);
+    return `<div class="po-legend">${keys.join("")}<span>${esc(spots.hint)}</span></div>`;
+  }
+
+  function renderStandingsTable(rankings, highlightNames, leagueName) {
     const rows = [];
     rankings.forEach(r => {
       (r.teams || []).forEach(t => {
@@ -1837,18 +1886,27 @@
         });
       });
     });
+    const spots = playoffSpotsFor(leagueName, rows.length);
     return `
       <table class="standings">
         <thead><tr><th></th><th>Team</th><th style="text-align:right">W&nbsp;–&nbsp;L</th></tr></thead>
         <tbody>
-          ${rows.map(row => `
-            <tr class="${highlightNames && highlightNames.includes(row.name) ? "highlight" : ""}">
+          ${rows.map(row => {
+            const cls = [];
+            if (highlightNames && highlightNames.includes(row.name)) cls.push("highlight");
+            if (spots && row.ordinal <= spots.direct) cls.push("po-direct");
+            else if (spots && row.ordinal <= spots.last) cls.push("po-in");
+            if (spots && row.ordinal === spots.last) cls.push("po-cut");
+            return `
+            <tr class="${cls.join(" ")}">
               <td class="rank">${row.ordinal}</td>
               <td class="team">${esc(row.name)}</td>
               <td class="record">${row.wins}&nbsp;–&nbsp;${row.losses}</td>
-            </tr>`).join("")}
+            </tr>`;
+          }).join("")}
         </tbody>
-      </table>`;
+      </table>
+      ${playoffLegendHtml(spots)}`;
   }
 
   async function getTournamentsForLeagueName(leagueName, allLeagues) {
@@ -1908,7 +1966,7 @@
     return { rankings, tournLabel: splitLabel(current, leagueName) };
   }
 
-  async function loadStandingsTableInto(slot, tournamentId) {
+  async function loadStandingsTableInto(slot, tournamentId, leagueName) {
     slot.innerHTML = '<p class="empty-list">Lade…</p>';
     try {
       const rankings = await fetchStandingsForTournament(tournamentId);
@@ -1916,7 +1974,7 @@
         slot.innerHTML = '<p class="empty-list">Für diesen Split keine Tabelle verfügbar.</p>';
         return;
       }
-      slot.innerHTML = renderStandingsTable(rankings);
+      slot.innerHTML = renderStandingsTable(rankings, null, leagueName);
     } catch (e) {
       slot.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
@@ -1934,7 +1992,7 @@
         `<option value="${esc(t.id)}" ${t.id === current.id ? "selected" : ""}>${esc(splitLabel(t, leagueName))}</option>`
       ).join("");
       return `
-        <div class="standings-group">
+        <div class="standings-group" data-league="${esc(leagueName)}">
           <h3>${esc(leagueName)}<select class="filter-select split-select">${options}</select></h3>
           <div class="standings-table-slot" data-tournament="${esc(current.id)}"><p class="empty-list">Lade…</p></div>
         </div>`;
@@ -1948,8 +2006,9 @@
       const slot = group.querySelector(".standings-table-slot");
       const select = group.querySelector(".split-select");
       if (!slot) return;
-      loadStandingsTableInto(slot, slot.getAttribute("data-tournament"));
-      if (select) select.addEventListener("change", () => loadStandingsTableInto(slot, select.value));
+      const leagueName = group.getAttribute("data-league") || "";
+      loadStandingsTableInto(slot, slot.getAttribute("data-tournament"), leagueName);
+      if (select) select.addEventListener("change", () => loadStandingsTableInto(slot, select.value, leagueName));
     });
   }
 
@@ -2062,7 +2121,7 @@
             return;
           }
           tableEl.innerHTML = `<p class="live-note" style="margin-bottom:8px">${esc(tournLabel)}</p>` +
-            renderStandingsTable(rankings, [m.teamA.name, m.teamB.name]);
+            renderStandingsTable(rankings, [m.teamA.name, m.teamB.name], m.league);
         } catch (e) {
           tableEl.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
         }
