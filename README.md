@@ -85,6 +85,32 @@ damit Ergebnisse zeitnah im Kalendertitel auftauchen. Wenn du es schneller
 willst (z.B. Ergebnis quasi live), stell den Cron in `sync.yml` z.B. auf
 `*/15 * * * *` (alle 15 Minuten).
 
+## Playoff-Plätze in den Tabellen
+
+Die Ligatabellen markieren, welche Plätze noch etwas wert sind: goldener Balken
+für die Plätze, die direkt im Playoff-Bracket stehen, grüner für die, die über
+Play-In bzw. Lower Bracket weiterkommen, dazu eine Linie unter dem letzten
+Platz, der es überhaupt noch schafft.
+
+Die Formate ändern sich jede Saison, deshalb steht alles in einer einzigen
+Tabelle in `docs/index.html` (`PLAYOFF_SPOTS`). Stand Saison 2026:
+
+| Liga | Teams | direkt | noch dabei |
+|------|-------|--------|------------|
+| LEC  | 10    | 1–4 (Upper Bracket) | 5–6 (Lower Bracket) |
+| LCS  | 8     | 1–4 (Upper Bracket) | 5–6 (Lower Bracket) |
+| LCK  | 10    | 1–4                 | 5–8 (Play-In)       |
+| LPL  | Gruppen | Ascend 1–4        | Ascend 5–8, Nirvana 1–4 (Play-In) |
+
+`teams` in jedem Eintrag ist eine Sicherung: markiert wird nur, wenn die
+Tabelle genau so viele Zeilen hat. Eine Playoff- oder Gruppentabelle mit
+anderer Länge bleibt unmarkiert, statt einen falschen Schnitt zu zeigen. Die
+LPL spielt in Gruppen unterschiedlicher Größe - deshalb hat sie mehrere
+Einträge, die über die Zeilenzahl auseinandergehalten werden.
+
+Ändert eine Liga ihr Format, reicht es, die Zahlen dort anzupassen; das
+Rendering zieht nach.
+
 ## Hinweise
 
 - Genutzt wird dieselbe (inoffizielle, aber stabile und öffentlich sichtbare)
