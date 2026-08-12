@@ -561,6 +561,55 @@
     font-size: 0.5625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
   }
 
+  /* Duell-Ansicht der Runde: pro Match eine Zeile mit Ergebnis und beiden
+     Tipps darunter - eine Tabelle mit zwei Spalten zeigt zwar dasselbe, aber
+     man muss zwischen Spalten hin- und herspringen, um zu vergleichen. */
+  .duel-day { margin-bottom: var(--s4); }
+  .duel-day:last-child { margin-bottom: 0; }
+  .duel-day-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2);
+    padding: 0 var(--s1) var(--s2); border-bottom: 1px solid var(--line); margin-bottom: var(--s2);
+  }
+  .duel-day-head .d {
+    font-size: 0.6875rem; font-weight: 650; color: var(--text-2);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .duel-day-head .s { font-size: 0.6875rem; color: var(--text-dim); font-family: var(--mono); white-space: nowrap; }
+  .duel-day-head .s b { color: var(--accent); font-weight: 700; }
+
+  .duel {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--mat-1);
+    padding: var(--s2) var(--s3); margin-bottom: var(--s2); cursor: pointer;
+    transition: border-color var(--t-tint) ease-out, background-color var(--t-tint) ease-out;
+  }
+  .duel:last-child { margin-bottom: 0; }
+  .duel-line { display: grid; grid-template-columns: 34px 1fr auto 1fr; align-items: center; gap: var(--s2); }
+  .duel-line .lg {
+    font-size: 0.5625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .duel-line .side {
+    display: flex; align-items: center; gap: 6px; min-width: 0;
+    font-size: 0.8125rem; font-weight: 600; color: var(--text-dim);
+  }
+  .duel-line .side.b { justify-content: flex-end; }
+  .duel-line .side img { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+  .duel-line .side.win { color: var(--text); }
+  .duel-line .mid { font-family: var(--mono); font-size: 0.8125rem; color: var(--text); white-space: nowrap; }
+  .duel-line .mid.pending { color: var(--text-dim); font-weight: 500; }
+  .duel-line .mid .live-dot { margin-right: 4px; }
+
+  .duel-picks { display: flex; justify-content: space-between; gap: var(--s2); margin-top: var(--s2); }
+  .dp {
+    flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: 6px;
+    background: var(--mat-2); border: 1px solid transparent; border-radius: 999px;
+    padding: 3px var(--s3); font-size: 0.6875rem;
+  }
+  .dp .who { color: var(--text-dim); }
+  .dp .val { font-family: var(--mono); color: var(--text); font-weight: 650; }
+  .dp .muted { color: var(--text-dim); }
+  .dp.lead { border-color: var(--accent-line); background: var(--accent-soft); }
+  .dp .pts-badge { margin-left: 0; }
+
   /* Unter-Navigation im Tippspiel: acht gestapelte Karten wären zu viel auf
      einmal, deshalb liegt jeweils nur ein Bereich offen. */
   .tipp-nav {
@@ -646,7 +695,6 @@
   .pts-2 { color: var(--accent); background: var(--accent-soft); }
   .pts-1 { color: var(--good); background: var(--good-soft); }
   .pts-0 { color: var(--text-dim); background: var(--mat-2); }
-  .tipp-cell-dim { color: var(--text-dim); }
 
   /* ---- Worlds ---- */
   .w-head { text-align: center; font-size: 0.6875rem; color: var(--text-dim); margin-bottom: var(--s4); line-height: 1.7; }
@@ -791,6 +839,7 @@
     .btn:hover { filter: brightness(1.07); }
     .url-box button:hover, .filter-select:hover, .modal-close:hover { border-color: var(--accent-line); }
     .match:hover { background: rgba(255, 255, 255, 0.035); }
+    .duel:hover { border-color: var(--accent-line); }
     .team-icon-btn:hover, .team-pick:not(:disabled):hover { background: rgba(255, 255, 255, 0.05); }
     .slot-opt:not(:disabled):hover, .ticket .bo-chip:not(:disabled):hover { border-color: var(--accent-line); }
     nav.tabs button:hover:not(.active) { color: var(--text-2); background: rgba(255, 255, 255, 0.045); }
@@ -1281,7 +1330,7 @@
     return matchRegistry.length - 1;
   }
   function attachRowClicks(container) {
-    container.querySelectorAll(".match[data-ridx]").forEach(row => {
+    container.querySelectorAll(".match[data-ridx], .duel[data-ridx]").forEach(row => {
       row.addEventListener("click", () => {
         const idx = parseInt(row.getAttribute("data-ridx"), 10);
         openMatchModal(matchRegistry[idx], row);
@@ -2221,47 +2270,108 @@
     return { players, totals, weekTotals, exactCount, playedCount };
   }
 
-  function tippSummaryCellHtml(m, playerName) {
+  // Ein Tipp eines Spielers als Pille. Vor dem eigenen Tipp bleibt der Tipp des
+  // anderen verdeckt, sonst könnte man einfach abschreiben.
+  function duelPickHtml(m, playerName) {
     const picks = tippStore.picks[m.id] || {};
     const pick = picks[playerName];
-    if (!pick) return '<span class="tipp-cell-dim">–</span>';
     const mine = picks[tippPlayerName];
     const isCompleted = m.state === "completed";
-    const canSee = isCompleted || !!mine || playerName === tippPlayerName;
-    if (!canSee) return '<span class="tipp-cell-dim">?</span>';
     const pts = isCompleted ? tippComputePoints(pick, m) : null;
-    const ptsHtml = pts !== null ? `<span class="pts-badge pts-${pts}">${pts > 0 ? "+" + pts : "0"}</span>` : "";
-    return `${pick.s1}:${pick.s2}${ptsHtml}`;
+    const canSee = isCompleted || !!mine || playerName === tippPlayerName;
+
+    let val;
+    if (!pick) val = '<span class="muted">kein Tipp</span>';
+    else if (!canSee) val = '<span class="muted">verdeckt</span>';
+    else val = `<span class="val">${pick.s1}:${pick.s2}</span>`;
+    const badge = pts !== null ? `<span class="pts-badge pts-${pts}">${pts > 0 ? "+" + pts : "0"}</span>` : "";
+    return { html: `<span class="who">${esc(playerName)}</span>${val}${badge}`, pts };
   }
 
-  function renderTippSummaryTable(roundMatches) {
-    if (roundMatches.length === 0) return '<p class="empty-list">Keine Matches in dieser Runde.</p>';
-    const sorted = roundMatches.slice().sort((a, b) => a.start - b.start);
-    const players = tippPlayerList();
+  function duelPicksHtml(m) {
+    const cells = tippPlayerList().map(n => duelPickHtml(m, n));
+    // Nur hervorheben, wenn einer das Match für sich entschieden hat.
+    const best = Math.max(...cells.map(c => (c.pts === null ? -1 : c.pts)));
+    const soleLead = best > 0 && cells.filter(c => c.pts === best).length === 1;
+    return cells.map(c =>
+      `<div class="dp${soleLead && c.pts === best ? " lead" : ""}">${c.html}</div>`).join("");
+  }
+
+  function duelStatusHtml(m) {
+    if (m.state === "completed") {
+      const wA = m.teamA.result ? m.teamA.result.gameWins : "-";
+      const wB = m.teamB.result ? m.teamB.result.gameWins : "-";
+      return `<span class="mid">${wA}:${wB}</span>`;
+    }
+    if (m.state === "inProgress") return '<span class="mid"><span class="live-dot"></span>Live</span>';
+    return `<span class="mid pending">${m.start.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}</span>`;
+  }
+
+  function tippDuelHtml(m) {
+    const ridx = registerMatch(m);
+    const wA = m.teamA.result ? m.teamA.result.gameWins : null;
+    const wB = m.teamB.result ? m.teamB.result.gameWins : null;
+    const done = m.state === "completed" && wA !== null && wB !== null;
     return `
-      <div class="table-scroll">
-      <table class="standings" id="tipp-summary-table">
-        <thead><tr><th>Match</th>${players.map(p => `<th style="text-align:right">${esc(p)}</th>`).join("")}</tr></thead>
-        <tbody>
-          ${sorted.map(m => `
-            <tr data-match-id="${esc(m.id)}">
-              <td>${esc(m.teamA.code || m.teamA.name)}&nbsp;–&nbsp;${esc(m.teamB.code || m.teamB.name)}</td>
-              ${players.map(p => `<td class="record" data-player="${esc(p)}">${tippSummaryCellHtml(m, p)}</td>`).join("")}
-            </tr>`).join("")}
-        </tbody>
-      </table>
+      <div class="duel" data-ridx="${ridx}" data-match-id="${esc(m.id)}">
+        <div class="duel-line">
+          <span class="lg">${esc(m.league)}</span>
+          <span class="side a${done && wA > wB ? " win" : ""}">${teamLogoHtml(m.teamA)}${esc(m.teamA.code || m.teamA.name)}</span>
+          ${duelStatusHtml(m)}
+          <span class="side b${done && wB > wA ? " win" : ""}">${esc(m.teamB.code || m.teamB.name)}${teamLogoHtml(m.teamB)}</span>
+        </div>
+        <div class="duel-picks">${duelPicksHtml(m)}</div>
       </div>`;
   }
 
-  function updateTippSummaryRow(m) {
-    const table = document.getElementById("tipp-summary-table");
-    if (!table) return;
-    const row = Array.from(table.querySelectorAll("tr[data-match-id]")).find(r => r.getAttribute("data-match-id") === String(m.id));
-    if (!row) return;
-    tippPlayerList().forEach(p => {
-      const cell = Array.from(row.querySelectorAll("td[data-player]")).find(c => c.getAttribute("data-player") === p);
-      if (cell) cell.innerHTML = tippSummaryCellHtml(m, p);
+  function duelDayLabel(d) {
+    const today = new Date();
+    const tomorrow = new Date(today.getTime() + 24 * 3600e3);
+    if (d.toDateString() === today.toDateString()) return "Heute";
+    if (d.toDateString() === tomorrow.toDateString()) return "Morgen";
+    return d.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit" });
+  }
+
+  function renderTippDuels(roundMatches) {
+    if (roundMatches.length === 0) return '<p class="empty-list">Keine Matches in dieser Runde.</p>';
+    const players = tippPlayerList();
+    const days = [];
+    roundMatches.slice().sort((a, b) => a.start - b.start).forEach(m => {
+      const key = m.start.toDateString();
+      let day = days.length && days[days.length - 1].key === key ? days[days.length - 1] : null;
+      if (!day) { day = { key, date: m.start, matches: [] }; days.push(day); }
+      day.matches.push(m);
     });
+
+    return days.map(day => {
+      // Tagesstand nur zeigen, wenn an dem Tag überhaupt schon Punkte fielen.
+      const dayPts = {};
+      players.forEach(n => { dayPts[n] = 0; });
+      let scored = false;
+      day.matches.filter(m => m.state === "completed").forEach(m => {
+        const picks = tippStore.picks[m.id] || {};
+        players.forEach(n => {
+          const p = tippComputePoints(picks[n], m);
+          if (p !== null) { dayPts[n] += p; scored = true; }
+        });
+      });
+      const score = scored
+        ? `<span class="s">${players.map(n => `${esc(n)} <b>${dayPts[n]}</b>`).join(" : ")}</span>`
+        : "";
+      return `
+        <div class="duel-day">
+          <div class="duel-day-head"><span class="d">${esc(duelDayLabel(day.date))}</span>${score}</div>
+          ${day.matches.map(tippDuelHtml).join("")}
+        </div>`;
+    }).join("");
+  }
+
+  // Nach einem gespeicherten Tipp nur die Pillen des Matches neu zeichnen.
+  function updateTippSummaryRow(m) {
+    const row = Array.from(document.querySelectorAll(".duel[data-match-id]"))
+      .find(r => r.getAttribute("data-match-id") === String(m.id));
+    const box = row && row.querySelector(".duel-picks");
+    if (box) box.innerHTML = duelPicksHtml(m);
   }
 
   function renderTippAllTimeTable(stats) {
@@ -2432,8 +2542,7 @@
       </div>
 
       <div class="tipp-panel" id="tipp-sub-round">
-        <div class="card"><h2>Tipps dieser Woche</h2>${renderTippSummaryTable(roundMatches)}</div>
-        <div class="card"><h2>Ergebnisse dieser Runde</h2>${renderTippCompleted(roundCompleted)}</div>
+        <div class="card"><h2>Tipps dieser Woche</h2>${renderTippDuels(roundMatches)}</div>
       </div>
 
       <div class="tipp-panel" id="tipp-sub-rank">
