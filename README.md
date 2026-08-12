@@ -104,9 +104,21 @@ Tabelle in `docs/index.html` (`PLAYOFF_SPOTS`). Stand Saison 2026:
 
 `teams` in jedem Eintrag ist eine Sicherung: markiert wird nur, wenn die
 Tabelle genau so viele Zeilen hat. Eine Playoff- oder Gruppentabelle mit
-anderer Länge bleibt unmarkiert, statt einen falschen Schnitt zu zeigen. Die
-LPL spielt in Gruppen unterschiedlicher Größe - deshalb hat sie mehrere
-Einträge, die über die Zeilenzahl auseinandergehalten werden.
+anderer Länge bleibt unmarkiert, statt einen falschen Schnitt zu zeigen.
+
+### Ligen mit Gruppen
+
+LCK und LPL spielen die Regular Season 2026 in Gruppen. Die API liefert dann
+pro Gruppe eine eigene Sektion; die Seite zeigt alle davon untereinander, jede
+mit ihrem Gruppennamen. Ein Eintrag in `PLAYOFF_SPOTS` kann deshalb statt über
+`teams` auch über `section` (regulärer Ausdruck auf den Gruppennamen) greifen -
+so wird z.B. `Ascend` anders markiert als `Nirvana`.
+
+Für die beiden LCK-Gruppen (je 5 Teams) ist bewusst nichts hinterlegt: dort
+kommen aus der oberen Gruppe 1-4 direkt weiter und Platz 5 ins Play-In, aus der
+unteren nur 1-3 - welche der beiden die obere ist, steht ausschließlich im
+Gruppennamen. Solange der nicht eingetragen ist, bleiben die Gruppen
+unmarkiert, statt die halbe Tabelle falsch einzufärben.
 
 Ändert eine Liga ihr Format, reicht es, die Zahlen dort anzupassen; das
 Rendering zieht nach.
