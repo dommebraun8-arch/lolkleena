@@ -535,26 +535,8 @@
   .round-info { text-align: center; font-size: 0.6875rem; color: var(--text-dim); margin-bottom: var(--s4); line-height: 1.6; }
   .round-info b { color: var(--text); }
 
-  .tipp-board { display: flex; gap: var(--s2); margin-bottom: var(--s3); flex-wrap: wrap; }
-  .tipp-board-entry {
-    flex: 1; min-width: 140px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0) 42%), var(--mat-1);
-    border: 1px solid var(--line); border-top-color: var(--line-strong);
-    border-radius: var(--r-lg); padding: var(--s3); text-align: center; box-shadow: var(--shadow-2);
-  }
-  .tipp-board-entry .pname { font-size: 0.75rem; color: var(--text-dim); margin-bottom: var(--s1); }
-  .tipp-board-entry .stat-row { display: flex; justify-content: center; gap: var(--s4); }
-  .tipp-board-entry .stat { text-align: center; }
-  .tipp-board-entry .stat .n {
-    font-family: var(--mono); font-size: 1.375rem; font-weight: 700; color: var(--accent);
-    letter-spacing: -0.025em; line-height: 1.15;
-  }
-  .tipp-board-entry .stat .l {
-    font-size: 0.5625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
-  }
-
-  /* Führer der Woche auf der Startseite - gleiche Optik wie das Tipp-Board,
-     der Führende bekommt zusätzlich Krone und Akzentrahmen. */
+  /* Punktestand beider Spieler - auf der Startseite und im Kopf des Tipp-Tabs.
+     Wer die Woche anführt, bekommt Krone und Akzentrahmen. */
   .card[hidden] { display: none; }
   .tipp-lead { display: flex; gap: var(--s2); flex-wrap: wrap; }
   .tipp-lead-entry {
@@ -578,6 +560,31 @@
   .tipp-lead-entry .stat .l {
     font-size: 0.5625rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;
   }
+
+  /* Unter-Navigation im Tippspiel: acht gestapelte Karten wären zu viel auf
+     einmal, deshalb liegt jeweils nur ein Bereich offen. */
+  .tipp-nav {
+    display: flex; gap: var(--s4); border-bottom: 1px solid var(--line); margin-bottom: var(--s3);
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tipp-nav::-webkit-scrollbar { display: none; }
+  .tipp-nav button {
+    position: relative; background: transparent; border: none; color: var(--text-dim);
+    font-family: var(--sans); font-weight: 600; font-size: 0.6875rem; padding: 0 0 var(--s2);
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: color var(--t-tint) ease-out;
+  }
+  .tipp-nav button::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent);
+    transform: scaleX(0); transition: transform var(--t-snap) var(--ease-snap);
+  }
+  .tipp-nav button.active { color: var(--text); }
+  .tipp-nav button.active::after { transform: scaleX(1); }
+  .tipp-nav .cnt {
+    display: inline-block; margin-left: 5px; padding: 1px 5px; border-radius: 999px;
+    background: var(--accent); color: var(--accent-ink); font-size: 0.5625rem; font-weight: 700;
+  }
+  .tipp-panel { display: none; }
+  .tipp-panel.active { display: block; animation: panel-in 300ms var(--ease-snap) both; }
 
   .ticket {
     background: var(--mat-1); border: 1px solid var(--line); border-top-color: var(--line-strong);
@@ -745,6 +752,7 @@
      Rückmeldung hängt deshalb am Fingerdruck und kommt sofort (§1, §10).
      ========================================================================= */
   .btn, .url-box button, .modal-close, .filter-select, nav.tabs button, .w-phasenav button,
+  .tipp-nav button,
   .modal-subtabs button, .team-icon-btn, .team-pick, .slot-opt, .ticket .bo-chip, .match, .feature .cta {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
@@ -786,7 +794,8 @@
     .team-icon-btn:hover, .team-pick:not(:disabled):hover { background: rgba(255, 255, 255, 0.05); }
     .slot-opt:not(:disabled):hover, .ticket .bo-chip:not(:disabled):hover { border-color: var(--accent-line); }
     nav.tabs button:hover:not(.active) { color: var(--text-2); background: rgba(255, 255, 255, 0.045); }
-    .w-phasenav button:hover, .modal-subtabs button:hover { color: var(--text-2); }
+    .w-phasenav button:hover, .modal-subtabs button:hover,
+    .tipp-nav button:hover:not(.active) { color: var(--text-2); }
   }
 
   /* Sichtbarer Fokus für Tastatur, ohne ihn bei Mausklicks aufzudrängen. */
@@ -808,8 +817,8 @@
     .ticket .bo-chip:not(:disabled):active, .match:active,
     nav.tabs button:active, .feature .cta:active { transform: none; }
     .modal-box { transition: opacity 180ms ease-out; transform: none !important; }
-    .tab-panel.active, .modal-subpanel.active { animation: none; }
-    .w-phasenav button::after, .modal-subtabs button::after { transition: none; }
+    .tab-panel.active, .modal-subpanel.active, .tipp-panel.active { animation: none; }
+    .w-phasenav button::after, .modal-subtabs button::after, .tipp-nav button::after { transition: none; }
     .status .dot, .live-dot { animation: none; opacity: 1; }
   }
   @media (prefers-reduced-transparency: reduce) {
@@ -824,7 +833,7 @@
       --line: rgba(255, 255, 255, 0.2); --line-strong: rgba(255, 255, 255, 0.34);
       --text-dim: #a7acb6; --text-2: #d3d7de;
     }
-    .card, .ticket, .tipp-board-entry, .bracket-slot { border-color: var(--line-strong); }
+    .card, .ticket, .tipp-lead-entry, .bracket-slot { border-color: var(--line-strong); }
     .team-pick.selected, .slot-opt.selected, .ticket .bo-chip.selected { outline: 2px solid var(--accent); }
     .team-pick.hit, .slot-opt.hit { outline: 2px solid var(--good); }
     body::before { display: none; }
@@ -2255,18 +2264,6 @@
     });
   }
 
-  function renderTippBoard(stats) {
-    if (stats.players.length === 0) return "";
-    return `<div class="tipp-board">` + stats.players.map(n => `
-      <div class="tipp-board-entry">
-        <div class="pname">${esc(n)}</div>
-        <div class="stat-row">
-          <div class="stat"><div class="n">${stats.weekTotals[n]}</div><div class="l">Woche</div></div>
-          <div class="stat"><div class="n">${stats.totals[n]}</div><div class="l">Gesamt</div></div>
-        </div>
-      </div>`).join("") + `</div>`;
-  }
-
   function renderTippAllTimeTable(stats) {
     const ranked = stats.players.slice().sort((a, b) => stats.totals[b] - stats.totals[a]);
     return `
@@ -2366,6 +2363,7 @@
     wireTicketPicks(ticketEl, m, () => {
       wireTicketUpcoming(ticketEl, m);
       updateTippSummaryRow(m);
+      updateTippOpenCount();
     });
   }
 
@@ -2400,33 +2398,99 @@
     }).join("");
   }
 
+  // Wie viele Matches der Runde stehen noch offen, ohne eigenen Tipp? Die Zahl
+  // steht als Zähler am "Tippen"-Reiter, damit man sie nicht suchen muss.
+  function countOpenPicks(upcoming) {
+    const now = new Date();
+    return upcoming.filter(m => m.start > now && !(tippStore.picks[m.id] || {})[tippPlayerName]).length;
+  }
+
   function renderTipp(roundMatches, roundCompleted, allCompleted, next24h, weekEnd) {
     const el = document.getElementById("tipp-body");
     const upcoming = roundMatches.filter(m => m.state !== "completed");
     const stats = computeTippTotals(allCompleted, roundCompleted);
     const pastBroader = allCompleted.slice(0, 20);
+    const open = countOpenPicks(upcoming);
 
+    // Der Bereich hatte acht Karten untereinander - jetzt steht der Punktestand
+    // fest oben und der Rest liegt hinter vier Reitern.
     el.innerHTML = `
-      <div class="round-info">Eingeloggt als <b>${esc(tippPlayerName)}</b> · Runde endet <b>${tippFmtRoundEnd(weekEnd)}</b></div>
-      <div class="card"><h2>Tipps dieser Woche</h2>${renderTippSummaryTable(roundMatches)}</div>
-      ${renderTippBoard(stats)}
-      <div class="card"><h2>All-Time Bestenliste</h2>${renderTippAllTimeTable(stats)}</div>
-      <div class="card"><h2>Nächste 24 Stunden</h2>${next24h.length ? renderGrouped(next24h) : '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>'}</div>
-      <div class="card"><h2>Diese Runde tippen</h2>${renderTippUpcoming(upcoming)}</div>
-      <div class="card"><h2>Ergebnisse dieser Runde</h2>${renderTippCompleted(roundCompleted)}</div>
-      <div class="card"><h2>Vergangene Spiele</h2>${pastBroader.length ? renderGrouped(pastBroader) : '<p class="empty-list">Noch keine abgeschlossenen Matches.</p>'}</div>
-      <div class="card"><h2>Tabellen</h2><div id="tipp-standings"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div></div>
+      <div class="card">
+        <div class="round-info" style="margin-bottom:var(--s3)">Eingeloggt als <b>${esc(tippPlayerName)}</b></div>
+        ${renderTippLeaderBoard(stats, weekEnd)}
+      </div>
+
+      <div class="tipp-nav" id="tipp-nav">
+        <button data-tsub="pick" class="active">Tippen${open ? `<span class="cnt">${open}</span>` : ""}</button>
+        <button data-tsub="round">Diese Runde</button>
+        <button data-tsub="rank">Bestenliste</button>
+        <button data-tsub="more">Mehr</button>
+      </div>
+
+      <div class="tipp-panel active" id="tipp-sub-pick">
+        <div class="card"><h2>Diese Runde tippen</h2>${renderTippUpcoming(upcoming)}</div>
+      </div>
+
+      <div class="tipp-panel" id="tipp-sub-round">
+        <div class="card"><h2>Tipps dieser Woche</h2>${renderTippSummaryTable(roundMatches)}</div>
+        <div class="card"><h2>Ergebnisse dieser Runde</h2>${renderTippCompleted(roundCompleted)}</div>
+      </div>
+
+      <div class="tipp-panel" id="tipp-sub-rank">
+        <div class="card"><h2>All-Time Bestenliste</h2>${renderTippAllTimeTable(stats)}</div>
+      </div>
+
+      <div class="tipp-panel" id="tipp-sub-more">
+        <div class="card"><h2>Nächste 24 Stunden</h2>${next24h.length ? renderGrouped(next24h) : '<p class="empty-list">Keine Spiele in den nächsten 24 Stunden.</p>'}</div>
+        <div class="card"><h2>Vergangene Spiele</h2>${pastBroader.length ? renderGrouped(pastBroader) : '<p class="empty-list">Noch keine abgeschlossenen Matches.</p>'}</div>
+        <div class="card"><h2>Tabellen</h2><div id="tipp-standings"><p class="status"><span class="dot"></span>Lade Tabellen…</p></div></div>
+      </div>
     `;
 
     attachRowClicks(el);
 
-    const ticketEls = Array.from(el.querySelectorAll(".ticket[data-uid]"));
-    upcoming.forEach((m, i) => {
-      if (ticketEls[i]) wireTicketUpcoming(ticketEls[i], m);
+    // Über die Match-ID statt über die Reihenfolge zuordnen: in den Panels
+    // stehen auch Tickets ohne data-uid (Ergebnisse), die sonst verrutschen.
+    const ticketByUid = new Map(
+      Array.from(el.querySelectorAll(".ticket[data-uid]")).map(t => [t.getAttribute("data-uid"), t])
+    );
+    upcoming.forEach(m => {
+      const ticket = ticketByUid.get(String(m.id));
+      if (ticket) wireTicketUpcoming(ticket, m);
     });
 
-    const tippStandingsEl = document.getElementById("tipp-standings");
-    if (tippStandingsEl) renderStandingsInto(tippStandingsEl);
+    wireTippSubtabs(el);
+  }
+
+  // Die Tabellen kosten eigene API-Abfragen - deshalb erst laden, wenn "Mehr"
+  // zum ersten Mal geöffnet wird.
+  function wireTippSubtabs(el) {
+    const nav = el.querySelector("#tipp-nav");
+    if (!nav) return;
+    let standingsLoaded = false;
+    const buttons = Array.from(nav.querySelectorAll("button"));
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-tsub");
+        buttons.forEach(b => b.classList.toggle("active", b === btn));
+        el.querySelectorAll(".tipp-panel").forEach(p => p.classList.toggle("active", p.id === "tipp-sub-" + key));
+        if (btn.scrollIntoView) btn.scrollIntoView({ inline: "nearest", block: "nearest" });
+        if (key === "more" && !standingsLoaded) {
+          standingsLoaded = true;
+          const box = document.getElementById("tipp-standings");
+          if (box) renderStandingsInto(box);
+        }
+      });
+    });
+  }
+
+  // Nach jedem gespeicherten Tipp: Zähler am "Tippen"-Reiter nachziehen.
+  function updateTippOpenCount() {
+    const btn = document.querySelector('#tipp-nav button[data-tsub="pick"]');
+    if (!btn) return;
+    const tickets = Array.from(document.querySelectorAll("#tipp-sub-pick .ticket[data-uid]"));
+    const open = tickets.filter(t => !t.querySelector(".saved-note.ok") && !t.querySelector(".locked-note")).length;
+    btn.innerHTML = "Tippen" + (open ? `<span class="cnt">${open}</span>` : "");
   }
   // ==================== /TIPPSPIEL ====================
 
