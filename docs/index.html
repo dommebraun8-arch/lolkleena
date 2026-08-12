@@ -1891,14 +1891,16 @@
     LEC: [{ teams: 10, direct: 4, last: 6, directLabel: "Upper Bracket", inLabel: "Lower Bracket", hint: "Top 6 der Regular Season" }],
     LCS: [{ teams: 8, direct: 4, last: 6, directLabel: "Upper Bracket", inLabel: "Lower Bracket", hint: "Top 6 der Regular Season" }],
     // LCK Split 3 2026 spielt in zwei Gruppen à 5 (dreifache Runde in der
-    // eigenen Gruppe). Aus der oberen Gruppe gehen 1–4 direkt in die Playoffs,
-    // Platz 5 zusammen mit 1–3 der unteren Gruppe ins Play-In. Welche der
-    // beiden die obere ist, steht nur im Namen der Sektion - solange der hier
-    // nicht hinterlegt ist, bleiben die Gruppen absichtlich unmarkiert, statt
-    // die halbe Tabelle falsch einzufärben. Sobald die Namen bekannt sind:
-    //   { section: /<oberer Gruppenname>/i, direct: 4, last: 5, … }
-    //   { section: /<unterer Gruppenname>/i, direct: 0, last: 3, … }
-    LCK: [{ teams: 10, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Top 4 direkt, 5–8 über das Play-In" }],
+    // eigenen Gruppe), besetzt nach den Runden 1-2: Elder ist die obere Hälfte,
+    // Nashor die untere. Die Gruppe steht in der Legende mit dabei - liegt die
+    // Zuordnung falsch herum, faellt das auf der Seite sofort auf und die
+    // beiden Eintraege sind einfach zu tauschen.
+    LCK: [
+      { section: /elder/i, teams: 5, direct: 4, last: 5, directLabel: "Playoffs", inLabel: "Play-In", hint: "Obere Gruppe (Elder)" },
+      { section: /nashor/i, teams: 5, direct: 0, last: 3, directLabel: "", inLabel: "Play-In", hint: "Untere Gruppe (Nashor)" },
+      // Falls eine Saison wieder in einer einzigen Tabelle gespielt wird:
+      { teams: 10, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Top 4 direkt, 5–8 über das Play-In" }
+    ],
     // LPL spielt ebenfalls in Gruppen; Split 3 2026 hat Ascend (8) und
     // Nirvana (6). Hier ist der Gruppenname bekannt, deshalb zuerst danach.
     LPL: [
@@ -1915,7 +1917,8 @@
     const variants = PLAYOFF_SPOTS[leagueName];
     if (!variants) return null;
     if (sectionName) {
-      const byName = variants.find(v => v.section && v.section.test(sectionName));
+      const byName = variants.find(v =>
+        v.section && v.section.test(sectionName) && (!v.teams || v.teams === rowCount));
       if (byName) return byName;
     }
     return variants.find(v => !v.section && v.teams === rowCount) || null;
@@ -1935,11 +1938,12 @@
       "· Platz 1–4 starten im Upper Bracket\n" +
       "· Platz 5–6 starten im Lower Bracket\n\n" +
       "Der Erstplatzierte darf sich seinen ersten Gegner aus den Plätzen 2–4 aussuchen.",
-    LCK: "10 Teams in zwei Gruppen à 5, dreifache Runde innerhalb der eigenen Gruppe.\n\n" +
-      "Obere Gruppe:\n" +
+    LCK: "10 Teams in zwei Gruppen à 5, dreifache Runde innerhalb der eigenen Gruppe. " +
+      "Die Gruppen sind nach den Runden 1–2 besetzt.\n\n" +
+      "Gruppe Elder (obere Hälfte):\n" +
       "· Platz 1–4 direkt in die Playoffs\n" +
       "· Platz 5 ins Play-In\n\n" +
-      "Untere Gruppe:\n" +
+      "Gruppe Nashor (untere Hälfte):\n" +
       "· Platz 1–3 ins Play-In\n" +
       "· Platz 4–5 ausgeschieden\n\n" +
       "Play-In: 4 Teams im GSL-Format, 2 kommen weiter. In den Playoffs stehen damit 6 Teams; " +
