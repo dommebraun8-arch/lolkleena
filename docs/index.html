@@ -370,6 +370,11 @@
   table.standings tr.po-direct .rank { box-shadow: inset 2px 0 0 var(--accent); color: var(--accent); }
   table.standings tr.po-in .rank { box-shadow: inset 2px 0 0 var(--good); color: var(--good); }
   table.standings tr.po-cut td { border-bottom: 1px solid var(--accent-line); }
+  .standings-section + .standings-section { margin-top: var(--s4); }
+  .standings-section-name {
+    font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-2); font-weight: 650; margin-bottom: var(--s1);
+  }
   .po-legend {
     display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3);
     margin-top: var(--s2); font-size: 0.625rem; color: var(--text-dim); line-height: 1.6;
@@ -1555,10 +1560,10 @@
     const allLeagues = await getAllLeagues();
     teamsByLeagueCache = Promise.all(STANDINGS_LEAGUES.map(async name => {
       try {
-        const { rankings } = await fetchCurrentStandingsForLeague(name, allLeagues);
+        const { sections } = await fetchCurrentStandingsForLeague(name, allLeagues);
         const teams = [];
         const seen = new Set();
-        (rankings || []).forEach(r => (r.teams || []).forEach(t => {
+        sectionsToRankings(sections).forEach(r => (r.teams || []).forEach(t => {
           if (!seen.has(t.id)) { seen.add(t.id); teams.push(t); }
         }));
         return { name, teams };
@@ -1832,11 +1837,20 @@
   }
 
   // ---- STANDINGS TAB (+ wiederverwendbar für Modal) ----
-  function extractRankings(standings) {
+  // Manche Ligen spielen die Regular Season in Gruppen (LCK und LPL 2026), dann
+  // liefert die API pro Gruppe eine eigene Sektion. Frueher wurde nur die erste
+  // gezeigt - bei der LCK also 5 von 10 Teams.
+  function extractSections(standings) {
     if (!standings || !standings.stages) return [];
     const stage = standings.stages.find(s => s.type === "split") || standings.stages[0];
-    if (!stage || !stage.sections || !stage.sections[0]) return [];
-    return stage.sections[0].rankings || [];
+    if (!stage || !stage.sections) return [];
+    return stage.sections
+      .map(sec => ({ name: sec.name || "", rankings: sec.rankings || [] }))
+      .filter(sec => sec.rankings.length > 0);
+  }
+
+  function sectionsToRankings(sections) {
+    return (sections || []).reduce((all, sec) => all.concat(sec.rankings), []);
   }
 
   // ---- Playoff-Plätze (Stand Saison 2026) ----
@@ -1851,19 +1865,35 @@
   const PLAYOFF_SPOTS = {
     LEC: [{ teams: 10, direct: 4, last: 6, directLabel: "Upper Bracket", inLabel: "Lower Bracket", hint: "Top 6 der Regular Season" }],
     LCS: [{ teams: 8, direct: 4, last: 6, directLabel: "Upper Bracket", inLabel: "Lower Bracket", hint: "Top 6 der Regular Season" }],
+    // LCK Split 3 2026 spielt in zwei Gruppen à 5 (dreifache Runde in der
+    // eigenen Gruppe). Aus der oberen Gruppe gehen 1–4 direkt in die Playoffs,
+    // Platz 5 zusammen mit 1–3 der unteren Gruppe ins Play-In. Welche der
+    // beiden die obere ist, steht nur im Namen der Sektion - solange der hier
+    // nicht hinterlegt ist, bleiben die Gruppen absichtlich unmarkiert, statt
+    // die halbe Tabelle falsch einzufärben. Sobald die Namen bekannt sind:
+    //   { section: /<oberer Gruppenname>/i, direct: 4, last: 5, … }
+    //   { section: /<unterer Gruppenname>/i, direct: 0, last: 3, … }
     LCK: [{ teams: 10, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Top 4 direkt, 5–8 über das Play-In" }],
-    // LPL spielt in Gruppen, deshalb hängt der Schnitt an der Gruppengröße:
-    // Split 3 2026 hat Ascend mit 8 und Nirvana mit 6 Teams.
+    // LPL spielt ebenfalls in Gruppen; Split 3 2026 hat Ascend (8) und
+    // Nirvana (6). Hier ist der Gruppenname bekannt, deshalb zuerst danach.
     LPL: [
-      { teams: 8, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Gruppe Ascend" },
-      { teams: 6, direct: 0, last: 4, directLabel: "", inLabel: "Play-In", hint: "Gruppe Nirvana" }
+      { section: /ascend/i, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Gruppe Ascend" },
+      { section: /nirvana/i, direct: 0, last: 4, directLabel: "", inLabel: "Play-In", hint: "Gruppe Nirvana" },
+      { teams: 8, direct: 4, last: 8, directLabel: "Playoffs", inLabel: "Play-In", hint: "Obere Gruppe" },
+      { teams: 6, direct: 0, last: 4, directLabel: "", inLabel: "Play-In", hint: "Untere Gruppe" }
     ]
   };
 
-  function playoffSpotsFor(leagueName, rowCount) {
+  // Gruppen werden zuerst über den Namen der Sektion erkannt (die LPL nennt sie
+  // Ascend/Nirvana), sonst über die Zeilenzahl.
+  function playoffSpotsFor(leagueName, rowCount, sectionName) {
     const variants = PLAYOFF_SPOTS[leagueName];
     if (!variants) return null;
-    return variants.find(v => v.teams === rowCount) || null;
+    if (sectionName) {
+      const byName = variants.find(v => v.section && v.section.test(sectionName));
+      if (byName) return byName;
+    }
+    return variants.find(v => !v.section && v.teams === rowCount) || null;
   }
 
   function playoffLegendHtml(spots) {
@@ -1874,9 +1904,9 @@
     return `<div class="po-legend">${keys.join("")}<span>${esc(spots.hint)}</span></div>`;
   }
 
-  function renderStandingsTable(rankings, highlightNames, leagueName) {
+  function renderStandingsSection(section, highlightNames, leagueName, showName) {
     const rows = [];
-    rankings.forEach(r => {
+    section.rankings.forEach(r => {
       (r.teams || []).forEach(t => {
         rows.push({
           ordinal: r.ordinal,
@@ -1886,27 +1916,40 @@
         });
       });
     });
-    const spots = playoffSpotsFor(leagueName, rows.length);
+    const spots = playoffSpotsFor(leagueName, rows.length, section.name);
+    // Bei Gleichstand vergibt die API denselben Platz mehrfach (1, 2, 2, 4) -
+    // die Schnittlinie deshalb an der letzten passenden Zeile ziehen und nicht
+    // an einer Platznummer, die es gar nicht gibt.
+    const cutIdx = spots ? rows.map(r => r.ordinal <= spots.last).lastIndexOf(true) : -1;
     return `
-      <table class="standings">
-        <thead><tr><th></th><th>Team</th><th style="text-align:right">W&nbsp;–&nbsp;L</th></tr></thead>
-        <tbody>
-          ${rows.map(row => {
-            const cls = [];
-            if (highlightNames && highlightNames.includes(row.name)) cls.push("highlight");
-            if (spots && row.ordinal <= spots.direct) cls.push("po-direct");
-            else if (spots && row.ordinal <= spots.last) cls.push("po-in");
-            if (spots && row.ordinal === spots.last) cls.push("po-cut");
-            return `
-            <tr class="${cls.join(" ")}">
-              <td class="rank">${row.ordinal}</td>
-              <td class="team">${esc(row.name)}</td>
-              <td class="record">${row.wins}&nbsp;–&nbsp;${row.losses}</td>
-            </tr>`;
-          }).join("")}
-        </tbody>
-      </table>
-      ${playoffLegendHtml(spots)}`;
+      <div class="standings-section">
+        ${showName && section.name ? `<div class="standings-section-name">${esc(section.name)}</div>` : ""}
+        <table class="standings">
+          <thead><tr><th></th><th>Team</th><th style="text-align:right">W&nbsp;–&nbsp;L</th></tr></thead>
+          <tbody>
+            ${rows.map((row, i) => {
+              const cls = [];
+              if (highlightNames && highlightNames.includes(row.name)) cls.push("highlight");
+              if (spots && row.ordinal <= spots.direct) cls.push("po-direct");
+              else if (spots && row.ordinal <= spots.last) cls.push("po-in");
+              if (i === cutIdx && i < rows.length - 1) cls.push("po-cut");
+              return `
+              <tr class="${cls.join(" ")}">
+                <td class="rank">${row.ordinal}</td>
+                <td class="team">${esc(row.name)}</td>
+                <td class="record">${row.wins}&nbsp;–&nbsp;${row.losses}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+        ${playoffLegendHtml(spots)}
+      </div>`;
+  }
+
+  function renderStandingsTable(sections, highlightNames, leagueName) {
+    const list = sections || [];
+    const showName = list.length > 1;
+    return list.map(sec => renderStandingsSection(sec, highlightNames, leagueName, showName)).join("");
   }
 
   async function getTournamentsForLeagueName(leagueName, allLeagues) {
@@ -1955,26 +1998,26 @@
     if (!r.ok) throw new Error("Tabelle nicht erreichbar");
     const data = await r.json();
     const standings = data.data.standings && data.data.standings[0];
-    return extractRankings(standings);
+    return extractSections(standings);
   }
 
   async function fetchCurrentStandingsForLeague(leagueName, allLeagues) {
     const tournaments = await getTournamentsForLeagueName(leagueName, allLeagues);
     if (tournaments.length === 0) throw new Error("Kein Turnier gefunden");
     const current = pickCurrentTournament(tournaments);
-    const rankings = await fetchStandingsForTournament(current.id);
-    return { rankings, tournLabel: splitLabel(current, leagueName) };
+    const sections = await fetchStandingsForTournament(current.id);
+    return { sections, tournLabel: splitLabel(current, leagueName) };
   }
 
   async function loadStandingsTableInto(slot, tournamentId, leagueName) {
     slot.innerHTML = '<p class="empty-list">Lade…</p>';
     try {
-      const rankings = await fetchStandingsForTournament(tournamentId);
-      if (!rankings || rankings.length === 0) {
+      const sections = await fetchStandingsForTournament(tournamentId);
+      if (!sections || sections.length === 0) {
         slot.innerHTML = '<p class="empty-list">Für diesen Split keine Tabelle verfügbar.</p>';
         return;
       }
-      slot.innerHTML = renderStandingsTable(rankings, null, leagueName);
+      slot.innerHTML = renderStandingsTable(sections, null, leagueName);
     } catch (e) {
       slot.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
     }
@@ -2115,13 +2158,13 @@
     } else {
       getAllLeagues().then(async allLeagues => {
         try {
-          const { rankings, tournLabel, error } = await fetchCurrentStandingsForLeague(m.league, allLeagues);
-          if (error || !rankings || rankings.length === 0) {
+          const { sections, tournLabel, error } = await fetchCurrentStandingsForLeague(m.league, allLeagues);
+          if (error || !sections || sections.length === 0) {
             tableEl.innerHTML = '<p class="empty-list">Aktuell keine Tabelle verfügbar.</p>';
             return;
           }
           tableEl.innerHTML = `<p class="live-note" style="margin-bottom:8px">${esc(tournLabel)}</p>` +
-            renderStandingsTable(rankings, [m.teamA.name, m.teamB.name], m.league);
+            renderStandingsTable(sections, [m.teamA.name, m.teamB.name], m.league);
         } catch (e) {
           tableEl.innerHTML = `<p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>`;
         }
