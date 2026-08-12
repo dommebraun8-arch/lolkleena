@@ -370,6 +370,31 @@
   table.standings tr.po-direct .rank { box-shadow: inset 2px 0 0 var(--accent); color: var(--accent); }
   table.standings tr.po-in .rank { box-shadow: inset 2px 0 0 var(--good); color: var(--good); }
   table.standings tr.po-cut td { border-bottom: 1px solid var(--accent-line); }
+  /* Regeln zum Playoff-Einzug: hängen als Info-Zeichen am Liganamen und gehen
+     bei Hover, Tap und Tastaturfokus auf. */
+  .standings-group h3 { position: relative; }
+  .standings-group h3 .lg-name { display: inline-flex; align-items: center; gap: 6px; }
+  .rules-btn {
+    width: 14px; height: 14px; padding: 0; border-radius: 999px; cursor: help;
+    border: 1px solid var(--line-strong); background: var(--mat-2); color: var(--text-dim);
+    font-family: var(--sans); font-size: 0.5625rem; font-weight: 700; line-height: 1;
+    text-transform: none; letter-spacing: 0; flex-shrink: 0;
+    transition: color var(--t-tint) ease-out, border-color var(--t-tint) ease-out;
+  }
+  .rules-btn::after {
+    content: attr(data-tip); position: absolute; left: 0; top: calc(100% + 6px); z-index: 40;
+    /* Breite an der Kopfzeile ausrichten, sonst laeuft der Kasten auf dem
+       Handy rechts aus dem Bild. */
+    width: max-content; max-width: min(320px, 100%); padding: var(--s3);
+    background: var(--mat-3); border: 1px solid var(--line-strong); border-radius: var(--r-md);
+    box-shadow: var(--shadow-2); color: var(--text-2); font-family: var(--sans); font-size: 0.6875rem;
+    font-weight: 450; line-height: 1.6; letter-spacing: 0; text-transform: none; text-align: left;
+    white-space: pre-line; opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity var(--t-tint) ease-out;
+  }
+  .rules-btn:hover, .rules-btn:focus { color: var(--accent); border-color: var(--accent-line); }
+  .rules-btn:hover::after, .rules-btn:focus::after { opacity: 1; visibility: visible; }
+
   .standings-section + .standings-section { margin-top: var(--s4); }
   .standings-section-name {
     font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.07em;
@@ -1896,6 +1921,48 @@
     return variants.find(v => !v.section && v.teams === rowCount) || null;
   }
 
+  // Der ganze Modus in Textform, abrufbar über das Info-Zeichen am Liganamen.
+  // Die Kurzform in der Legende sagt, welche Plätze reichen - hier steht, wie
+  // es danach weitergeht.
+  const PLAYOFF_RULES = {
+    LEC: "10 Teams, einfache Runde (Bo3, Fearless Draft).\n\n" +
+      "Die Top 6 kommen in die Playoffs:\n" +
+      "· Platz 1–4 starten im Upper Bracket\n" +
+      "· Platz 5–6 starten im Lower Bracket\n\n" +
+      "Playoffs: Double Elimination, alle Serien Bo5.",
+    LCS: "8 Teams, einfache Runde (Bo3).\n\n" +
+      "Die Top 6 kommen in die Playoffs:\n" +
+      "· Platz 1–4 starten im Upper Bracket\n" +
+      "· Platz 5–6 starten im Lower Bracket\n\n" +
+      "Der Erstplatzierte darf sich seinen ersten Gegner aus den Plätzen 2–4 aussuchen.",
+    LCK: "10 Teams in zwei Gruppen à 5, dreifache Runde innerhalb der eigenen Gruppe.\n\n" +
+      "Obere Gruppe:\n" +
+      "· Platz 1–4 direkt in die Playoffs\n" +
+      "· Platz 5 ins Play-In\n\n" +
+      "Untere Gruppe:\n" +
+      "· Platz 1–3 ins Play-In\n" +
+      "· Platz 4–5 ausgeschieden\n\n" +
+      "Play-In: 4 Teams im GSL-Format, 2 kommen weiter. In den Playoffs stehen damit 6 Teams; " +
+      "die besten 3 fahren zu Worlds.",
+    LPL: "14 Teams in zwei Gruppen: Ascend (8) und Nirvana (6).\n\n" +
+      "Gruppe Ascend:\n" +
+      "· Platz 1–4 direkt in die Playoffs\n" +
+      "· Platz 5–8 ins Play-In\n\n" +
+      "Gruppe Nirvana:\n" +
+      "· Platz 1–4 ins Play-In\n" +
+      "· Platz 5–6 ausgeschieden\n\n" +
+      "Aus dem Play-In kommen 4 Teams weiter, in den Playoffs stehen damit 8 Teams."
+  };
+
+  function playoffRulesHtml(leagueName) {
+    const rules = PLAYOFF_RULES[leagueName];
+    if (!rules) return "";
+    const text = `${leagueName} · Einzug in die Playoffs (Saison 2026)\n\n${rules}`;
+    // Als Button, damit es auch per Tap und per Tastatur aufgeht - reines
+    // :hover würde auf dem Handy nie auslösen.
+    return `<button class="rules-btn" type="button" data-tip="${esc(text)}" aria-label="${esc(text)}">i</button>`;
+  }
+
   function playoffLegendHtml(spots) {
     if (!spots) return "";
     const keys = [];
@@ -2036,7 +2103,7 @@
       ).join("");
       return `
         <div class="standings-group" data-league="${esc(leagueName)}">
-          <h3>${esc(leagueName)}<select class="filter-select split-select">${options}</select></h3>
+          <h3><span class="lg-name">${esc(leagueName)}${playoffRulesHtml(leagueName)}</span><select class="filter-select split-select">${options}</select></h3>
           <div class="standings-table-slot" data-tournament="${esc(current.id)}"><p class="empty-list">Lade…</p></div>
         </div>`;
     } catch (e) {

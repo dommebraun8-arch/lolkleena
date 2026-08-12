@@ -106,6 +106,12 @@ Tabelle in `docs/index.html` (`PLAYOFF_SPOTS`). Stand Saison 2026:
 Tabelle genau so viele Zeilen hat. Eine Playoff- oder Gruppentabelle mit
 anderer Länge bleibt unmarkiert, statt einen falschen Schnitt zu zeigen.
 
+Neben dem Liganamen steht ein kleines **i**: dort stehen die vollständigen
+Regeln zum Playoff-Einzug (Modus, welche Plätze direkt weiterkommen, was das
+Play-In macht). Der Text steht in `PLAYOFF_RULES`, direkt neben den Zahlen.
+Er geht bei Mouseover auf, auf dem Handy per Tap und mit der Tastatur per
+Tab-Fokus.
+
 ### Ligen mit Gruppen
 
 LCK und LPL spielen die Regular Season 2026 in Gruppen. Die API liefert dann
