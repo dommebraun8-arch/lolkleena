@@ -8,7 +8,8 @@
  *   serverseitig in den Speicher - und zwar ausschließlich unter dem Namen des
  *   eingeloggten Nutzers. Ohne das würden zwei gleichzeitig geöffnete Browser
  *   den jeweils zuletzt geschriebenen Gesamtstand hochladen und sich damit die
- *   Tipps des anderen überschreiben.
+ *   Tipps des anderen überschreiben. Über dieselbe Route läuft auch der
+ *   Fantasy-Kader (kind "fantasy").
  * - /api/whoami liefert den eingeloggten Namen, damit das Frontend kein
  *   eigenes (unsicheres) Namensfeld mehr braucht.
  *
@@ -74,7 +75,7 @@ function checkAuth(request, env) {
 async function handleTipp(request, env) {
   if (request.method === "GET") {
     const data = await env.TIPP_KV.get(KV_KEY);
-    return new Response(data || '{"picks":{},"worlds":{}}', {
+    return new Response(data || '{"picks":{},"worlds":{},"fantasy":{}}', {
       headers: { "content-type": "application/json" },
     });
   }
@@ -105,6 +106,7 @@ async function readStore(env) {
   if (!store || typeof store !== "object" || Array.isArray(store)) store = {};
   if (!store.picks || typeof store.picks !== "object") store.picks = {};
   if (!store.worlds || typeof store.worlds !== "object") store.worlds = {};
+  if (!store.fantasy || typeof store.fantasy !== "object") store.fantasy = {};
   return store;
 }
 
@@ -122,6 +124,11 @@ function worldsSection(store, season, name) {
 function isId(v, maxLen) {
   return typeof v === "string" && v.length > 0 && v.length <= (maxLen || 64);
 }
+// Fantasy-Runden heißen wie die Kalenderwoche ihres Starts: "2026-W07".
+function isRoundKey(v) {
+  return typeof v === "string" && /^\d{4}-W\d{2}$/.test(v);
+}
+const FANTASY_ROLES = ["top", "jungle", "mid", "bottom", "support"];
 function isScore(v) {
   return Number.isInteger(v) && v >= 0 && v <= 5;
 }
@@ -192,6 +199,26 @@ async function handlePick(request, env, player) {
       if (Object.keys(picks).length >= 32) break;
     }
     worldsSection(store, patch.season, "bracket")[player] = { picks, ts };
+  } else if (patch.kind === "fantasy") {
+    // Kader einer Runde. Geprüft wird nur die Form - ob ein Spieler noch
+    // wechselbar ist und ob das Budget reicht, weiß nur die Seite: dafür
+    // bräuchte der Worker den Spielplan und die Preisliste. Beides steht in
+    // docs/fantasy-data.json, und beide Logins gehören denselben zwei Leuten.
+    if (!isRoundKey(patch.round) || !patch.squad || typeof patch.squad !== "object") {
+      return new Response("Ungültiger Fantasy-Kader", { status: 400 });
+    }
+    const squad = {};
+    for (const role of FANTASY_ROLES) {
+      const pid = patch.squad[role];
+      if (pid === null || pid === undefined || pid === "") continue;
+      if (!isId(pid)) return new Response("Ungültiger Spieler", { status: 400 });
+      squad[role] = pid;
+    }
+    const captain = FANTASY_ROLES.includes(patch.captain) ? patch.captain : null;
+    if (!store.fantasy[patch.round] || typeof store.fantasy[patch.round] !== "object") {
+      store.fantasy[patch.round] = {};
+    }
+    store.fantasy[patch.round][player] = { squad, captain, ts };
   } else {
     return new Response("Unbekannte Tipp-Art", { status: 400 });
   }

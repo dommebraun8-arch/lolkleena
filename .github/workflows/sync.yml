@@ -27,10 +27,17 @@ jobs:
       - name: Spielplan aktualisieren
         run: python lol_calendar_sync.py
 
+      # Läuft nach dem Kalender und darf ihn nicht mitreißen: bleibt der
+      # Livestats-Feed mal stumm, soll der Spielplan trotzdem aktualisiert
+      # werden. Der nächste Lauf holt die fehlenden Spiele nach.
+      - name: Fantasy-Statistiken aktualisieren
+        run: python fantasy_stats.py
+        continue-on-error: true
+
       - name: Änderungen committen und pushen
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/lol-schedule.ics
-          git diff --staged --quiet || git commit -m "Update LoL Spielplan"
+          git add docs/lol-schedule.ics docs/fantasy-data.json
+          git diff --staged --quiet || git commit -m "Update LoL Spielplan und Fantasy-Werte"
           git push

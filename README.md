@@ -192,6 +192,104 @@ Weg (`PUT /api/tipp`) zurück.
 - Die alte jsonblob-ID braucht niemand mehr - der Worker übernimmt den
   Speicher automatisch.
 
+## Fantasy-Liga
+
+Eigener Tab **Fantasy**: jeder stellt aus echten Profispielern einen Kader aus
+fünf Rollen zusammen und bekommt Punkte für das, was die Spieler in LEC, LCS,
+LCK und LPL wirklich abliefern.
+
+### Regeln
+
+| | |
+| --- | --- |
+| Kader | genau ein Top, Jungle, Mid, Bot und Support |
+| Budget | 35.0 - Preise liegen zwischen 4.0 und 12.0 |
+| Runde | Montag 12:00 bis Montag 12:00, wie im Tippspiel |
+| Kapitän | ein Spieler pro Runde, zählt doppelt |
+| Sperre | ein Platz ist fest, sobald das Team des Spielers sein erstes Spiel der Runde begonnen hat |
+| Wechsel | jederzeit, solange der Platz nicht gesperrt ist |
+
+Zwei Regeln, die den Alltag angenehm machen:
+
+- **Der Kader läuft weiter.** Wer eine Woche nicht reinschaut, spielt mit dem
+  Kader der Vorwoche - sonst hinge alles daran, die Seite rechtzeitig zu
+  öffnen. Gespeichert wird erst wieder, wenn man etwas ändert.
+- **Bezahlt wird der Preis vom Tag der Wahl.** Steigt ein Spieler später im
+  Wert, bleibt der Kader gültig; man muss ihn nicht verkaufen. Erst beim
+  nächsten Tausch zählt der neue Preis.
+
+Fremde Kader sind verdeckt, bis der eigene vollständig steht - wie beim
+Tippspiel.
+
+### Punkte
+
+Pro Spiel eines Spielers:
+
+| Wert | Punkte |
+| --- | --- |
+| Kill | +2 |
+| Assist | +1,5 |
+| Tod | −0,5 |
+| Creep Score | +0,02 je Creep |
+| 10 Kills **oder** 10 Assists in einem Spiel | +2 |
+| kein einziger Tod | +2 |
+| Team gewinnt die Serie | +3, einmal je Match |
+
+Der Sieg-Bonus hängt am Match und nicht am einzelnen Spiel, weil die API nur
+den Sieger der Serie meldet - wer ein einzelnes Spiel gewonnen hat, steht
+nirgends. Angezeigt wird er beim letzten Spiel des Spielers in diesem Match.
+
+### Preise
+
+Der Preis eines Spielers ergibt sich aus seinem Punkteschnitt der letzten zehn
+Runden, in denen er gespielt hat - **innerhalb seiner Rolle** verteilt. Der
+beste Support kostet also genauso viel wie der beste Midlaner. Das ist Absicht:
+weil jede Rolle genau einmal besetzt werden muss, gäbe eine rollenübergreifende
+Skala nur fünf teure Midlaner und lauter billige Supports her.
+
+Preise werden zum Rundenwechsel eingefroren, damit sich ein längst gesetzter
+Kader nicht mitten in der Woche verteuert. Wer weniger als drei Spiele in
+diesem Zeitraum hat, steht auf dem Einheitspreis 5.0.
+
+### Woher die Werte kommen
+
+`fantasy_stats.py` läuft in derselben GitHub Action wie der Kalender und
+schreibt `docs/fantasy-data.json`. Die Seite rechnet nichts nach, sie liest nur
+diese Datei - pro Spiel eine eigene Abfrage im Browser wäre zu viel.
+
+- Kader und Rollen: `getTeams` (nur aktive Teams der vier Ligen).
+- Spielwerte: der Livestats-Feed
+  (`feed.lolesports.com/livestats/v1/window/<gameId>`), letzter Frame eines
+  beendeten Spiels. Derselbe Feed, aus dem der Live-Tab die Kills zieht.
+- Welche Matches überhaupt: `getSchedule` plus `getCompletedEvents` je Turnier
+  der laufenden Saison.
+
+Der Sammler arbeitet inkrementell und merkt sich verarbeitete Matches. Beim
+ersten Lauf holt er höchstens 250 Spiele (`FANTASY_MAX_GAMES`), die laufende
+Saison ist also nach ein paar Durchgängen vollständig. Ein Match wird immer
+komplett verarbeitet oder gar nicht - sonst gäbe es den Serien-Bonus doppelt.
+Fehlen Livestats, versucht er es dreimal und hakt das Match dann ab.
+
+Ändert man das Punktesystem, muss `SCORING_VERSION` hoch: dann rechnet der
+nächste Lauf die Saison von vorn durch, statt alte und neue Punkte zu mischen.
+Komplett neu aufbauen geht mit `FANTASY_REBUILD=1 python fantasy_stats.py`.
+
+### Speicher
+
+Die Kader liegen im selben Cloudflare-KV wie die Tipps, unter `fantasy`, und
+werden über `POST /api/tipp/pick` mit `kind: "fantasy"` geschrieben. Der Worker
+schreibt auch hier ausschließlich unter dem Namen des eingeloggten Nutzers.
+
+Geprüft wird serverseitig nur die Form (gültiger Rundenschlüssel, bekannte
+Rollen). Ob ein Platz noch wechselbar ist und ob das Budget reicht, entscheidet
+die Seite - dafür bräuchte der Worker Spielplan und Preisliste. Bei zwei
+Logins, die derselben Person gehören, ist das die einfachere Lösung; wer das
+härter will, müsste den Worker `fantasy-data.json` mitlesen lassen.
+
+**Nach dem Update den Worker neu deployen** (`wrangler deploy`), sonst nimmt er
+`kind: "fantasy"` nicht an und das Speichern scheitert mit einer Meldung im
+Kader-Bereich.
+
 ## Worlds-Tippspiel
 
 Eigener Tab **Worlds**, getrennt vom wöchentlichen Liga-Tippspiel. Ein Turnier
@@ -245,6 +343,11 @@ ansehen; Tipps werden pro Jahrgang gespeichert.
 `.claude/skills/apple-design/SKILL.md` hält fest, nach welchen Regeln die
 Oberfläche gebaut ist. Umgesetzt ist:
 
+- **Fantasy-Kader als Karten.** Die fünf Plätze sind eigene Flächen auf der
+  mittleren Schicht (`--mat-2`), der Kapitänsplatz trägt den Akzentton. Am
+  Telefon rutschen die Knöpfe unter die Zeile, statt Name und Punkte
+  zusammenzuquetschen. Ein gesperrter Platz wird zurückgenommen, nicht
+  versteckt - man soll sehen, wer da steht.
 - **Seitenleiste statt Tab-Reihe.** Die Navigation steht links, bleibt beim
   Scrollen stehen und wächst auf breiten Schirmen mit (66px am Telefon, 92px am
   Rechner). Der Inhalt liegt in Boxen ungleicher Breite, teils eingerückt,

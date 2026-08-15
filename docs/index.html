@@ -814,6 +814,140 @@
   .lock-what { font-size: 0.75rem; color: var(--accent); font-weight: 600; margin-top: 2px; }
   .lock-rest { font-size: 0.6875rem; color: var(--text-dim); margin-top: var(--s2); }
 
+  /* ---- Fantasy: Kader, Budget, Spielerauswahl ----
+     Die fünf Plätze sind das Herzstück und sollen sich wie Karten anfassen
+     lassen: eigene Schicht (--mat-2), Licht von oben, gesperrte Plätze
+     sichtbar zurückgenommen statt versteckt. */
+  .f-budget { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s4); }
+  .f-budget-bar {
+    flex: 1; height: 8px; border-radius: 99px; background: var(--mat-3);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5); overflow: hidden;
+  }
+  .f-budget-bar span {
+    display: block; height: 100%; border-radius: 99px; background: var(--accent);
+    transition: width var(--t-snap) var(--ease-snap), background-color var(--t-tint) ease-out;
+  }
+  .f-budget-bar.over span { background: var(--live); }
+  .f-budget-num { font-family: var(--mono); font-size: 0.8125rem; color: var(--text-2); white-space: nowrap; }
+  .f-budget-num b { color: var(--text); }
+  .f-budget-num.over b { color: var(--live); }
+
+  .f-slots { display: grid; gap: var(--s2); }
+  @media (min-width: 720px) { .f-slots { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .f-slots { grid-template-columns: repeat(1, 1fr); } }
+
+  .f-slot {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr) auto auto;
+    grid-template-areas: "role player pts actions";
+    align-items: center; gap: var(--s3);
+    padding: var(--s3); border-radius: var(--r-md);
+    background: var(--mat-2); border: 1px solid var(--line);
+    box-shadow: var(--shadow-1), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    transition: border-color var(--t-tint) ease-out, background-color var(--t-tint) ease-out;
+  }
+  .f-role { grid-area: role; }
+  .f-player { grid-area: player; }
+  .f-pts { grid-area: pts; }
+  .f-slot-right { grid-area: actions; }
+  /* Am Telefon reicht die Breite nicht für vier Spalten: Rolle, Spieler und
+     Punkte in die erste Zeile, die Knöpfe darunter. */
+  @media (max-width: 560px) {
+    .f-slot {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "role player pts" "actions actions actions";
+      row-gap: var(--s2); column-gap: var(--s2);
+    }
+    .f-slot-right { justify-content: flex-end; }
+  }
+  .f-slot.cap { border-color: var(--accent-line); background: var(--accent-soft); }
+  .f-slot.locked { opacity: 0.72; }
+  .f-role {
+    font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--text-dim); font-weight: 650;
+  }
+  .f-slot.cap .f-role { color: var(--accent); }
+  .f-player { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
+  .f-player img {
+    width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none;
+    background: var(--mat-3); border: 1px solid var(--line);
+  }
+  .f-pmeta { min-width: 0; }
+  .f-pname {
+    font-weight: 650; font-size: 0.875rem; letter-spacing: -0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .f-pteam { font-size: 0.6875rem; color: var(--text-dim); }
+  .f-pteam .lk { color: var(--live); }
+  .f-pteam .ok { color: var(--good); }
+  .f-slot-right { display: flex; align-items: center; gap: var(--s2); }
+  .f-pts {
+    font-family: var(--mono); font-size: 0.9375rem; font-weight: 700; color: var(--accent);
+    min-width: 42px; text-align: right;
+  }
+  .f-pts.zero { color: var(--text-dim); font-weight: 500; }
+  .f-price { font-family: var(--mono); font-size: 0.75rem; color: var(--text-2); }
+  .f-btn {
+    border: 1px solid var(--line-strong); background: var(--mat-3); color: var(--text-2);
+    border-radius: var(--r-sm); padding: 6px 10px; font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: transform var(--t-press) cubic-bezier(0.22, 0.61, 0.36, 1),
+                background-color var(--t-tint) ease-out, color var(--t-tint) ease-out;
+  }
+  .f-btn:active { transform: scale(0.94); }
+  .f-btn[disabled] { opacity: 0.4; cursor: default; }
+  .f-btn.cap-on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .f-btn.wide { width: 100%; text-align: center; padding: 10px; }
+
+  .f-hint { font-size: 0.6875rem; color: var(--text-dim); margin-top: var(--s3); }
+  .f-warn {
+    margin-top: var(--s3); padding: var(--s2) var(--s3); border-radius: var(--r-sm);
+    background: rgba(240, 101, 90, 0.1); border: 1px solid rgba(240, 101, 90, 0.35);
+    color: var(--live); font-size: 0.75rem;
+  }
+  .f-note {
+    margin-top: var(--s3); padding: var(--s2) var(--s3); border-radius: var(--r-sm);
+    background: var(--mat-2); border: 1px solid var(--line);
+    color: var(--text-2); font-size: 0.75rem;
+  }
+
+  /* Auswahlliste im Modal */
+  .f-filters { display: flex; gap: var(--s2); flex-wrap: wrap; margin-bottom: var(--s3); }
+  .f-search {
+    width: 100%; padding: 10px var(--s3); border-radius: var(--r-sm);
+    background: var(--mat-2); border: 1px solid var(--line); color: var(--text);
+    font-family: inherit; font-size: 0.875rem; margin-bottom: var(--s3);
+  }
+  .f-search::placeholder { color: var(--text-dim); }
+  .f-list { max-height: 52vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .f-prow {
+    display: grid; grid-template-columns: 32px 1fr auto auto; align-items: center; gap: var(--s2);
+    width: 100%; text-align: left; padding: var(--s2); border-radius: var(--r-sm);
+    background: transparent; border: 1px solid transparent; color: var(--text);
+    font-family: inherit; cursor: pointer;
+  }
+  .f-prow + .f-prow { margin-top: 2px; }
+  .f-prow img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: var(--mat-3); }
+  .f-prow .nm { font-weight: 600; font-size: 0.8125rem; }
+  .f-prow .sub { font-size: 0.6875rem; color: var(--text-dim); }
+  .f-prow .num { font-family: var(--mono); font-size: 0.75rem; color: var(--text-2); text-align: right; }
+  .f-prow .num b { color: var(--text); }
+  .f-prow.sel { border-color: var(--accent-line); background: var(--accent-soft); }
+  .f-prow.off { opacity: 0.45; cursor: default; }
+  .f-prow.off .num b { color: var(--live); }
+  .f-prow:active:not(.off) { background: var(--mat-3); }
+
+  /* Punkte-Aufschlüsselung */
+  .f-line {
+    display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+    font-size: 0.6875rem; color: var(--text-dim); font-family: var(--mono);
+    padding: 4px 0 4px var(--s5);
+  }
+  .f-line .pt { color: var(--accent); font-weight: 700; }
+  .f-line .wb { color: var(--good); }
+  .f-versus { display: grid; gap: var(--s4); }
+  @media (min-width: 900px) { .f-versus { grid-template-columns: 1fr 1fr; } }
+
   /* =========================================================================
      Anfassbarkeit: die Seite läuft am iPhone, dort gibt es kein :hover. Die
      Rückmeldung hängt deshalb am Fingerdruck und kommt sofort (§1, §10).
@@ -918,6 +1052,7 @@
       <button data-tab="results"><span class="ic" aria-hidden="true">▦</span>Ergebnis</button>
       <button data-tab="standings"><span class="ic" aria-hidden="true">▤</span>Tabelle</button>
       <button data-tab="tipp"><span class="ic" aria-hidden="true">✦</span>Tippen</button>
+      <button data-tab="fantasy"><span class="ic" aria-hidden="true">♟</span>Fantasy</button>
       <button data-tab="worlds"><span class="ic" aria-hidden="true">♛</span>Worlds</button>
     </nav>
     <div class="me" id="rail-me" title="eingeloggt">·</div>
@@ -995,6 +1130,10 @@
       <div id="tipp-body"><p class="status"><span class="dot"></span>Lade…</p></div>
     </div>
 
+    <div class="tab-panel" id="tab-fantasy">
+      <div id="fantasy-body"><p class="status"><span class="dot"></span>Lade…</p></div>
+    </div>
+
     <div class="tab-panel" id="tab-worlds">
       <div id="worlds-body"><p class="status"><span class="dot"></span>Lade…</p></div>
     </div>
@@ -1024,6 +1163,18 @@
     <div class="modal-subpanel active" id="modal-info"></div>
     <div class="modal-subpanel" id="modal-h2h"><p class="empty-list">Lade…</p></div>
     <div class="modal-subpanel" id="modal-table"><p class="empty-list">Lade…</p></div>
+  </div>
+</div>
+
+<!-- Fantasy: Spielerauswahl -->
+<div class="modal-overlay" id="fantasy-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="fantasy-modal-close">&times;</button>
+    <div class="modal-league" id="fantasy-pick-title">Spieler wählen</div>
+    <p class="live-note" style="text-align:left;margin:0 0 var(--s3)" id="fantasy-pick-sub"></p>
+    <input class="f-search" id="fantasy-search" type="search" placeholder="Name oder Team suchen" autocomplete="off">
+    <div class="f-filters" id="fantasy-filters"></div>
+    <div class="f-list" id="fantasy-pick-list"></div>
   </div>
 </div>
 
@@ -1231,7 +1382,7 @@
 
   // ---- Tabs ----
   const tabButtons = document.querySelectorAll("nav.tabs button");
-  const loaded = { start: false, live: false, results: false, standings: false, tipp: false, worlds: false };
+  const loaded = { start: false, live: false, results: false, standings: false, tipp: false, fantasy: false, worlds: false };
 
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1259,6 +1410,7 @@
     if (tab === "results") return loadResults();
     if (tab === "standings") return loadStandings();
     if (tab === "tipp") return loadTipp();
+    if (tab === "fantasy") return loadFantasy();
     if (tab === "worlds") return loadWorlds();
   }
 
@@ -1269,6 +1421,7 @@
     scheduleCache = null;
     teamsByLeagueCache = null;
     allTournamentsCache = null;
+    fantasyData = null;
     resetWorldsCaches();
     Object.keys(resultsByYearCache).forEach(k => delete resultsByYearCache[k]);
   }
@@ -2704,6 +2857,817 @@
     btn.innerHTML = "Tippen" + (open ? `<span class="cnt">${open}</span>` : "");
   }
   // ==================== /TIPPSPIEL ====================
+
+  // ==================== FANTASY ====================
+  // Wochenkader aus echten Profispielern: fünf Rollen, festes Budget, Punkte
+  // aus den echten Spielwerten. Die Seite rechnet die Werte nicht selbst aus -
+  // dafür bräuchte sie pro Spiel eine eigene Abfrage. Sie liest, was
+  // fantasy_stats.py in docs/fantasy-data.json geschrieben hat.
+  //
+  // Drei Regeln bestimmen fast alles, was hier passiert:
+  //  - Ein Platz ist gesperrt, sobald das Team des Spielers sein erstes Spiel
+  //    der Runde begonnen hat. Wer plant, kann bis kurz vorher tauschen.
+  //  - Ein Kader gilt weiter, bis man ihn ändert. Auch wer eine Woche nicht
+  //    reinschaut, spielt mit - sonst hinge alles daran, die Seite zu öffnen.
+  //  - Bezahlt wird der Preis vom Zeitpunkt der Wahl. Steigt ein Spieler
+  //    später im Wert, bleibt der Kader gültig (wie im Fußball-Fantasy).
+  const FANTASY_URL = "fantasy-data.json";
+  const FANTASY_ROLES = [
+    { key: "top", label: "Top" },
+    { key: "jungle", label: "Jungle" },
+    { key: "mid", label: "Mid" },
+    { key: "bottom", label: "Bot" },
+    { key: "support", label: "Support" }
+  ];
+
+  let fantasyData = null;
+  let fantasyRound = null;
+  let fantasyLocks = {};
+  let fantasyPick = null;
+  let fantasySub = "squad";
+
+  async function loadFantasyData() {
+    if (fantasyData) return fantasyData;
+    const r = await fetch(FANTASY_URL, { cache: "no-store" });
+    if (!r.ok) throw new Error("Spielerdaten noch nicht erzeugt (" + r.status + ")");
+    const data = await r.json();
+    if (!data || typeof data !== "object" || !data.players) throw new Error("Spielerdaten unbrauchbar");
+    data.players = data.players || {};
+    data.rounds = data.rounds || {};
+    data.prices = data.prices || {};
+    data.lines = data.lines || [];
+    fantasyData = data;
+    return fantasyData;
+  }
+
+  // Rundenschlüssel wie im Sammler: ISO-Kalenderwoche des Montags, an dem die
+  // Runde beginnt ("2026-W07").
+  function isoWeekKey(d) {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+    return `${t.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+  }
+
+  function fantasyRoundInfo(now) {
+    const { weekStart, weekEnd } = getWeekBounds(now);
+    return { key: isoWeekKey(weekStart), start: weekStart, end: weekEnd };
+  }
+
+  // Erste Partie jedes Teams in dieser Runde - daran hängt die Sperre. Neben
+  // der Team-ID auch Kürzel und Name ablegen, falls Spielplan und Kaderliste
+  // die Teams mal unterschiedlich benennen.
+  function fantasyBuildLocks(events, round) {
+    const map = {};
+    const put = (key, date) => {
+      if (!key) return;
+      const k = String(key).toUpperCase();
+      if (!map[k] || date < map[k]) map[k] = date;
+    };
+    events.filter(m => m.start >= round.start && m.start < round.end).forEach(m => {
+      [m.teamA, m.teamB].forEach(t => { put(t.id, m.start); put(t.code, m.start); put(t.name, m.start); });
+    });
+    return map;
+  }
+
+  function fantasyPlayer(pid) {
+    return (fantasyData.players || {})[pid] || null;
+  }
+
+  function fantasyKickoff(pid) {
+    const p = fantasyPlayer(pid);
+    if (!p) return null;
+    return fantasyLocks[String(p.teamId || "").toUpperCase()]
+        || fantasyLocks[String(p.code || "").toUpperCase()]
+        || fantasyLocks[String(p.team || "").toUpperCase()] || null;
+  }
+
+  function fantasyLocked(pid, now) {
+    const k = fantasyKickoff(pid);
+    return !!k && k <= (now || new Date());
+  }
+
+  function fantasyPriceTable(roundKey) {
+    const all = fantasyData.prices || {};
+    if (all[roundKey]) return all[roundKey];
+    // Läuft der Sammler mal später als der Rundenwechsel, gilt die zuletzt
+    // bekannte Preisliste weiter, statt alles auf den Standardpreis zu werfen.
+    const keys = Object.keys(all).sort();
+    return keys.length ? all[keys[keys.length - 1]] : {};
+  }
+
+  function fantasyPrice(pid) {
+    const v = fantasyPriceTable(fantasyRound.key)[pid];
+    if (typeof v === "number") return v;
+    return typeof fantasyData.priceDefault === "number" ? fantasyData.priceDefault : 5;
+  }
+
+  function fantasyBudget() {
+    return typeof fantasyData.budget === "number" ? fantasyData.budget : 35;
+  }
+
+  function fantasyStoreRounds() {
+    return (tippStore && tippStore.fantasy) || {};
+  }
+
+  // Fehlt für eine Runde ein eigener Eintrag, zählt der letzte davor.
+  function fantasyEffective(roundKey, who) {
+    const all = fantasyStoreRounds();
+    const keys = Object.keys(all).filter(k => k <= roundKey).sort();
+    for (let i = keys.length - 1; i >= 0; i--) {
+      const entry = all[keys[i]] && all[keys[i]][who];
+      if (entry && entry.squad && Object.keys(entry.squad).length) {
+        return { entry, from: keys[i] };
+      }
+    }
+    return null;
+  }
+
+  function fantasySquadOf(roundKey, who) {
+    const eff = fantasyEffective(roundKey, who);
+    return eff ? eff.entry : null;
+  }
+
+  function fantasyPaid(entry, role) {
+    const pid = entry.squad[role];
+    if (!pid) return 0;
+    if (entry.paid && typeof entry.paid[role] === "number") return entry.paid[role];
+    return fantasyPrice(pid);
+  }
+
+  function fantasyCost(entry) {
+    return Math.round(FANTASY_ROLES.reduce((sum, r) => sum + fantasyPaid(entry, r.key), 0) * 10) / 10;
+  }
+
+  function fantasyPlayerPts(roundKey, pid) {
+    const round = (fantasyData.rounds || {})[roundKey];
+    const stat = round && round.p ? round.p[pid] : null;
+    return stat ? { pts: stat[0], games: stat[1] } : { pts: 0, games: 0 };
+  }
+
+  function fantasyScore(roundKey, who) {
+    const entry = fantasySquadOf(roundKey, who);
+    if (!entry) return { total: 0, per: {}, entry: null };
+    const per = {};
+    let total = 0;
+    FANTASY_ROLES.forEach(role => {
+      const pid = entry.squad[role.key];
+      if (!pid) return;
+      const stat = fantasyPlayerPts(roundKey, pid);
+      const mult = entry.captain === role.key ? 2 : 1;
+      per[role.key] = { pid, pts: stat.pts, games: stat.games, mult };
+      total += stat.pts * mult;
+    });
+    return { total: Math.round(total * 10) / 10, per, entry };
+  }
+
+  function fantasyAllTime() {
+    const out = {};
+    ALLOWED_TIPP_PLAYERS.forEach(n => { out[n] = 0; });
+    Object.keys(fantasyData.rounds || {}).forEach(key => {
+      ALLOWED_TIPP_PLAYERS.forEach(n => {
+        out[n] = Math.round((out[n] + fantasyScore(key, n).total) * 10) / 10;
+      });
+    });
+    return out;
+  }
+
+  function fantasyComplete(entry) {
+    return !!entry && FANTASY_ROLES.every(r => entry.squad[r.key]);
+  }
+
+  // Fremde Kader bleiben verdeckt, bis der eigene steht - wie beim Tippspiel.
+  function fantasyReveal(roundKey) {
+    if (roundKey < fantasyRound.key) return true;
+    if (new Date() >= fantasyRound.end) return true;
+    return fantasyComplete(fantasySquadOf(roundKey, tippPlayerName));
+  }
+
+  function fantasyDraft() {
+    const eff = fantasyEffective(fantasyRound.key, tippPlayerName);
+    const squad = {}, paid = {};
+    if (eff) {
+      FANTASY_ROLES.forEach(r => {
+        const pid = eff.entry.squad[r.key];
+        if (!pid) return;
+        squad[r.key] = pid;
+        paid[r.key] = fantasyPaid(eff.entry, r.key);
+      });
+    }
+    return {
+      squad, paid,
+      captain: eff && eff.entry.captain ? eff.entry.captain : null,
+      inherited: !!eff && eff.from !== fantasyRound.key
+    };
+  }
+
+  function fantasyWrite(draft) {
+    const round = fantasyRound.key;
+    const squad = Object.assign({}, draft.squad);
+    const paid = Object.assign({}, draft.paid);
+    const captain = draft.captain || null;
+    const mutate = store => {
+      if (!store.fantasy) store.fantasy = {};
+      if (!store.fantasy[round]) store.fantasy[round] = {};
+      store.fantasy[round][tippPlayerName] = { squad, paid, captain, ts: Date.now() };
+    };
+    return { mutate, persist: () => tippPatch({ kind: "fantasy", round, squad, paid, captain }, mutate) };
+  }
+
+  // Änderung am Kader: Entwurf holen, anpassen, sofort anzeigen, im
+  // Hintergrund speichern (commitPick nimmt es bei einem Fehler zurück).
+  function fantasyApply(change) {
+    const draft = fantasyDraft();
+    change(draft);
+    if (draft.captain && !draft.squad[draft.captain]) draft.captain = null;
+    const el = document.getElementById("fantasy-body");
+    commitPick(el, fantasyWrite(draft), () => renderFantasy());
+  }
+
+  // ---- Anzeige-Helfer ----
+  function fantasyShortWhen(d) {
+    return d.toLocaleString("de-DE", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function fantasyNum(n) {
+    return (Math.round(n * 10) / 10).toFixed(1);
+  }
+
+  function fantasyAvatar(pid) {
+    const p = fantasyPlayer(pid) || {};
+    const fb = fallbackLogo(p.name || "?");
+    return `<img src="${esc(p.image || p.teamImage || fb)}" alt="" onerror="this.src='${fb}'">`;
+  }
+
+  function fantasyKickoffHtml(pid, now) {
+    const k = fantasyKickoff(pid);
+    if (!k) return '<span>kein Spiel</span>';
+    if (k <= now) return `<span class="lk">gesperrt</span>`;
+    return `<span class="ok">bis ${esc(fantasyShortWhen(k))}</span>`;
+  }
+
+  // ---- Kader ----
+  function fantasySlotHtml(role, draft, now) {
+    const pid = draft.squad[role.key];
+    const player = pid ? fantasyPlayer(pid) : null;
+    const locked = pid ? fantasyLocked(pid, now) : false;
+    const isCap = draft.captain === role.key;
+    const stat = pid ? fantasyPlayerPts(fantasyRound.key, pid) : { pts: 0, games: 0 };
+    const shown = Math.round(stat.pts * (isCap ? 2 : 1) * 10) / 10;
+
+    let body;
+    if (pid && player) {
+      body = `
+        <div class="f-player">
+          ${fantasyAvatar(pid)}
+          <div class="f-pmeta">
+            <div class="f-pname">${esc(player.name)}</div>
+            <div class="f-pteam">${esc(player.code || player.team)} · <span class="f-price">${fantasyNum(fantasyPaid(draft, role.key))}</span> · ${fantasyKickoffHtml(pid, now)}</div>
+          </div>
+        </div>`;
+    } else if (pid) {
+      body = `<div class="f-player"><div class="f-pmeta">
+        <div class="f-pname">Unbekannter Spieler</div>
+        <div class="f-pteam">nicht mehr im Kader der Liga</div></div></div>`;
+    } else {
+      body = `<div class="f-player"><div class="f-pmeta">
+        <div class="f-pname" style="color:var(--text-dim)">frei</div>
+        <div class="f-pteam">noch nicht besetzt</div></div></div>`;
+    }
+
+    return `
+      <div class="f-slot${isCap ? " cap" : ""}${locked ? " locked" : ""}" data-role="${role.key}">
+        <div class="f-role">${esc(role.label)}${isCap ? "<br>Kapitän" : ""}</div>
+        ${body}
+        <span class="f-pts${shown ? "" : " zero"}">${fantasyNum(shown)}</span>
+        <div class="f-slot-right">
+          <button class="f-btn f-cap${isCap ? " cap-on" : ""}" data-role="${role.key}"
+            ${!pid || locked ? "disabled" : ""} title="Kapitän: doppelte Punkte">C</button>
+          <button class="f-btn f-swap" data-role="${role.key}" ${locked ? "disabled" : ""}>${pid ? "Tauschen" : "Wählen"}</button>
+        </div>
+      </div>`;
+  }
+
+  function fantasySquadPanelHtml(now) {
+    const draft = fantasyDraft();
+    const cost = FANTASY_ROLES.reduce((s, r) => s + (draft.paid[r.key] || 0), 0);
+    const budget = fantasyBudget();
+    const over = cost > budget + 0.001;
+    const pct = Math.min(100, Math.round((cost / budget) * 100));
+    const missing = FANTASY_ROLES.filter(r => !draft.squad[r.key]).length;
+    const anyLocked = FANTASY_ROLES.some(r => draft.squad[r.key] && fantasyLocked(draft.squad[r.key], now));
+
+    let note = "";
+    if (missing) {
+      note = `<div class="f-warn">Noch ${missing} ${missing === 1 ? "Platz" : "Plätze"} frei - unbesetzte Plätze bringen keine Punkte.</div>`;
+    } else if (draft.inherited) {
+      note = `<div class="f-note">Kader läuft aus der Vorwoche weiter. Er zählt so, wie er ist - Änderungen sind möglich, solange das Team noch nicht gespielt hat.</div>`;
+    }
+    if (!draft.captain && !missing) {
+      note += `<div class="f-note">Kein Kapitän gesetzt. Der Kapitän bringt doppelte Punkte - über das <b>C</b> wählen.</div>`;
+    }
+
+    return `
+      <div class="card">
+        <h2>Dein Kader</h2>
+        <div class="f-budget">
+          <div class="f-budget-bar${over ? " over" : ""}"><span style="width:${pct}%"></span></div>
+          <div class="f-budget-num${over ? " over" : ""}"><b>${fantasyNum(cost)}</b> / ${fantasyNum(budget)}</div>
+        </div>
+        <div class="f-slots">${FANTASY_ROLES.map(r => fantasySlotHtml(r, draft, now)).join("")}</div>
+        <div class="saved-note"></div>
+        ${note}
+        <p class="f-hint">
+          Ein Platz ist gesperrt, sobald das Team des Spielers sein erstes Spiel der Runde begonnen hat${anyLocked ? " - bei dir ist das schon passiert" : ""}.
+          Bezahlt wird der Preis vom Zeitpunkt der Wahl; steigt ein Spieler später, bleibt dein Kader gültig.
+        </p>
+      </div>`;
+  }
+
+  // ---- Punkte ----
+  function fantasyLinesHtml(roundKey, pid) {
+    const lines = (fantasyData.lines || []).filter(l => l.r === roundKey && l.p === pid);
+    if (!lines.length) return "";
+    return lines.map(l => `
+      <div class="f-line">
+        <span>${esc(l.c || "?")}</span>
+        <span>${l.k}/${l.d}/${l.a}</span>
+        <span>${l.cs} CS</span>
+        ${l.wb ? '<span class="wb">Serien-Sieg</span>' : ""}
+        <span class="pt">${fantasyNum(l.pts)}</span>
+      </div>`).join("");
+  }
+
+  function fantasyBreakdownHtml(who, roundKey, reveal, withLines) {
+    const score = fantasyScore(roundKey, who);
+    if (!score.entry) {
+      return `<p class="empty-list">${esc(who)} hat noch keinen Kader aufgestellt.</p>`;
+    }
+    if (!reveal) {
+      return `<p class="empty-list">Verdeckt, bis dein eigener Kader steht.</p>`;
+    }
+    const rows = FANTASY_ROLES.map(role => {
+      const cell = score.per[role.key];
+      if (!cell) {
+        return `<tr><td class="rank">${esc(role.label)}</td><td class="team" style="color:var(--text-dim)">frei</td><td class="record">–</td><td class="record">0.0</td></tr>`;
+      }
+      const player = fantasyPlayer(cell.pid);
+      const total = Math.round(cell.pts * cell.mult * 10) / 10;
+      return `
+        <tr>
+          <td class="rank">${esc(role.label)}</td>
+          <td class="team">${esc(player ? player.name : "?")}${cell.mult > 1 ? ' <span style="color:var(--accent)">×2</span>' : ""}
+            <div style="font-size:0.6875rem;color:var(--text-dim);font-weight:400">${esc(player ? (player.code || player.team) : "")} · ${cell.games} ${cell.games === 1 ? "Spiel" : "Spiele"}</div>
+            ${withLines ? fantasyLinesHtml(roundKey, cell.pid) : ""}
+          </td>
+          <td class="record">${fantasyNum(cell.pts)}</td>
+          <td class="record" style="color:var(--accent);font-weight:700">${fantasyNum(total)}</td>
+        </tr>`;
+    }).join("");
+
+    return `
+      <table class="standings">
+        <thead><tr><th></th><th>Spieler</th><th style="text-align:right">Roh</th><th style="text-align:right">Punkte</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td></td><td class="team">Summe</td><td class="record"></td>
+          <td class="record" style="color:var(--accent);font-weight:700">${fantasyNum(score.total)}</td></tr></tfoot>
+      </table>`;
+  }
+
+  function fantasyPointsPanelHtml() {
+    const key = fantasyRound.key;
+    const reveal = fantasyReveal(key);
+    const others = ALLOWED_TIPP_PLAYERS.filter(n => n !== tippPlayerName);
+    return `
+      <div class="f-versus">
+        <div class="card">
+          <h2>${esc(tippPlayerName)} · diese Runde</h2>
+          ${fantasyBreakdownHtml(tippPlayerName, key, true, true)}
+        </div>
+        ${others.map(n => `
+          <div class="card">
+            <h2>${esc(n)} · diese Runde</h2>
+            ${fantasyBreakdownHtml(n, key, reveal, reveal)}
+          </div>`).join("")}
+      </div>`;
+  }
+
+  // ---- Markt ----
+  function fantasyMarketRows(filter) {
+    const key = fantasyRound.key;
+    const list = Object.keys(fantasyData.players || {}).map(pid => {
+      const p = fantasyData.players[pid];
+      const stat = fantasyPlayerPts(key, pid);
+      return {
+        pid, p, price: fantasyPrice(pid),
+        round: stat.pts, season: p.pts || 0, avg: p.avg || 0, games: p.games || 0
+      };
+    }).filter(row => {
+      if (row.p.active === false && !row.games) return false;
+      if (filter.league && row.p.league !== filter.league) return false;
+      if (filter.role && row.p.role !== filter.role) return false;
+      if (filter.q) {
+        const q = filter.q.toLowerCase();
+        if (!(`${row.p.name} ${row.p.team} ${row.p.code}`.toLowerCase().includes(q))) return false;
+      }
+      return true;
+    });
+    const sorters = {
+      avg: (a, b) => b.avg - a.avg,
+      season: (a, b) => b.season - a.season,
+      round: (a, b) => b.round - a.round,
+      price: (a, b) => b.price - a.price
+    };
+    list.sort(sorters[filter.sort] || sorters.avg);
+    return list;
+  }
+
+  let fantasyMarketFilter = { league: "", role: "", sort: "avg", q: "" };
+
+  function fantasyMarketPanelHtml() {
+    const rows = fantasyMarketRows(fantasyMarketFilter).slice(0, 120);
+    const leagues = (fantasyData.leagues || []).slice();
+    const chip = (val, label, active) =>
+      `<button class="f-btn${active ? " cap-on" : ""}" data-mfilter="league" data-val="${esc(val)}">${esc(label)}</button>`;
+    const roleChip = (val, label, active) =>
+      `<button class="f-btn${active ? " cap-on" : ""}" data-mfilter="role" data-val="${esc(val)}">${esc(label)}</button>`;
+
+    return `
+      <div class="card">
+        <h2>Spielermarkt</h2>
+        <input class="f-search" id="fantasy-market-search" type="search" placeholder="Name oder Team suchen"
+               value="${esc(fantasyMarketFilter.q)}" autocomplete="off">
+        <div class="f-filters">
+          ${chip("", "Alle Ligen", !fantasyMarketFilter.league)}
+          ${leagues.map(l => chip(l, l, fantasyMarketFilter.league === l)).join("")}
+        </div>
+        <div class="f-filters">
+          ${roleChip("", "Alle Rollen", !fantasyMarketFilter.role)}
+          ${FANTASY_ROLES.map(r => roleChip(r.key, r.label, fantasyMarketFilter.role === r.key)).join("")}
+        </div>
+        <div class="f-filters">
+          <button class="f-btn${fantasyMarketFilter.sort === "avg" ? " cap-on" : ""}" data-mfilter="sort" data-val="avg">Ø je Spiel</button>
+          <button class="f-btn${fantasyMarketFilter.sort === "season" ? " cap-on" : ""}" data-mfilter="sort" data-val="season">Saison</button>
+          <button class="f-btn${fantasyMarketFilter.sort === "round" ? " cap-on" : ""}" data-mfilter="sort" data-val="round">Diese Runde</button>
+          <button class="f-btn${fantasyMarketFilter.sort === "price" ? " cap-on" : ""}" data-mfilter="sort" data-val="price">Preis</button>
+        </div>
+        <div class="table-scroll">
+          <table class="standings">
+            <thead><tr>
+              <th>Spieler</th><th>Rolle</th>
+              <th style="text-align:right">Preis</th>
+              <th style="text-align:right">Ø</th>
+              <th style="text-align:right">Saison</th>
+              <th style="text-align:right">Runde</th>
+            </tr></thead>
+            <tbody>
+              ${rows.length ? rows.map(row => `
+                <tr>
+                  <td class="team">${esc(row.p.name)}
+                    <div style="font-size:0.6875rem;color:var(--text-dim);font-weight:400">${esc(row.p.code || row.p.team)} · ${esc(row.p.league)}</div>
+                  </td>
+                  <td class="record" style="text-align:left">${esc((FANTASY_ROLES.find(r => r.key === row.p.role) || {}).label || row.p.role)}</td>
+                  <td class="record">${fantasyNum(row.price)}</td>
+                  <td class="record">${fantasyNum(row.avg)}</td>
+                  <td class="record">${fantasyNum(row.season)}</td>
+                  <td class="record">${fantasyNum(row.round)}</td>
+                </tr>`).join("")
+                : '<tr><td colspan="6" style="color:var(--text-dim)">Niemand gefunden.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+        <p class="f-hint">Ø ist der Schnitt je Spiel in dieser Saison. Der Preis richtet sich nach den letzten Runden und
+        gilt innerhalb einer Rolle - auf jeder Position gibt es teure und günstige Spieler.</p>
+      </div>`;
+  }
+
+  // ---- Historie ----
+  function fantasyHistoryPanelHtml() {
+    const keys = Object.keys(fantasyData.rounds || {}).sort().reverse().slice(0, 12);
+    const totals = fantasyAllTime();
+    const ranked = ALLOWED_TIPP_PLAYERS.slice().sort((a, b) => totals[b] - totals[a]);
+
+    const table = `
+      <table class="standings">
+        <thead><tr><th></th><th>Manager</th><th style="text-align:right">Punkte</th></tr></thead>
+        <tbody>${ranked.map((n, i) => `
+          <tr><td class="rank">${i + 1}</td><td class="team">${esc(n)}</td>
+          <td class="record" style="color:var(--accent);font-weight:700">${fantasyNum(totals[n])}</td></tr>`).join("")}
+        </tbody>
+      </table>`;
+
+    const rounds = keys.map(key => {
+      const scores = ALLOWED_TIPP_PLAYERS.map(n => ({ n, s: fantasyScore(key, n) }));
+      const played = scores.filter(x => x.s.entry);
+      if (!played.length) return "";
+      const best = Math.max(...scores.map(x => x.s.total));
+      const round = fantasyData.rounds[key] || {};
+      const when = round.start ? new Date(round.start).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }) : "";
+      return `
+        <div class="duel-day">
+          <div class="duel-day-head">
+            <span class="d">${esc(key.replace("-W", " · KW "))}${when ? " ab " + esc(when) : ""}</span>
+            <span class="s">${scores.map(x => `${esc(x.n)} <b>${fantasyNum(x.s.total)}</b>`).join(" : ")}</span>
+          </div>
+          ${scores.map(x => `
+            <div class="duel">
+              <div class="duel-line">
+                <span class="lg">${esc(x.n)}</span>
+                <span class="side a${best > 0 && x.s.total === best ? " win" : ""}" style="justify-content:flex-start">
+                  ${x.s.entry ? FANTASY_ROLES.map(r => {
+                    const pid = x.s.entry.squad[r.key];
+                    const p = pid ? fantasyPlayer(pid) : null;
+                    const cap = x.s.entry.captain === r.key;
+                    return `<span style="margin-right:8px">${esc(p ? p.name : "–")}${cap ? '<span style="color:var(--accent)">*</span>' : ""}</span>`;
+                  }).join("") : "kein Kader"}
+                </span>
+                <span class="mid">${fantasyNum(x.s.total)}</span>
+              </div>
+            </div>`).join("")}
+        </div>`;
+    }).join("");
+
+    return `
+      <div class="card"><h2>Gesamtwertung</h2>${table}</div>
+      <div class="card"><h2>Vergangene Runden</h2>
+        ${rounds || '<p class="empty-list">Noch keine abgeschlossene Runde.</p>'}
+        <p class="f-hint">* markiert den Kapitän.</p>
+      </div>`;
+  }
+
+  // ---- Kopf + Zusammenbau ----
+  function fantasyLeaderHtml() {
+    const key = fantasyRound.key;
+    const totals = fantasyAllTime();
+    const week = {};
+    ALLOWED_TIPP_PLAYERS.forEach(n => { week[n] = fantasyScore(key, n).total; });
+    const best = Math.max(...ALLOWED_TIPP_PLAYERS.map(n => week[n]));
+    const hasLeader = best > 0;
+    const ranked = ALLOWED_TIPP_PLAYERS.slice().sort((a, b) => week[b] - week[a] || totals[b] - totals[a]);
+    const leaders = ALLOWED_TIPP_PLAYERS.filter(n => week[n] === best);
+    const note = !hasLeader
+      ? "Diese Runde noch keine Punkte."
+      : (leaders.length > 1 ? "Gleichstand - beide führen." : `${leaders[0]} führt diese Runde.`);
+
+    return `
+      <div class="tipp-lead">
+        ${ranked.map(n => {
+          const crown = hasLeader && week[n] === best;
+          return `
+          <div class="tipp-lead-entry${crown ? " is-leader" : ""}">
+            <div class="pname">${crown ? '<span class="crown" title="Führt diese Runde">👑</span>' : ""}${esc(n)}</div>
+            <div class="stat-row">
+              <div class="stat"><div class="n">${fantasyNum(week[n])}</div><div class="l">Runde</div></div>
+              <div class="stat"><div class="n">${fantasyNum(totals[n])}</div><div class="l">Gesamt</div></div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+      <p class="round-info" style="margin:var(--s3) 0 0">${esc(note)} Runde endet <b>${esc(tippFmtRoundEnd(fantasyRound.end))}</b>.</p>`;
+  }
+
+  function renderFantasy() {
+    const el = document.getElementById("fantasy-body");
+    const now = new Date();
+    const draft = fantasyDraft();
+    const missing = FANTASY_ROLES.filter(r => !draft.squad[r.key]).length;
+    const ageHours = fantasyData.generated
+      ? Math.round((now - new Date(fantasyData.generated)) / 3600000) : null;
+    const stale = ageHours === null ? ""
+      : (ageHours < 1 ? " Werte gerade aktualisiert." : ` Werte zuletzt vor ${ageHours} h aktualisiert.`);
+
+    el.innerHTML = `
+      <div class="card">
+        <div class="round-info" style="margin-bottom:var(--s3)">
+          Eingeloggt als <b>${esc(tippPlayerName)}</b> · Runde <b>${esc(fantasyRound.key.replace("-W", " · KW "))}</b>
+        </div>
+        ${fantasyLeaderHtml()}
+      </div>
+
+      <div class="tipp-nav" id="fantasy-nav">
+        <button data-fsub="squad">Kader${missing ? `<span class="cnt">${missing}</span>` : ""}</button>
+        <button data-fsub="points">Punkte</button>
+        <button data-fsub="market">Markt</button>
+        <button data-fsub="history">Historie</button>
+      </div>
+
+      <div class="tipp-panel" id="fantasy-sub-squad">${fantasySquadPanelHtml(now)}</div>
+      <div class="tipp-panel" id="fantasy-sub-points">${fantasyPointsPanelHtml()}</div>
+      <div class="tipp-panel" id="fantasy-sub-market">${fantasyMarketPanelHtml()}</div>
+      <div class="tipp-panel" id="fantasy-sub-history">${fantasyHistoryPanelHtml()}</div>
+
+      <p class="f-hint" style="padding:0 var(--s2)">
+        Punkte je Spiel: Kill +2 · Assist +1,5 · Tod −0,5 · CS +0,02 · 10 Kills oder Assists +2 · ohne Tod +2 ·
+        gewonnene Serie +3. Kapitän zählt doppelt.${stale}
+      </p>`;
+
+    fantasyActivateSub(fantasySub);
+    fantasyWireSquad();
+    fantasyWireNav();
+    fantasyWireMarket();
+  }
+
+  function fantasyActivateSub(key) {
+    fantasySub = key;
+    const nav = document.getElementById("fantasy-nav");
+    if (!nav) return;
+    nav.querySelectorAll("button").forEach(b => b.classList.toggle("active", b.getAttribute("data-fsub") === key));
+    document.querySelectorAll("#fantasy-body .tipp-panel").forEach(p =>
+      p.classList.toggle("active", p.id === "fantasy-sub-" + key));
+  }
+
+  function fantasyWireNav() {
+    const nav = document.getElementById("fantasy-nav");
+    if (!nav) return;
+    nav.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        fantasyActivateSub(btn.getAttribute("data-fsub"));
+        if (btn.scrollIntoView) btn.scrollIntoView({ inline: "nearest", block: "nearest" });
+      });
+    });
+  }
+
+  function fantasyWireSquad() {
+    const panel = document.getElementById("fantasy-sub-squad");
+    if (!panel) return;
+    panel.querySelectorAll(".f-swap").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const role = FANTASY_ROLES.find(r => r.key === btn.getAttribute("data-role"));
+        if (role) openFantasyPicker(role, btn);
+      });
+    });
+    panel.querySelectorAll(".f-cap").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const role = btn.getAttribute("data-role");
+        fantasyApply(draft => { draft.captain = draft.captain === role ? null : role; });
+      });
+    });
+  }
+
+  function fantasyWireMarket() {
+    const panel = document.getElementById("fantasy-sub-market");
+    if (!panel) return;
+    panel.querySelectorAll("[data-mfilter]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        fantasyMarketFilter[btn.getAttribute("data-mfilter")] = btn.getAttribute("data-val");
+        panel.innerHTML = fantasyMarketPanelHtml();
+        fantasyWireMarket();
+      });
+    });
+    const search = document.getElementById("fantasy-market-search");
+    if (search) {
+      search.addEventListener("input", () => {
+        fantasyMarketFilter.q = search.value;
+        const pos = search.selectionStart;
+        panel.innerHTML = fantasyMarketPanelHtml();
+        fantasyWireMarket();
+        const again = document.getElementById("fantasy-market-search");
+        if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+      });
+    }
+  }
+
+  // ---- Auswahl-Dialog ----
+  function openFantasyPicker(role, originEl) {
+    const draft = fantasyDraft();
+    const others = FANTASY_ROLES.filter(r => r.key !== role.key)
+      .reduce((sum, r) => sum + (draft.paid[r.key] || 0), 0);
+    fantasyPick = { role, draft, remaining: Math.round((fantasyBudget() - others) * 10) / 10, league: "", q: "" };
+
+    document.getElementById("fantasy-pick-title").textContent = role.label + " wählen";
+    document.getElementById("fantasy-pick-sub").innerHTML =
+      `Noch <b>${fantasyNum(fantasyPick.remaining)}</b> von ${fantasyNum(fantasyBudget())} für diesen Platz übrig. ` +
+      `Spieler, deren Team diese Runde schon gespielt hat, sind nicht mehr wählbar.`;
+    const search = document.getElementById("fantasy-search");
+    search.value = "";
+    renderFantasyPickList();
+    openOverlay(document.getElementById("fantasy-modal"), originEl);
+  }
+
+  function renderFantasyPickList() {
+    const box = document.getElementById("fantasy-pick-list");
+    const filters = document.getElementById("fantasy-filters");
+    if (!box || !fantasyPick) return;
+    const now = new Date();
+    const leagues = (fantasyData.leagues || []).slice();
+
+    filters.innerHTML =
+      `<button class="f-btn${!fantasyPick.league ? " cap-on" : ""}" data-pleague="">Alle</button>` +
+      leagues.map(l => `<button class="f-btn${fantasyPick.league === l ? " cap-on" : ""}" data-pleague="${esc(l)}">${esc(l)}</button>`).join("");
+    filters.querySelectorAll("[data-pleague]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        fantasyPick.league = btn.getAttribute("data-pleague");
+        renderFantasyPickList();
+      });
+    });
+
+    const q = (fantasyPick.q || "").toLowerCase();
+    const current = fantasyPick.draft.squad[fantasyPick.role.key];
+
+    const list = Object.keys(fantasyData.players || {})
+      .map(pid => ({ pid, p: fantasyData.players[pid] }))
+      .filter(row => row.p.role === fantasyPick.role.key)
+      .filter(row => row.p.active !== false || row.pid === current)
+      .filter(row => !fantasyPick.league || row.p.league === fantasyPick.league)
+      .filter(row => !q || `${row.p.name} ${row.p.team} ${row.p.code}`.toLowerCase().includes(q))
+      .map(row => {
+        const price = fantasyPrice(row.pid);
+        return {
+          ...row, price,
+          locked: fantasyLocked(row.pid, now),
+          kickoff: fantasyKickoff(row.pid),
+          tooExpensive: price > fantasyPick.remaining + 0.001
+        };
+      })
+      .sort((a, b) => (b.p.avg || 0) - (a.p.avg || 0));
+
+    if (!list.length) {
+      box.innerHTML = '<p class="empty-list">Niemand gefunden.</p>';
+      return;
+    }
+
+    // Sackgasse abfangen: wer drei teure Plätze gekauft hat, findet hier sonst
+    // nur graue Zeilen und keinen Hinweis, was zu tun ist.
+    const affordable = list.filter(row => !row.tooExpensive && !row.locked).length;
+    const hint = affordable === 0 && list.some(row => row.tooExpensive)
+      ? `<div class="f-warn">Kein Spieler passt in die restlichen ${fantasyNum(fantasyPick.remaining)}.
+         Tausche zuerst auf einem anderen Platz jemanden Günstigeren ein.</div>`
+      : "";
+
+    box.innerHTML = hint + list.map(row => {
+      const off = row.locked || row.tooExpensive;
+      let why = "";
+      if (row.locked) why = "Team hat gespielt";
+      else if (row.tooExpensive) why = "zu teuer";
+      else if (row.kickoff) why = fantasyShortWhen(row.kickoff);
+      else why = "kein Spiel";
+      return `
+        <button class="f-prow${off ? " off" : ""}${row.pid === current ? " sel" : ""}"
+                data-pid="${esc(row.pid)}" ${off ? "disabled" : ""}>
+          ${fantasyAvatar(row.pid)}
+          <span>
+            <span class="nm">${esc(row.p.name)}</span>
+            <span class="sub"><br>${esc(row.p.code || row.p.team)} · ${esc(row.p.league)} · ${esc(why)}</span>
+          </span>
+          <span class="num">Ø ${fantasyNum(row.p.avg || 0)}<br><span class="sub">${row.p.games || 0} Sp.</span></span>
+          <span class="num"><b>${fantasyNum(row.price)}</b></span>
+        </button>`;
+    }).join("");
+
+    box.querySelectorAll("[data-pid]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const pid = btn.getAttribute("data-pid");
+        const roleKey = fantasyPick.role.key;
+        const price = fantasyPrice(pid);
+        closeOverlay(document.getElementById("fantasy-modal"));
+        fantasyApply(draft => {
+          draft.squad[roleKey] = pid;
+          draft.paid[roleKey] = price;
+        });
+      });
+    });
+  }
+
+  async function loadFantasy() {
+    const el = document.getElementById("fantasy-body");
+    el.innerHTML = '<p class="status"><span class="dot"></span>Lade Kader…</p>';
+    try {
+      await ensureTippIdentity();
+      if (!ALLOWED_TIPP_PLAYERS.includes(tippPlayerName)) {
+        el.innerHTML = `<div class="card"><p class="empty-list">Eingeloggt als "${esc(tippPlayerName)}" - für diesen Login ist Fantasy nicht freigeschaltet.</p></div>`;
+        return;
+      }
+      const [data, events, store] = await Promise.all([
+        loadFantasyData(),
+        loadSchedule().catch(() => []),
+        tippLoadStore()
+      ]);
+      tippStore = store;
+      fantasyRound = fantasyRoundInfo(new Date());
+      fantasyLocks = fantasyBuildLocks(events, fantasyRound);
+      if (!Object.keys(data.players).length) {
+        el.innerHTML = '<div class="card"><p class="empty-list">Noch keine Spielerdaten. Der Sammler läuft alle drei Stunden - nach dem ersten Durchgang steht hier der Markt.</p></div>';
+        return;
+      }
+      renderFantasy();
+    } catch (e) {
+      el.innerHTML = `<div class="card"><p class="empty-list">Nicht ladbar (${esc(e.message)}).</p>
+        <p class="f-hint">Die Spielerdaten liegen in <code>docs/fantasy-data.json</code> und werden von der GitHub Action erzeugt.</p></div>`;
+    }
+  }
+
+  document.getElementById("fantasy-modal-close").addEventListener("click", () =>
+    closeOverlay(document.getElementById("fantasy-modal")));
+  document.getElementById("fantasy-modal").addEventListener("click", e => {
+    if (e.target.id === "fantasy-modal") closeOverlay(document.getElementById("fantasy-modal"));
+  });
+  document.getElementById("fantasy-search").addEventListener("input", e => {
+    if (!fantasyPick) return;
+    fantasyPick.q = e.target.value;
+    renderFantasyPickList();
+  });
+  // ==================== /FANTASY ====================
 
   // ==================== WORLDS-TIPPSPIEL ====================
   // Eigener Turniermodus: Runden richten sich nach der Turnierphase
