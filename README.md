@@ -106,6 +106,12 @@ Tabelle in `docs/index.html` (`PLAYOFF_SPOTS`). Stand Saison 2026:
 Tabelle genau so viele Zeilen hat. Eine Playoff- oder Gruppentabelle mit
 anderer Länge bleibt unmarkiert, statt einen falschen Schnitt zu zeigen.
 
+Neben dem Liganamen steht ein kleines **i**: dort stehen die vollständigen
+Regeln zum Playoff-Einzug (Modus, welche Plätze direkt weiterkommen, was das
+Play-In macht). Der Text steht in `PLAYOFF_RULES`, direkt neben den Zahlen.
+Er geht bei Mouseover auf, auf dem Handy per Tap und mit der Tastatur per
+Tab-Fokus.
+
 ### Ligen mit Gruppen
 
 LCK und LPL spielen die Regular Season 2026 in Gruppen. Die API liefert dann
@@ -114,11 +120,16 @@ mit ihrem Gruppennamen. Ein Eintrag in `PLAYOFF_SPOTS` kann deshalb statt über
 `teams` auch über `section` (regulärer Ausdruck auf den Gruppennamen) greifen -
 so wird z.B. `Ascend` anders markiert als `Nirvana`.
 
-Für die beiden LCK-Gruppen (je 5 Teams) ist bewusst nichts hinterlegt: dort
-kommen aus der oberen Gruppe 1-4 direkt weiter und Platz 5 ins Play-In, aus der
-unteren nur 1-3 - welche der beiden die obere ist, steht ausschließlich im
-Gruppennamen. Solange der nicht eingetragen ist, bleiben die Gruppen
-unmarkiert, statt die halbe Tabelle falsch einzufärben.
+Die LCK spielt Split 3 2026 in zwei Gruppen à 5, besetzt nach den Runden 1-2:
+**Elder** ist die obere Hälfte (Platz 1-4 direkt in die Playoffs, Platz 5 ins
+Play-In), **Nashor** die untere (nur Platz 1-3 ins Play-In). Weil die
+Zuordnung nur am Gruppennamen hängt, steht sie in der Legende mit dabei
+("Obere Gruppe (Elder)") - liegt sie falsch herum, fällt das auf der Seite
+sofort auf und die beiden Einträge sind einfach zu tauschen.
+
+Greift ein Eintrag über `section`, muss zusätzlich `teams` passen, sofern
+gesetzt. So markiert die Elder-Regel nicht plötzlich eine gleichnamige Gruppe
+anderer Größe.
 
 Ändert eine Liga ihr Format, reicht es, die Zahlen dort anzupassen; das
 Rendering zieht nach.
